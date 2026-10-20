@@ -41,18 +41,20 @@ with its own history, so Git cannot reconcile the two.
 
 > `fatal: Need to specify how to reconcile divergent branches.`
 > `fatal: refusing to merge unrelated histories.`
+> `error: Your local changes to the following files would be overwritten by merge.`
 
-This is not a broken repository. It is what happens when a copy of
-`backend` still has the history from before the branch became a generated
-output, and the pull tries to merge it with the new one.
+None of these mean the repository is broken. The `backend` branch is
+generated, so there is nothing to merge with it.
 
-There is nothing to merge, so do not merge. Take the server's version:
+**The fix is one command:**
 
 ```bash
 npm run deploy:update
 ```
 
-or, on the hosting machine, in the panel's terminal:
+It fetches the branch, sets aside anything that was edited on this
+machine, and puts the local copy back in step with the server. On the
+hosting machine, in the panel's terminal, the same thing by hand:
 
 ```bash
 cd /path/to/the/repository
@@ -63,15 +65,24 @@ npm install
 npm start
 ```
 
-After that, pull the branch the same way from now on. The
-`sync-backend` workflow publishes `backend` without a force push, so a
-clone that is in step stays in step.
+**This cannot happen again.** The `sync-backend` workflow publishes
+`backend` as one commit on top of the last one, with no force push, and
+every commit it has ever published stays in that history. So the branch
+is a straight line, and any clone, however old, fast-forwards with a
+plain `git pull`. There is no version of it that has to be reconciled.
+
+To make that the default on a new machine:
+
+```bash
+git config --global pull.ff only
+```
+
+A pull then refuses a non-fast-forward with a clear message instead of
+stopping halfway, and it never creates a merge commit behind your back.
 
 **If the server did not update after a push, this is why.** The panel
-pulls the branch; if the pull failed, the old code kept running.
-
-On a fresh clone, `git config pull.ff only` makes a pull refuse to create
-a merge commit instead of stopping with the message above.
+pulls the branch; if the pull failed, the old code kept running. Check
+the panel's log for the message above.
 
 ## 1. Backend (Wispbyte)
 

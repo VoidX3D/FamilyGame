@@ -1,16 +1,17 @@
 /* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
-/* Puts the local copy of the generated backend branch back in step with
- * the server.
+/* Puts a local copy of the repository back in step with the server.
  *
- * The `backend` branch is published by a workflow, not by hand. It used to
- * be force pushed, which means a clone that already has the old history
- * cannot be merged with it: git stops with "need to specify how to
- * reconcile divergent branches" or "refusing to merge unrelated
- * histories".
+ * Two things go wrong on a machine that has been pulling for a while:
  *
- * There is nothing to merge. The branch is an output, so the right move is
- * to take the server's version and drop the local one. This does that,
- * and it is safe to run at any time.
+ * 1. The generated `backend` branch used to be force pushed, so a clone
+ *    with the old history cannot be merged with it. Git stops with
+ *    "need to specify how to reconcile divergent branches" or "refusing
+ *    to merge unrelated histories". There is nothing to merge: the branch
+ *    is an output, so the fix is to take the server's version.
+ *
+ * 2. A file that was edited on the machine, such as a settings file the
+ *    panel made, stops a pull with "your local changes would be
+ *    overwritten". Those edits are set aside rather than thrown away.
  *
  *   node scripts/sync-backend.mjs
  */
@@ -45,6 +46,20 @@ if (!fetched.ok) {
   process.exit(1);
 }
 
+// If something was edited on this machine, set it aside rather than losing
+// it. A pull cannot run with those changes in the way.
+let stashed = false;
+if (current === BRANCH) {
+  const dirty = run(["status", "--porcelain"], { allowFailure: true }).output;
+  if (dirty.trim()) {
+    run(["stash", "push", "-u", "-m", "sync-backend: local changes"], {
+      allowFailure: true,
+    });
+    stashed = true;
+    console.log("Your local changes were set aside (git stash).");
+  }
+}
+
 // Take the server's version of the branch, whatever the local history is.
 run(["branch", "--force", BRANCH, `origin/${BRANCH}`]);
 
@@ -57,6 +72,11 @@ const head = run(["rev-parse", "--short", `origin/${BRANCH}`]).output;
 const local = run(["rev-parse", "--short", BRANCH]).output;
 
 console.log(`\n${BRANCH} is now at ${local} (the server is at ${head}).`);
+
+if (stashed) {
+  console.log("Your edits are still there. Bring them back with: git stash pop");
+}
+
 console.log(
   current === BRANCH
     ? "Your working copy matches the server. Run the install and start steps again."

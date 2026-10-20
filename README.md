@@ -219,6 +219,16 @@ the short version is:
 npm run deploy:update
 ```
 
+### The git error you keep seeing
+
+> `fatal: Need to specify how to reconcile divergent branches.`
+
+The `backend` branch is generated, so it is an output and not a branch to
+merge with. `npm run deploy:update` puts a local copy back in step with
+the server, and the publish workflow now keeps the history in a straight
+line, so a plain `git pull` fast-forwards and the error cannot come
+back.
+
 ## Project layout
 
 ```text
