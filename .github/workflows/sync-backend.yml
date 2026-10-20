@@ -58,13 +58,9 @@ jobs:
           fi
 
           # A plain push keeps the history a straight line, so every clone can
-          # fast-forward. If something has committed to the branch by hand,
-          # fall back to a force push rather than leaving the deploy broken.
-          if ! git push origin "$sync_commit:refs/heads/backend"; then
-            echo "::warning::The backend branch was not a fast-forward. Force pushing it."
-            git push --force origin "$sync_commit:refs/heads/backend"
-            echo "::warning::A clone that still has the old history must run: git fetch origin backend && git branch --force backend origin/backend"
-          fi
+          # fast-forward. Never force-push this branch: Wispbyte pulls it on
+          # restart, and a force-push would make every existing clone diverge.
+          git push origin "$sync_commit:refs/heads/backend"
 
       - name: Tell the host how to update
         if: success()
