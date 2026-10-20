@@ -7,17 +7,17 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 
 /* The server is started in different ways: "npm start", "npm run dev", or a
  * plain "node index.js" on the hosting panel. The settings file is read here
- * so it always applies, no matter how the process was started. A real
- * environment variable always wins over the file. */
-function loadEnvFile() {
+ * so it always applies, no matter how the process was started. */
+function readEnvFile() {
+  const values = {};
   let text;
   try {
     // ENV_FILE points at a different settings file, or at nothing.
     const file = process.env.ENV_FILE ?? path.join(here, ".env");
-    if (!file) return;
+    if (!file) return values;
     text = fs.readFileSync(file, "utf8");
   } catch {
-    return;
+    return values;
   }
 
   for (const line of text.split(/\r?\n/)) {
@@ -34,22 +34,33 @@ function loadEnvFile() {
     ) {
       value = value.slice(1, -1);
     }
-    if (process.env[key] === undefined) process.env[key] = value;
+    values[key] = value;
   }
+
+  return values;
 }
 
-loadEnvFile();
+const fileValues = readEnvFile();
 
 /* The frontend that may talk to this server. The deployed site is listed
  * here so the server works with no configuration at all; a settings file or
- * an environment variable can add or replace entries. */
+ * an environment variable can add more. */
 const DEFAULT_ORIGINS = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "https://funfamilygame.vercel.app",
 ].join(",");
 
-const rawOrigins = process.env.FRONTEND_ORIGINS ?? DEFAULT_ORIGINS;
+/* The frontends that may talk to this server.
+ *
+ * The settings file and the hosting panel are both sources, so the two are
+ * merged rather than one replacing the other. A stale value left in the
+ * panel can then only ever add an origin, never take the deployed site
+ * away. */
+const rawOrigins =
+  [process.env.FRONTEND_ORIGINS, fileValues.FRONTEND_ORIGINS]
+    .filter(Boolean)
+    .join(",") || DEFAULT_ORIGINS;
 
 /* An origin is a scheme + host, with no path, no trailing slash and no
  * capital letters. Comparing the normalised form means
@@ -85,8 +96,17 @@ function matchesPattern(pattern, origin) {
 
 const allowedOrigins = parseOrigins(rawOrigins);
 
-const nodeEnv = process.env.NODE_ENV || "production";
-const configuredPasscode = process.env.ADMIN_PASSCODE ?? "";
+/* A setting comes from the environment first, then from the settings file. */
+function setting(key, fallback = "") {
+  const value = process.env[key];
+  if (value !== undefined && value !== "") return value;
+  const fromFile = fileValues[key];
+  if (fromFile !== undefined && fromFile !== "") return fromFile;
+  return fallback;
+}
+
+const nodeEnv = setting("NODE_ENV", "production");
+const configuredPasscode = setting("ADMIN_PASSCODE");
 const hasConfiguredPasscode = configuredPasscode.trim().length > 0;
 
 if (
@@ -145,8 +165,8 @@ function isOriginAllowed(origin) {
 }
 
 export const config = {
-  port: Number(process.env.PORT || process.env.SERVER_PORT || 3000),
-  host: process.env.HOST || "0.0.0.0",
+  port: Number(setting("PORT") || setting("SERVER_PORT") || 3000),
+  host: setting("HOST", "0.0.0.0"),
   nodeEnv,
   adminPasscode: hasConfiguredPasscode ? configuredPasscode : generatedPasscode,
   generatedPasscode,
@@ -159,12 +179,10 @@ export const config = {
   adminSessionTtlMs: 12 * 60 * 60 * 1000,
   roomTtlMs: 30 * 60 * 1000,
   loginWindowMs: 10 * 60 * 1000,
-  loginAttempts: Number(
-    process.env.ADMIN_LOGIN_ATTEMPTS || defaultLoginAttempts,
-  ),
+  loginAttempts: Number(setting("ADMIN_LOGIN_ATTEMPTS", defaultLoginAttempts)),
   rateLimits: {
-    check: Number(process.env.RATE_LIMIT_CHECK || 60),
-    join: Number(process.env.RATE_LIMIT_JOIN || 30),
-    action: Number(process.env.RATE_LIMIT_ACTION || 180),
+    check: Number(setting("RATE_LIMIT_CHECK", 60)),
+    join: Number(setting("RATE_LIMIT_JOIN", 30)),
+    action: Number(setting("RATE_LIMIT_ACTION", 180)),
   },
 };
