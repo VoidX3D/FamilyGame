@@ -1,0 +1,43 @@
+name: Sync backend branch
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "server/**"
+      - ".github/workflows/sync-backend.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-backend
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Publish server folder to backend
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          split_sha="$(git subtree split --prefix=server HEAD)"
+
+          # The deployment branch must stay backend-only.
+          if git ls-tree -r --name-only "$split_sha" | grep -Eq '^(web|\.github)/'; then
+            echo "Refusing to publish: frontend files found in backend tree."
+            exit 1
+          fi
+          git cat-file -e "$split_sha:package.json"
+          git cat-file -e "$split_sha:index.js"
+
+          git push --force origin "$split_sha:refs/heads/backend"
