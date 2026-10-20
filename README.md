@@ -1,5 +1,9 @@
 # Family Game Hub
 
+![Family Game Hub](preview/player-draw-it.png)
+
+Made by **VoidX3D (Sincere Bhattarai)**.
+
 A private, browser-based party-game hub for 3 to 10 players in the same room.
 One host opens a room, everyone joins from a phone or laptop with a five-character
 code, and the host starts a game. The server owns every room, turn, score, and
@@ -8,6 +12,18 @@ secret assignment.
 No database is required. Rooms live in server memory. The built-in question bank
 is in `server/data/default-content.json`; edits made in the host console are
 saved to `server/data/content.json`.
+
+## What it looks like
+
+| One of Us | Draw It |
+| --- | --- |
+| ![One of Us on a phone](preview/player-one-of-us.png) | ![Draw It on a phone](preview/player-draw-it.png) |
+
+| The host console | The API documentation |
+| --- | --- |
+| ![The host console](preview/host-console.png) | ![The API documentation](preview/api-docs.png) |
+
+More in [`preview/`](preview/).
 
 ## Games in v1
 
@@ -182,6 +198,26 @@ merge commit instead of stopping with *"need to specify how to reconcile
 divergent branches"*.
 
 See [DEPLOY.md](DEPLOY.md) for the full deployment notes.
+
+### The repository topics
+
+The topics and the description are set with one command, which needs a
+GitHub token:
+
+```bash
+GITHUB_TOKEN=ghp_yourtoken node scripts/github-topics.mjs
+```
+
+### If the server did not update after a push
+
+The hosting panel pulls the generated `backend` branch. If that pull
+failed, the old code keeps running. The fix is in
+[DEPLOY.md](DEPLOY.md#when-git-says-it-cannot-reconcile-the-branches), and
+the short version is:
+
+```bash
+npm run deploy:update
+```
 
 ## Project layout
 

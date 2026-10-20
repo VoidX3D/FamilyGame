@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 /* Player-side game screens. Every screen is rendered from server state:
  * no secret ever lives in this file, and no timer is started here. */
 
@@ -1399,6 +1400,31 @@ function historyList(game) {
   return block(blockTitle("Turn history"), list);
 }
 
+/* The palette the drawer can pick from. */
+const DRAW_COLORS = [
+  "#f4f1ff",
+  "#ff8a6b",
+  "#5eead4",
+  "#c4b5fd",
+  "#ffd166",
+  "#7dd3fc",
+  "#86efac",
+  "#f9a8d4",
+];
+
+/* The brush sizes, as a fraction of the canvas width. */
+const DRAW_SIZES = [0.005, 0.011, 0.02, 0.034];
+
+const DRAW_TOOLS = [
+  { id: "pen", label: "Pen", icon: "✎" },
+  { id: "erase", label: "Eraser", icon: "▱" },
+  { id: "fill", label: "Fill", icon: "◧" },
+];
+
+const BOARD_BACKGROUND = "#0d1526";
+
+const FLUSH_MS = 120;
+
 /* The drawing board.
  *
  * The canvas is one node that is created once and moved around, never
@@ -1422,11 +1448,12 @@ const drawState = {
   painting: false,
   clock: null,
   observer: null,
+  tool: "pen",
+  color: DRAW_COLORS[0],
+  size: DRAW_SIZES[1],
 };
 
-const STROKE_COLOR = "#f4f1ff";
-const STROKE_WIDTH = 0.012;
-const FLUSH_MS = 120;
+
 
 function drawTurnKey(game) {
   return `${game.id}|${game.turnNumber ?? 0}|${game.phase}`;
@@ -1459,7 +1486,17 @@ function ensureDrawCanvas(game) {
     canvas.setPointerCapture?.(event.pointerId);
     drawState.painting = true;
     const point = pointFrom(event);
-    if (point) drawState.buffer = [point];
+    if (!point) return;
+
+    if (drawState.tool === "fill") {
+      // The fill is a single click, not a drag.
+      drawState.painting = false;
+      canvas.releasePointerCapture?.(event.pointerId);
+      applyFill(point);
+      return;
+    }
+
+    drawState.buffer = [point];
   });
 
   canvas.addEventListener("pointermove", (event) => {
@@ -1519,8 +1556,9 @@ function drawSegment(point) {
   if (points.length < 2) return;
 
   const [from, to] = [points[points.length - 2], points[points.length - 1]];
-  ctx.strokeStyle = STROKE_COLOR;
-  ctx.lineWidth = STROKE_WIDTH * canvas.width;
+  ctx.strokeStyle =
+    drawState.tool === "erase" ? BOARD_BACKGROUND : drawState.color;
+  ctx.lineWidth = drawState.size * canvas.width;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   ctx.beginPath();
@@ -1547,8 +1585,17 @@ function drawStroke(stroke) {
   const canvas = drawState.canvas;
   if (!ctx || !canvas || !Array.isArray(stroke.points)) return;
 
-  ctx.strokeStyle = stroke.color || STROKE_COLOR;
-  ctx.lineWidth = (stroke.width || STROKE_WIDTH) * canvas.width;
+  if (stroke.tool === "fill") {
+    const [point] = stroke.points;
+    if (point) {
+      fillAt(point, stroke.color || DRAW_COLORS[0]);
+    }
+    return;
+  }
+
+  ctx.strokeStyle =
+    stroke.tool === "erase" ? BOARD_BACKGROUND : stroke.color || DRAW_COLORS[0];
+  ctx.lineWidth = (stroke.width || 0.011) * canvas.width;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   ctx.beginPath();
@@ -1559,6 +1606,130 @@ function drawStroke(stroke) {
     else ctx.lineTo(x, y);
   });
   ctx.stroke();
+}
+
+/* Paints the area around a point with one colour. The fill is done here and
+ * replayed with the other strokes, so every phone ends up with the same
+ * picture. */
+function fillAt(point, color) {
+  const ctx = drawState.ctx;
+  const canvas = drawState.canvas;
+  if (!ctx || !canvas) return;
+
+  const width = canvas.width;
+  const height = canvas.height;
+  const startX = Math.round(point[0] * width);
+  const startY = Math.round(point[1] * height);
+  if (startX < 0 || startY < 0 || startX >= width || startY >= height) return;
+
+  const image = ctx.getImageData(0, 0, width, height);
+  const data = image.data;
+  const offset = (startY * width + startX) * 4;
+
+  const target = [data[offset], data[offset + 1], data[offset + 2], data[offset + 3]];
+  const fill = hexToRgba(color);
+  if (
+    target[0] === fill[0] &&
+    target[1] === fill[1] &&
+    target[2] === fill[2] &&
+    target[3] === fill[3]
+  ) {
+    return;
+  }
+
+  const seen = new Uint8Array(width * height);
+  const stack = [startX, startY];
+
+  while (stack.length) {
+    const y = stack.pop();
+    const x = stack.pop();
+    if (x < 0 || y < 0 || x >= width || y >= height) continue;
+    if (seen[y * width + x]) continue;
+    seen[y * width + x] = 1;
+
+    const at = (y * width + x) * 4;
+    if (
+      data[at] !== target[0] ||
+      data[at + 1] !== target[1] ||
+      data[at + 2] !== target[2] ||
+      data[at + 3] !== target[3]
+    ) {
+      continue;
+    }
+
+    // Walk left and right, then look at the rows above and below.
+    let left = x;
+    while (left > 0 && !seen[y * width + left - 1]) {
+      const p = (y * width + left - 1) * 4;
+      if (
+        data[p] !== target[0] ||
+        data[p + 1] !== target[1] ||
+        data[p + 2] !== target[2] ||
+        data[p + 3] !== target[3]
+      ) {
+        break;
+      }
+      left -= 1;
+    }
+
+    let right = x;
+    while (right < width - 1 && !seen[y * width + right + 1]) {
+      const p = (y * width + right + 1) * 4;
+      if (
+        data[p] !== target[0] ||
+        data[p + 1] !== target[1] ||
+        data[p + 2] !== target[2] ||
+        data[p + 3] !== target[3]
+      ) {
+        break;
+      }
+      right += 1;
+    }
+
+    for (let px = left; px <= right; px += 1) {
+      const p = (y * width + px) * 4;
+      data[p] = fill[0];
+      data[p + 1] = fill[1];
+      data[p + 2] = fill[2];
+      data[p + 3] = fill[3];
+      if (y > 0) stack.push(px, y - 1);
+      if (y < height - 1) stack.push(px, y + 1);
+    }
+  }
+
+  ctx.putImageData(image, 0, 0);
+}
+
+function hexToRgba(value) {
+  const text = String(value ?? "#ffffff").replace("#", "");
+  const full =
+    text.length === 3
+      ? text
+          .split("")
+          .map((part) => part + part)
+          .join("")
+      : text.padEnd(6, "0").slice(0, 6);
+  return [
+    parseInt(full.slice(0, 2), 16),
+    parseInt(full.slice(2, 4), 16),
+    parseInt(full.slice(4, 6), 16),
+    255,
+  ];
+}
+
+/* The drawer fills an area with the current colour. */
+function applyFill(point) {
+  const stroke = {
+    id: `c${++drawState.counter}`,
+    tool: "fill",
+    points: [point],
+    color: drawState.color,
+    width: drawState.size,
+  };
+  drawState.ownIds.add(stroke.id);
+  drawState.strokes.push(stroke);
+  fillAt(point, drawState.color);
+  drawState.actions?.stroke?.(stroke);
 }
 
 function flushStroke(force) {
@@ -1579,9 +1750,10 @@ function flushStroke(force) {
 
   drawState.actions?.stroke?.({
     id,
+    tool: drawState.tool,
     points,
-    color: STROKE_COLOR,
-    width: STROKE_WIDTH,
+    color: drawState.color,
+    width: drawState.size,
   });
 }
 
@@ -1594,12 +1766,37 @@ export function applyDrawStroke(stroke) {
   drawStroke(stroke);
 }
 
+/* Called by the app when the drawer takes a stroke back. */
+export function removeDrawStroke(payload) {
+  const id = payload?.id;
+  if (!id) return;
+  const index = drawState.strokes.findIndex((entry) => entry.id === id);
+  if (index === -1) return;
+  drawState.strokes.splice(index, 1);
+  redrawBoard();
+}
+
+/* Called by the app when the drawer wipes the board. */
+export function clearDrawBoard() {
+  drawState.strokes = [];
+  drawState.ownIds.clear();
+  drawState.buffer = [];
+  redrawBoard();
+}
+
 /* Called by the app when a player joins or reconnects mid-turn. */
 export function syncDrawBoard(payload) {
   if (!payload) return;
   const strokes = Array.isArray(payload.strokes) ? payload.strokes : [];
-  drawState.strokes = strokes;
-  drawState.ownIds.clear();
+
+  // The server's list is the truth, but a stroke that is still on its way
+  // is kept, so nothing the drawer has just drawn disappears.
+  const known = new Set(strokes.map((entry) => entry.id));
+  const inFlight = drawState.strokes.filter(
+    (entry) => !known.has(entry.id) && drawState.ownIds.has(entry.id),
+  );
+
+  drawState.strokes = [...strokes, ...inFlight];
   redrawBoard();
 }
 
@@ -1626,6 +1823,85 @@ function startDrawClock() {
     node.textContent = formatClock(remaining);
     node.classList.toggle("is-urgent", remaining <= 10_000);
   }, 250);
+}
+
+/* The tools the drawer uses: pen, eraser and fill, the colour palette and
+ * the brush size. Only the drawer sees it. */
+function drawToolBar(actions) {
+  const bar = el("div", "draw-tools");
+
+  const tools = el("div", "draw-tool-row");
+  for (const tool of DRAW_TOOLS) {
+    const button = el("button", "draw-tool", tool.icon);
+    button.type = "button";
+    button.title = tool.label;
+    button.setAttribute("aria-label", tool.label);
+    if (drawState.tool === tool.id) {
+      button.classList.add("is-active");
+      button.setAttribute("aria-pressed", "true");
+    }
+    button.addEventListener("click", () => {
+      drawState.tool = tool.id;
+      for (const other of tools.querySelectorAll(".draw-tool")) {
+        other.classList.remove("is-active");
+        other.removeAttribute("aria-pressed");
+      }
+      button.classList.add("is-active");
+      button.setAttribute("aria-pressed", "true");
+    });
+    tools.append(button);
+  }
+
+  const palette = el("div", "draw-tool-row draw-palette");
+  for (const color of DRAW_COLORS) {
+    const swatch = el("button", "draw-color");
+    swatch.type = "button";
+    swatch.style.background = color;
+    swatch.title = color;
+    swatch.setAttribute("aria-label", `Colour ${color}`);
+    if (drawState.color === color && drawState.tool !== "erase") {
+      swatch.classList.add("is-active");
+    }
+    swatch.addEventListener("click", () => {
+      drawState.color = color;
+      if (drawState.tool === "erase") {
+        drawState.tool = "pen";
+        for (const other of tools.querySelectorAll(".draw-tool")) {
+          other.classList.remove("is-active");
+          other.removeAttribute("aria-pressed");
+        }
+        const pen = tools.querySelector(".draw-tool");
+        pen?.classList.add("is-active");
+        pen?.setAttribute("aria-pressed", "true");
+      }
+      for (const other of palette.querySelectorAll(".draw-color")) {
+        other.classList.remove("is-active");
+      }
+      swatch.classList.add("is-active");
+    });
+    palette.append(swatch);
+  }
+
+  const sizes = el("div", "draw-tool-row draw-sizes");
+  DRAW_SIZES.forEach((size, index) => {
+    const dot = el("button", "draw-size");
+    dot.type = "button";
+    dot.title = `Brush ${index + 1}`;
+    dot.setAttribute("aria-label", `Brush size ${index + 1}`);
+    dot.style.setProperty("--dot", `${Math.max(5, size * 420)}px`);
+    if (drawState.size === size) dot.classList.add("is-active");
+    dot.addEventListener("click", () => {
+      drawState.size = size;
+      for (const other of sizes.querySelectorAll(".draw-size")) {
+        other.classList.remove("is-active");
+      }
+      dot.classList.add("is-active");
+    });
+    sizes.append(dot);
+  });
+
+  bar.append(tools, palette, sizes);
+  return bar;
 }
 
 function drawIt(state, game, mine, actions) {
@@ -1705,18 +1981,23 @@ function drawIt(state, game, mine, actions) {
       ),
     );
 
+    nodes.push(drawToolBar(actions));
+
     const tools = el("div", "button-row");
     const done = button("Done, reveal the word");
     done.addEventListener(
       "click",
       actOn(done, actions, { type: "done" }, "Could not end the turn."),
     );
+    const undo = button("Undo", "btn btn-tonal");
+    undo.addEventListener("click", () => {
+      drawState.actions?.undo?.();
+    });
     const clear = button("Clear the board", "btn btn-text");
-    clear.addEventListener(
-      "click",
-      actOn(clear, actions, { type: "clear" }, "Could not clear the board."),
-    );
-    tools.append(done, clear);
+    clear.addEventListener("click", () => {
+      drawState.actions?.clearBoard?.();
+    });
+    tools.append(done, undo, clear);
     nodes.push(tools);
   } else {
     const form = block(blockTitle("Your guess"));

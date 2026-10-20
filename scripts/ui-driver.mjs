@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Builder } from "selenium-webdriver";

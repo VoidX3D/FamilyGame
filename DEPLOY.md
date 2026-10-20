@@ -29,25 +29,49 @@ git branch --force backend origin/backend
 ```
 
 **Do not merge `backend` into another branch.** It is a subtree of `main`
-with its own history, so Git cannot reconcile the two and stops with
-`refusing to merge unrelated histories` or `need to specify how to
-reconcile divergent branches`. Nothing is wrong with the repository; the
-two branches are simply not related.
+with its own history, so Git cannot reconcile the two.
 
 | If you want to… | Do this |
 | --- | --- |
-| Update the deployed server | `git fetch origin backend && git branch --force backend origin/backend` |
+| Update the deployed server | `npm run deploy:update` |
 | Update your working copy of `main` | `git checkout main && git pull --ff-only origin main` |
 | See the server code without switching branch | `git show origin/backend:index.js` |
 
-The same applies to a clone of this repository:
+### When git says it cannot reconcile the branches
+
+> `fatal: Need to specify how to reconcile divergent branches.`
+> `fatal: refusing to merge unrelated histories.`
+
+This is not a broken repository. It is what happens when a copy of
+`backend` still has the history from before the branch became a generated
+output, and the pull tries to merge it with the new one.
+
+There is nothing to merge, so do not merge. Take the server's version:
 
 ```bash
-git config pull.ff only
+npm run deploy:update
 ```
 
-That makes a pull refuse to create a merge commit instead of asking how to
-reconcile.
+or, on the hosting machine, in the panel's terminal:
+
+```bash
+cd /path/to/the/repository
+git fetch origin backend
+git checkout backend
+git reset --hard origin/backend
+npm install
+npm start
+```
+
+After that, pull the branch the same way from now on. The
+`sync-backend` workflow publishes `backend` without a force push, so a
+clone that is in step stays in step.
+
+**If the server did not update after a push, this is why.** The panel
+pulls the branch; if the pull failed, the old code kept running.
+
+On a fresh clone, `git config pull.ff only` makes a pull refuse to create
+a merge commit instead of stopping with the message above.
 
 ## 1. Backend (Wispbyte)
 

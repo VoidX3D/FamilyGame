@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import { config } from "./config.js";
 import { createRateLimiter } from "./rateLimit.js";
 import { makeToken, now, sameSecret } from "./util.js";

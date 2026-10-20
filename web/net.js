@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 export const API_URL =
   window.APP_CONFIG?.API_URL ?? "http://localhost:3000";
 

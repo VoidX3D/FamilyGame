@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";

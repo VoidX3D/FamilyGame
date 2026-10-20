@@ -1,0 +1,16 @@
+# Family Game Hub - a private party game for the family.
+#
+# The game itself is meant to be found through the invite link that the
+# host shares, so the public pages are only the ones a person might land
+# on from a search.
+
+User-agent: *
+Allow: /$
+Allow: /privacy.html
+Allow: /terms.html
+Disallow: /admin
+Disallow: /g/
+Disallow: /game
+Disallow: /api/
+
+Sitemap: https://funfamilygame.vercel.app/sitemap.xml

@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 :root {
   --bg: #0b1220;
   --surface: #111a2b;
@@ -1238,6 +1239,107 @@ body[data-view="game"] .game-stage {
 
 .vote-breakdown .vote-count-list {
   margin-top: var(--space-3);
+}
+
+/* The small links at the bottom of the page. */
+.page-foot {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  color: var(--on-surface-faint);
+  font-size: 12.5px;
+}
+
+.page-foot a {
+  color: var(--on-surface-muted);
+  text-decoration: none;
+}
+
+.page-foot a:hover {
+  color: var(--secondary);
+  text-decoration: underline;
+}
+
+/* The drawer's tools: pen, eraser and fill, the colours and the sizes. */
+.draw-tools {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+}
+
+.draw-tool-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.draw-tool {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: var(--surface-3);
+  color: var(--on-surface);
+  font-size: 19px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease-emphasized),
+    background var(--duration-fast) var(--ease-emphasized);
+}
+
+.draw-tool.is-active {
+  border-color: var(--primary);
+  background: rgba(255, 138, 107, 0.16);
+  color: var(--primary);
+}
+
+.draw-color {
+  width: 30px;
+  height: 30px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-emphasized);
+}
+
+.draw-color.is-active {
+  border-color: var(--on-surface);
+  transform: scale(1.12);
+}
+
+.draw-size {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  background: var(--surface-3);
+  cursor: pointer;
+}
+
+.draw-size::after {
+  content: "";
+  width: var(--dot, 8px);
+  height: var(--dot, 8px);
+  border-radius: 50%;
+  background: var(--on-surface);
+}
+
+.draw-size.is-active {
+  border-color: var(--primary);
+}
+
+.draw-size.is-active::after {
+  background: var(--primary);
 }
 
 /* The leave button is pushed to the bottom of the screen, away from the

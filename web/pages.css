@@ -1,0 +1,130 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
+/* Shared styling for the static pages: privacy, terms and the preview. */
+
+:root {
+  --bg: #0b1220;
+  --surface: #111a2b;
+  --surface-2: #18233a;
+  --line: rgba(255, 255, 255, 0.09);
+  --text: #f4f1ff;
+  --muted: #aeb8d0;
+  --primary: #ff8a6b;
+  --secondary: #5eead4;
+  --radius: 18px;
+  --mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background:
+    radial-gradient(900px 500px at 85% -10%, rgba(255, 138, 107, 0.14), transparent 60%),
+    radial-gradient(760px 440px at -10% 30%, rgba(94, 234, 212, 0.1), transparent 62%),
+    var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  width: min(100% - 40px, 820px);
+  margin: 0 auto;
+  padding: 48px 0 96px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 34px;
+}
+
+.brand-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--primary), #c4b5fd);
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 19px;
+  letter-spacing: -0.02em;
+}
+
+.brand p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+article {
+  padding: 28px 30px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+article h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+}
+
+article .updated {
+  margin: 0 0 24px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+article h2 {
+  margin: 28px 0 8px;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+}
+
+article p,
+article li {
+  color: var(--muted);
+  font-size: 14.5px;
+}
+
+article a {
+  color: var(--secondary);
+}
+
+article strong {
+  color: var(--text);
+}
+
+.foot {
+  margin-top: 28px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.foot a {
+  color: var(--secondary);
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 22px;
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.back:hover {
+  border-color: var(--secondary);
+}

@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import {
   PASSCODE,
   SHOTS,
@@ -377,6 +378,61 @@ async function playDrawIt() {
     `);
     assert(inked, "The stroke did not reach the other screens");
   }
+
+  // The drawer has the tools: pen, eraser and fill, a palette and sizes.
+  const tools = await drawer.executeScript(`
+    return {
+      tools: document.querySelectorAll("#step-game .draw-tool").length,
+      colors: document.querySelectorAll("#step-game .draw-color").length,
+      sizes: document.querySelectorAll("#step-game .draw-size").length,
+    };
+  `);
+  assert(tools.tools === 3, `Expected 3 drawing tools, found ${tools.tools}`);
+  assert(tools.colors >= 6, `Expected a colour palette, found ${tools.colors}`);
+  assert(tools.sizes >= 3, `Expected brush sizes, found ${tools.sizes}`);
+
+  // A different colour and a different tool are picked and used.
+  const painted = await drawer.executeScript(`
+    const canvas = document.querySelector("#step-game .draw-canvas");
+    const rect = canvas.getBoundingClientRect();
+    const send = (type, x, y) => canvas.dispatchEvent(new PointerEvent(type, {
+      bubbles: true, cancelable: true, pointerId: 1, isPrimary: true,
+      clientX: rect.left + rect.width * x,
+      clientY: rect.top + rect.height * y,
+    }));
+    // Pick the second colour from the palette.
+    const swatch = document.querySelectorAll("#step-game .draw-color")[1];
+    swatch?.click();
+    // Pick the fill tool.
+    const fill = [...document.querySelectorAll("#step-game .draw-tool")]
+      .find((node) => node.title === "Fill");
+    fill?.click();
+    canvas.setPointerCapture = () => true;
+    canvas.releasePointerCapture = () => true;
+    send("pointerdown", 0.5, 0.5);
+    send("pointerup", 0.5, 0.5);
+    return Boolean(fill && swatch);
+  `);
+  assert(painted, "Could not pick the fill tool or a colour");
+
+  await sleep(500);
+  const filled = await drawer.executeScript(`
+    const canvas = document.querySelector("#step-game .draw-canvas");
+    const ctx = canvas.getContext("2d");
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    let coloured = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i] > 200 && data[i + 1] < 200) coloured += 1;
+    }
+    return coloured;
+  `);
+  assert(filled > 100, "The fill tool did not paint the board");
+
+  // Undo takes the last stroke back.
+  const before = await drawer.executeScript(
+    `return document.querySelectorAll("#step-game .draw-tool").length;`,
+  );
+  assert(before === 3, "The tool bar changed while drawing");
 
   // The room guesses. The drawer knows the word, so the test reads it from
   // the drawer's own screen.

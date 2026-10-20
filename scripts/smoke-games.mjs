@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import { spawn } from "node:child_process";
 import crypto from "node:crypto";
 import { io } from "socket.io-client";

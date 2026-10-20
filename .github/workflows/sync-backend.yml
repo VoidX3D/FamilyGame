@@ -57,4 +57,19 @@ jobs:
             sync_commit="$split_sha"
           fi
 
-          git push origin "$sync_commit:refs/heads/backend"
+          # A plain push keeps the history a straight line, so every clone can
+          # fast-forward. If something has committed to the branch by hand,
+          # fall back to a force push rather than leaving the deploy broken.
+          if ! git push origin "$sync_commit:refs/heads/backend"; then
+            echo "::warning::The backend branch was not a fast-forward. Force pushing it."
+            git push --force origin "$sync_commit:refs/heads/backend"
+            echo "::warning::A clone that still has the old history must run: git fetch origin backend && git branch --force backend origin/backend"
+          fi
+
+      - name: Tell the host how to update
+        if: success()
+        run: |
+          echo "The server copy of the backend branch is at ${{ github.sha }}."
+          echo "On the hosting machine, update it with:"
+          echo "  git fetch origin backend && git branch --force backend origin/backend"
+          echo "or run 'npm run deploy:update' in the repository."

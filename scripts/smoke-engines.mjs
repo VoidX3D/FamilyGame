@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import { GAME_LIST, getGame } from "../server/games/index.js";
 
 function assert(condition, message) {

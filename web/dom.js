@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 /* Small DOM helpers shared by the player app and the game screens. */
 
 export function initials(name) {

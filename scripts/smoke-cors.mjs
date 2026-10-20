@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import { spawn } from "node:child_process";
 
 /* Checks that the server only answers the frontend it was configured for.

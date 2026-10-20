@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import crypto from "node:crypto";
 import { config } from "./config.js";
 import {
@@ -25,6 +26,31 @@ export class RoomStore {
       total += room.players.length;
     }
     return total;
+  }
+
+  /* How many of them are actually connected. */
+  connectedPlayerCount() {
+    let total = 0;
+    for (const room of this.rooms.values()) {
+      total += room.players.filter((player) => player.connected).length;
+    }
+    return total;
+  }
+
+  /* A short picture of every open room. It carries no secrets: only the
+   * code, the phase, the game and how many people are in it. */
+  summary() {
+    const now = Date.now();
+    return [...this.rooms.values()].map((room) => ({
+      code: room.code,
+      phase: room.phase,
+      game: room.gameId,
+      players: room.players.length,
+      connected: room.players.filter((player) => player.connected).length,
+      createdAt: new Date(room.createdAt).toISOString(),
+      lastActivity: new Date(room.lastActivity).toISOString(),
+      idleSeconds: Math.round((now - room.lastActivity) / 1000),
+    }));
   }
 
   createRoom(adminToken) {

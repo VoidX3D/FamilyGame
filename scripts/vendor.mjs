@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import { copyFile, mkdir, stat } from "node:fs/promises";
 import path from "node:path";
 

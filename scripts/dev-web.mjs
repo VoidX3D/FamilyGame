@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import http from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";

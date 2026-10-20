@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";

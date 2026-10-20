@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import { api, createSocket, emitAck } from "./net.js";
 import { avatar } from "./dom.js";
 import { gameIcon, hydrateIcons, icon } from "./icons.js";

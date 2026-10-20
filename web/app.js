@@ -1,4 +1,11 @@
-import { applyDrawStroke, renderGameScreen, syncDrawBoard } from "./games.js";
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
+import {
+  applyDrawStroke,
+  clearDrawBoard,
+  removeDrawStroke,
+  renderGameScreen,
+  syncDrawBoard,
+} from "./games.js";
 import { avatar } from "./dom.js";
 import { hydrateIcons } from "./icons.js";
 import { createSocket, emitAck } from "./net.js";
@@ -388,6 +395,12 @@ function renderGame(state) {
     requestSync: () => {
       if (socket?.connected) socket.emit("draw:sync", {});
     },
+    undo: () => {
+      if (socket?.connected) socket.emit("draw:undo", {});
+    },
+    clearBoard: () => {
+      if (socket?.connected) socket.emit("draw:clear", {});
+    },
   });
 }
 
@@ -515,6 +528,14 @@ function connectSocket() {
 
   socket.on("draw:sync", (payload) => {
     syncDrawBoard(payload);
+  });
+
+  socket.on("draw:remove", (payload) => {
+    removeDrawStroke(payload);
+  });
+
+  socket.on("draw:clear", () => {
+    clearDrawBoard();
   });
 
   socket.on("room:closed", () => {
