@@ -45,13 +45,37 @@ app.set(
       : Number(trustProxy) || 0,
 );
 
-app.use(
-  cors({
-    origin: config.allowedOrigins,
-    methods: ["GET", "POST", "PUT"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
+/* The same rule decides for the REST API and for the Socket.IO handshake,
+ * so a browser is never allowed on one and blocked on the other. */
+const corsOptions = {
+  origin(origin, callback) {
+    if (config.isOriginAllowed(origin)) {
+      callback(null, true);
+      return;
+    }
+    noteRejectedOrigin(origin);
+    callback(null, false);
+  },
+  methods: ["GET", "POST", "PUT"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+/* A rejected origin is nearly always a wrong FRONTEND_ORIGINS value. The
+ * operator should see it in the server log instead of guessing. */
+const rejectedOrigins = new Map();
+function noteRejectedOrigin(origin) {
+  if (!origin) return;
+  const key = String(origin).slice(0, 120);
+  const seen = rejectedOrigins.get(key) ?? 0;
+  rejectedOrigins.set(key, seen + 1);
+  if (seen === 0) {
+    console.warn(
+      `[cors] Refused ${key}. Add it to FRONTEND_ORIGINS on the backend.`,
+    );
+  }
+}
+
+app.use(cors(corsOptions));
 app.use(express.json({ limit: "256kb" }));
 app.use((req, res, next) => {
   res.set("Cache-Control", "no-store");
@@ -190,7 +214,24 @@ app.use((err, req, res, next) => {
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: config.allowedOrigins, methods: ["GET", "POST"] },
+  // The same allowlist as the REST API.
+  cors: {
+    origin: corsOptions.origin,
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  },
+  // A browser blocks a response that carries no CORS grant, but a direct
+  // WebSocket upgrade is not covered by CORS at all. The handshake is
+  // refused here instead.
+  allowRequest(req, callback) {
+    const origin = req.headers.origin;
+    if (config.isOriginAllowed(origin)) {
+      callback(null, true);
+      return;
+    }
+    noteRejectedOrigin(origin);
+    callback("Not allowed by CORS", false);
+  },
   transports: ["websocket", "polling"],
   pingInterval: 25000,
   pingTimeout: 20000,
@@ -215,6 +256,12 @@ server.listen(config.port, config.host, () => {
         : config.allowedOrigins
     }`,
   );
+  if (config.nodeEnv === "production" && !config.allowedOrigins.includes("*")) {
+    console.log(
+      "[cors] The frontend must be listed in FRONTEND_ORIGINS. A pattern " +
+        "like https://*.vercel.app covers a domain change.",
+    );
+  }
 
   if (config.generatedPasscode) {
     console.log(

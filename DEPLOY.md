@@ -31,6 +31,25 @@ ADMIN_PASSCODE=<strong private passcode, at least 12 characters>
 FRONTEND_ORIGINS=https://funfamilygame.vercel.app
 ```
 
+`FRONTEND_ORIGINS` must list the exact origin the frontend is served from.
+A wrong value makes the browser block every request from the site: the page
+loads but the host console cannot sign in, and the console shows
+`Could not reach the game server`. The backend logs the refused origin:
+
+```text
+[cors] Refused https://wrong.example.com. Add it to FRONTEND_ORIGINS on the backend.
+```
+
+The list accepts a pattern, so a domain change does not break the deploy:
+
+```text
+FRONTEND_ORIGINS=https://funfamilygame.vercel.app,https://*.vercel.app
+```
+
+`TRUST_PROXY` sets how many proxies sit in front of the API. The default `1`
+is correct for Wispbyte; use `false` if the API is exposed directly, so a
+client cannot spoof its address and slip the IP rate limits.
+
 Production startup fails if `ADMIN_PASSCODE` is missing or shorter than 12
 characters. A development server can generate a temporary passcode when the
 variable is omitted, but production never does.
@@ -99,11 +118,12 @@ After Vercel assigns the domain:
 - [ ] The Content tab loads eight collections, and a saved edit survives a restart
 - [ ] An unknown path shows the custom 404 page
 
-## Current deployment state (as of the v1 build)
+## Current deployment state
 
-- The backend hostname `familygame.wisp.uno` was returning "Web server offline"
-  during the final local build, so production deployment is not yet verified.
-- The Vercel frontend is expected at `https://funfamilygame.vercel.app`. Set that
-  exact origin in the backend's `FRONTEND_ORIGINS` before testing.
-- No secrets belong in git. `server/.env` and `server/data/` are ignored;
-  configure production secrets in the Wispbyte panel.
+- The backend answers at `https://familygame.wisp.uno` and the frontend at
+  `https://funfamilygame.vercel.app`.
+- The backend's `FRONTEND_ORIGINS` must contain `https://funfamilygame.vercel.app`.
+  If it still names an older domain, the browser blocks the site and the host
+  console cannot sign in. Check the backend log for the refused origin.
+- No secrets belong in git. `server/.env` and `server/data/content.json` are
+  ignored; configure production secrets in the Wispbyte panel.

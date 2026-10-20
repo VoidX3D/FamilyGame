@@ -39,11 +39,20 @@ export async function api(path, { method = "GET", body, token } = {}) {
   if (body !== undefined) headers["Content-Type"] = "application/json";
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const response = await fetch(`${API_URL}${path}`, {
-    method,
-    headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  let response;
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch (error) {
+    // A blocked cross-origin request looks exactly like a dead server.
+    throw new Error(
+      `Could not reach the game server at ${API_URL}. If this site is not the one listed in the backend's FRONTEND_ORIGINS, the browser blocks the request.`,
+      { cause: error },
+    );
+  }
 
   let data = null;
   try {
