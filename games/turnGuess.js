@@ -28,6 +28,7 @@ function createEngine({ id, name, tagline, contentType, contentKey, note }) {
     maxPlayers: 10,
     maxRounds: 0,
     hasScore: true,
+    endless: true,
   };
 
   function fallbackItem() {

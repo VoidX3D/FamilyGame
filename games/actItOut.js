@@ -25,6 +25,7 @@ export const meta = {
   maxPlayers: 10,
   maxRounds: 0,
   hasScore: true,
+  oneTurnEach: true,
 };
 
 const FALLBACK_PROMPT = {

@@ -1,0 +1,1593 @@
+{
+  "version": 1,
+  "collections": {
+    "oneOfUsWords": [
+      {
+        "id": "momos",
+        "word": "Momos",
+        "category": "Food"
+      },
+      {
+        "id": "chiya",
+        "word": "Chiya",
+        "category": "Drink"
+      },
+      {
+        "id": "sel-roti",
+        "word": "Sel Roti",
+        "category": "Food"
+      },
+      {
+        "id": "dal-bhat",
+        "word": "Dal Bhat",
+        "category": "Food"
+      },
+      {
+        "id": "dashain",
+        "word": "Dashain",
+        "category": "Festival"
+      },
+      {
+        "id": "tihar",
+        "word": "Tihar",
+        "category": "Festival"
+      },
+      {
+        "id": "holi",
+        "word": "Holi",
+        "category": "Festival"
+      },
+      {
+        "id": "everest",
+        "word": "Everest",
+        "category": "Place"
+      },
+      {
+        "id": "pokhara",
+        "word": "Pokhara",
+        "category": "Place"
+      },
+      {
+        "id": "lumbini",
+        "word": "Lumbini",
+        "category": "Place"
+      },
+      {
+        "id": "ludo",
+        "word": "Ludo",
+        "category": "Game"
+      },
+      {
+        "id": "carrom",
+        "word": "Carrom",
+        "category": "Game"
+      },
+      {
+        "id": "cricket",
+        "word": "Cricket",
+        "category": "Sport"
+      },
+      {
+        "id": "football",
+        "word": "Football",
+        "category": "Sport"
+      },
+      {
+        "id": "temple",
+        "word": "Temple",
+        "category": "Place"
+      },
+      {
+        "id": "monastery",
+        "word": "Monastery",
+        "category": "Place"
+      },
+      {
+        "id": "elephant",
+        "word": "Elephant",
+        "category": "Animal"
+      },
+      {
+        "id": "rhino",
+        "word": "Rhinoceros",
+        "category": "Animal"
+      },
+      {
+        "id": "yak",
+        "word": "Yak",
+        "category": "Animal"
+      },
+      {
+        "id": "red-panda",
+        "word": "Red Panda",
+        "category": "Animal"
+      },
+      {
+        "id": "guitar",
+        "word": "Guitar",
+        "category": "Music"
+      },
+      {
+        "id": "madal",
+        "word": "Madal",
+        "category": "Music"
+      },
+      {
+        "id": "radio",
+        "word": "Radio",
+        "category": "Object"
+      },
+      {
+        "id": "umbrella",
+        "word": "Umbrella",
+        "category": "Object"
+      },
+      {
+        "id": "bicycle",
+        "word": "Bicycle",
+        "category": "Transport"
+      },
+      {
+        "id": "bus",
+        "word": "Bus",
+        "category": "Transport"
+      },
+      {
+        "id": "airplane",
+        "word": "Airplane",
+        "category": "Transport"
+      },
+      {
+        "id": "cinema",
+        "word": "Cinema",
+        "category": "Place"
+      },
+      {
+        "id": "picnic",
+        "word": "Picnic",
+        "category": "Activity"
+      },
+      {
+        "id": "monsoon",
+        "word": "Monsoon",
+        "category": "Nature"
+      }
+    ],
+    "whoIsItQuestions": [
+      {
+        "id": "who-is-it-1",
+        "text": "Who is most likely to forget where they put their phone?"
+      },
+      {
+        "id": "who-is-it-2",
+        "text": "Who is most likely to fall asleep during a movie?"
+      },
+      {
+        "id": "who-is-it-3",
+        "text": "Who tells the best stories?"
+      },
+      {
+        "id": "who-is-it-4",
+        "text": "Who is the first to laugh at their own joke?"
+      },
+      {
+        "id": "who-is-it-5",
+        "text": "Who is most likely to sing in the shower?"
+      },
+      {
+        "id": "who-is-it-6",
+        "text": "Who is most likely to order extra food just in case?"
+      },
+      {
+        "id": "who-is-it-7",
+        "text": "Who is most likely to get lost even with a map?"
+      },
+      {
+        "id": "who-is-it-8",
+        "text": "Who is the calmest in a crisis?"
+      },
+      {
+        "id": "who-is-it-9",
+        "text": "Who is most likely to dance at a wedding?"
+      },
+      {
+        "id": "who-is-it-10",
+        "text": "Who is most likely to cry at a happy ending?"
+      },
+      {
+        "id": "who-is-it-11",
+        "text": "Who is most likely to win a debate?"
+      },
+      {
+        "id": "who-is-it-12",
+        "text": "Who is most likely to be late?"
+      },
+      {
+        "id": "who-is-it-13",
+        "text": "Who is the biggest tea lover?"
+      },
+      {
+        "id": "who-is-it-14",
+        "text": "Who is most likely to take a hundred photos?"
+      },
+      {
+        "id": "who-is-it-15",
+        "text": "Who is most likely to adopt a stray animal?"
+      },
+      {
+        "id": "who-is-it-16",
+        "text": "Who is most likely to give the best advice?"
+      },
+      {
+        "id": "who-is-it-17",
+        "text": "Who is the most competitive at board games?"
+      },
+      {
+        "id": "who-is-it-18",
+        "text": "Who is most likely to make everyone laugh?"
+      },
+      {
+        "id": "who-is-it-19",
+        "text": "Who is most likely to plan a surprise?"
+      },
+      {
+        "id": "who-is-it-20",
+        "text": "Who spends the longest choosing a movie?"
+      },
+      {
+        "id": "who-is-it-21",
+        "text": "Who is the best cook?"
+      },
+      {
+        "id": "who-is-it-22",
+        "text": "Who is most likely to talk to strangers?"
+      },
+      {
+        "id": "who-is-it-23",
+        "text": "Who is most likely to forget an anniversary?"
+      },
+      {
+        "id": "who-is-it-24",
+        "text": "Who is most likely to keep a secret?"
+      },
+      {
+        "id": "who-is-it-25",
+        "text": "Who is most likely to start a group chat?"
+      },
+      {
+        "id": "who-is-it-26",
+        "text": "Who is the loudest person in the room?"
+      },
+      {
+        "id": "who-is-it-27",
+        "text": "Who is most likely to take an afternoon nap?"
+      },
+      {
+        "id": "who-is-it-28",
+        "text": "Who is most likely to try a new food first?"
+      },
+      {
+        "id": "who-is-it-29",
+        "text": "Who would win a staring contest?"
+      },
+      {
+        "id": "who-is-it-30",
+        "text": "Who is most likely to become famous?"
+      }
+    ],
+    "people": [
+      {
+        "id": "prithvi-narayan-shah",
+        "name": "Prithvi Narayan Shah",
+        "hints": [
+          "An 18th-century king",
+          "Began uniting Nepal from Gorkha"
+        ],
+        "aliases": [
+          "Prithvinarayan Shah"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "bhanubhakta-acharya",
+        "name": "Bhanubhakta Acharya",
+        "hints": [
+          "A 19th-century poet",
+          "Translated the Ramayana into Nepali"
+        ],
+        "aliases": [
+          "Bhanu Bhakta"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "laxmi-prasad-devkota",
+        "name": "Laxmi Prasad Devkota",
+        "hints": [
+          "Known as Mahakavi",
+          "Wrote Muna Madan"
+        ],
+        "aliases": [
+          "Laxmi Devkota"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "bp-koirala",
+        "name": "B. P. Koirala",
+        "hints": [
+          "Nepal's first elected prime minister",
+          "Also a short-story writer"
+        ],
+        "aliases": [
+          "BP Koirala",
+          "Bishweshwar Prasad Koirala"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "tenzing-norgay",
+        "name": "Tenzing Norgay Sherpa",
+        "hints": [
+          "A famous Everest climber",
+          "Summited with Edmund Hillary in 1953"
+        ],
+        "aliases": [
+          "Tenzing Norgay"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "pasang-lhamu",
+        "name": "Pasang Lhamu Sherpa",
+        "hints": [
+          "The first Nepali woman to summit Everest",
+          "A peak and a highway carry her name"
+        ],
+        "aliases": [
+          "Pasang Lhamu"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "madhav-prasad-ghimire",
+        "name": "Madhav Prasad Ghimire",
+        "hints": [
+          "Nepal's Rashtra Kavi",
+          "Wrote the epic Gauri"
+        ],
+        "aliases": [
+          "Madhav Ghimire"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "madan-krishna-shrestha",
+        "name": "Madan Krishna Shrestha",
+        "hints": [
+          "Half of the comedy duo Maha Jodi",
+          "A familiar face from Nepali TV comedy"
+        ],
+        "aliases": [
+          "Madan Krishna"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "hari-bansha-acharya",
+        "name": "Hari Bansha Acharya",
+        "hints": [
+          "The other half of Maha Jodi",
+          "Famous for comic characters and satire"
+        ],
+        "aliases": [
+          "Hari Bansha"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "rajesh-hamal",
+        "name": "Rajesh Hamal",
+        "hints": [
+          "Nicknamed Maha Nayak",
+          "A leading Nepali film hero of the 1990s"
+        ],
+        "aliases": [
+          "Maha Nayak"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "bhuwan-kc",
+        "name": "Bhuwan K.C.",
+        "hints": [
+          "A romantic Nepali film star",
+          "Also known for singing and directing"
+        ],
+        "aliases": [
+          "Bhuwan KC"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "manisha-koirala",
+        "name": "Manisha Koirala",
+        "hints": [
+          "A Nepali actress who worked in Bollywood",
+          "Starred in 1942: A Love Story"
+        ],
+        "aliases": [
+          "Manisha"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "karishma-manandhar",
+        "name": "Karishma Manandhar",
+        "hints": [
+          "A Miss Nepal turned actress",
+          "Known for 1990s Nepali films"
+        ],
+        "aliases": [
+          "Karishma"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "rekha-thapa",
+        "name": "Rekha Thapa",
+        "hints": [
+          "A popular action-film actress",
+          "Later entered politics"
+        ],
+        "aliases": [
+          "Rekha"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "anmol-kc",
+        "name": "Anmol K.C.",
+        "hints": [
+          "A young Nepali film actor",
+          "Starred in Hostel Returns"
+        ],
+        "aliases": [
+          "Anmol KC"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "samragyee-rl-shah",
+        "name": "Samragyee R.L. Shah",
+        "hints": [
+          "Actress in A Mero Hajur 2",
+          "Known for romantic films"
+        ],
+        "aliases": [
+          "Samragyee Shah",
+          "Samragyee RL Shah"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "nischal-basnet",
+        "name": "Nischal Basnet",
+        "hints": [
+          "An actor and director",
+          "Directed the film Loot"
+        ],
+        "aliases": [
+          "Nischal"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "dayahang-rai",
+        "name": "Dayahang Rai",
+        "hints": [
+          "An actor from eastern Nepal",
+          "Known for Kabaddi and Jhari"
+        ],
+        "aliases": [
+          "Dayahang"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "deepak-raj-giri",
+        "name": "Deepak Raj Giri",
+        "hints": [
+          "A comedian and filmmaker",
+          "Known for the Chhakka Panja films"
+        ],
+        "aliases": [
+          "Deepak Raj"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "priyanka-karki",
+        "name": "Priyanka Karki",
+        "hints": [
+          "An actress and model",
+          "Known for comedy films"
+        ],
+        "aliases": [
+          "Priyanka"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "sabin-rai",
+        "name": "Sabin Rai",
+        "hints": [
+          "A Nepali pop singer",
+          "Nicknamed the Rockstar"
+        ],
+        "aliases": [
+          "Sabin"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "sugam-pokharel",
+        "name": "Sugam Pokharel",
+        "hints": [
+          "A singer and composer",
+          "Known for romantic songs"
+        ],
+        "aliases": [
+          "Sugam"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "anju-panta",
+        "name": "Anju Panta",
+        "hints": [
+          "A Nepali playback singer",
+          "Has judged music shows"
+        ],
+        "aliases": [
+          "Anju"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "komal-oli",
+        "name": "Komal Oli",
+        "hints": [
+          "A singer and radio presenter",
+          "Known for folk songs"
+        ],
+        "aliases": [
+          "Komal"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "nabin-k-bhattarai",
+        "name": "Nabin K Bhattarai",
+        "hints": [
+          "A Nepali pop singer",
+          "Known for the song Pratibimba"
+        ],
+        "aliases": [
+          "Nabin Bhattarai"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "astha-raut",
+        "name": "Astha Raut",
+        "hints": [
+          "A Nepali singer",
+          "Known for the song Kaanchhi"
+        ],
+        "aliases": [
+          "Aastha Raut",
+          "Astha"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "yama-buddha",
+        "name": "Yama Buddha",
+        "hints": [
+          "A Nepali rapper",
+          "Known for the song Sathi"
+        ],
+        "aliases": [
+          "Yama"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "bipul-chettri",
+        "name": "Bipul Chettri",
+        "hints": [
+          "A singer-songwriter from Darjeeling",
+          "Known for Wildflower"
+        ],
+        "aliases": [
+          "Bipul"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "amrit-gurung",
+        "name": "Amrit Gurung",
+        "hints": [
+          "Lead singer of Nepathya",
+          "A folk-rock musician"
+        ],
+        "aliases": [
+          "Amrit",
+          "Nepathya"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "jhamak-ghimire",
+        "name": "Jhamak Ghimire",
+        "hints": [
+          "A writer who uses a wheelchair",
+          "Wrote Jiwan Kada Ki Phool"
+        ],
+        "aliases": [
+          "Jhamak"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "albert-einstein",
+        "name": "Albert Einstein",
+        "hints": [
+          "A physicist",
+          "Developed the theory of relativity"
+        ],
+        "aliases": [
+          "Einstein"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "lionel-messi",
+        "name": "Lionel Messi",
+        "hints": [
+          "An Argentine footballer",
+          "Won the 2022 World Cup"
+        ],
+        "aliases": [
+          "Messi"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "cristiano-ronaldo",
+        "name": "Cristiano Ronaldo",
+        "hints": [
+          "A Portuguese footballer",
+          "Famous for his goal celebrations"
+        ],
+        "aliases": [
+          "Ronaldo"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "serena-williams",
+        "name": "Serena Williams",
+        "hints": [
+          "A tennis champion",
+          "Won 23 Grand Slam singles titles"
+        ],
+        "aliases": [
+          "Serena"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "taylor-swift",
+        "name": "Taylor Swift",
+        "hints": [
+          "An American singer-songwriter",
+          "Known for storytelling songs"
+        ],
+        "aliases": [
+          "Taylor"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "michael-jackson",
+        "name": "Michael Jackson",
+        "hints": [
+          "Known as the King of Pop",
+          "Famous for the moonwalk"
+        ],
+        "aliases": [
+          "MJ"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "malala-yousafzai",
+        "name": "Malala Yousafzai",
+        "hints": [
+          "An education activist",
+          "The youngest Nobel Peace Prize winner"
+        ],
+        "aliases": [
+          "Malala"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "mahatma-gandhi",
+        "name": "Mahatma Gandhi",
+        "hints": [
+          "An Indian independence leader",
+          "Known for nonviolent protest"
+        ],
+        "aliases": [
+          "Gandhi"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "william-shakespeare",
+        "name": "William Shakespeare",
+        "hints": [
+          "An English playwright",
+          "Wrote Romeo and Juliet"
+        ],
+        "aliases": [
+          "Shakespeare"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "leonardo-da-vinci",
+        "name": "Leonardo da Vinci",
+        "hints": [
+          "A Renaissance artist and inventor",
+          "Painted the Mona Lisa"
+        ],
+        "aliases": [
+          "Da Vinci",
+          "Leonardo"
+        ],
+        "group": "Global"
+      }
+    ],
+    "places": [
+      {
+        "id": "kathmandu",
+        "name": "Kathmandu",
+        "hints": [
+          "The capital of Nepal",
+          "Home to Durbar Square and Swayambhunath"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "pokhara",
+        "name": "Pokhara",
+        "hints": [
+          "A city beside Phewa Lake",
+          "A gateway to Annapurna treks"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "lalitpur",
+        "name": "Lalitpur (Patan)",
+        "hints": [
+          "A city of fine arts",
+          "Home to Patan Durbar Square"
+        ],
+        "aliases": [
+          "Lalitpur",
+          "Patan"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "bhaktapur",
+        "name": "Bhaktapur",
+        "hints": [
+          "A medieval city in the Kathmandu Valley",
+          "Known for Nyatapola Temple"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "chitwan",
+        "name": "Chitwan",
+        "hints": [
+          "Home to a national park",
+          "Famous for rhinos and elephants"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "lumbini",
+        "name": "Lumbini",
+        "hints": [
+          "The birthplace of Buddha",
+          "Site of the Maya Devi Temple"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "janakpur",
+        "name": "Janakpur",
+        "hints": [
+          "A city linked to Sita",
+          "Home to Janaki Mandir"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "biratnagar",
+        "name": "Biratnagar",
+        "hints": [
+          "An industrial city in eastern Nepal",
+          "Near the Koshi River"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "birgunj",
+        "name": "Birgunj",
+        "hints": [
+          "A border city in southern Nepal",
+          "A major trade gateway to India"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "dharan",
+        "name": "Dharan",
+        "hints": [
+          "A city at the foot of the eastern hills",
+          "Known for BP Koirala Institute"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "butwal",
+        "name": "Butwal",
+        "hints": [
+          "A western Nepal trade city",
+          "Near the Tinau River"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "nepalgunj",
+        "name": "Nepalgunj",
+        "hints": [
+          "A city in the western plains",
+          "Hot and close to the Indian border"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "hetauda",
+        "name": "Hetauda",
+        "hints": [
+          "A city in Makwanpur",
+          "Surrounded by hills and forests"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "tansen",
+        "name": "Tansen (Palpa)",
+        "hints": [
+          "A hill town with an old bazaar",
+          "Known for dhaka fabric and karuwa"
+        ],
+        "aliases": [
+          "Tansen",
+          "Palpa"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "gorkha",
+        "name": "Gorkha",
+        "hints": [
+          "The ancestral home of the Shah dynasty",
+          "Site of Gorkha Durbar"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "bandipur",
+        "name": "Bandipur",
+        "hints": [
+          "A preserved hilltop bazaar",
+          "Car-free streets with mountain views"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "mustang",
+        "name": "Mustang",
+        "hints": [
+          "A high desert region",
+          "Home to Muktinath and Lo Manthang"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "muktinath",
+        "name": "Muktinath",
+        "hints": [
+          "A pilgrimage site",
+          "A temple with 108 water spouts"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "everest-base-camp",
+        "name": "Everest Base Camp",
+        "hints": [
+          "The starting point for Everest climbers",
+          "In the Khumbu region"
+        ],
+        "aliases": [
+          "EBC"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "annapurna",
+        "name": "Annapurna",
+        "hints": [
+          "A famous mountain range",
+          "Home to Annapurna I"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "rara-lake",
+        "name": "Rara Lake",
+        "hints": [
+          "The largest lake in Nepal",
+          "In Mugu district"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "phewa-lake",
+        "name": "Phewa Lake",
+        "hints": [
+          "A lake in Pokhara",
+          "Reflects the Annapurna range"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "tilicho-lake",
+        "name": "Tilicho Lake",
+        "hints": [
+          "A high-altitude lake",
+          "In the Annapurna region"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "pathibhara",
+        "name": "Pathibhara",
+        "hints": [
+          "A hilltop temple in Taplejung",
+          "A popular pilgrimage in eastern Nepal"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "ilam",
+        "name": "Ilam",
+        "hints": [
+          "An eastern hill district",
+          "Famous for tea gardens"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "jomsom",
+        "name": "Jomsom",
+        "hints": [
+          "A windy town in Mustang",
+          "Gateway to the Kali Gandaki valley"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "dolpo",
+        "name": "Dolpo",
+        "hints": [
+          "A remote highland region",
+          "Known for Shey Phoksundo Lake"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "khaptad",
+        "name": "Khaptad",
+        "hints": [
+          "A national park in far western Nepal",
+          "Rolling grasslands and temples"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "bardia",
+        "name": "Bardia",
+        "hints": [
+          "A national park in western Nepal",
+          "Known for tigers and wild elephants"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "namche-bazaar",
+        "name": "Namche Bazaar",
+        "hints": [
+          "A Sherpa town in Khumbu",
+          "The last big stop before Everest Base Camp"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "paris",
+        "name": "Paris",
+        "hints": [
+          "The capital of France",
+          "Home to the Eiffel Tower"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "london",
+        "name": "London",
+        "hints": [
+          "The capital of the United Kingdom",
+          "Home to Big Ben"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "tokyo",
+        "name": "Tokyo",
+        "hints": [
+          "The capital of Japan",
+          "Home to Shibuya Crossing"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "rome",
+        "name": "Rome",
+        "hints": [
+          "The capital of Italy",
+          "Home to the Colosseum"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "cairo",
+        "name": "Cairo",
+        "hints": [
+          "The capital of Egypt",
+          "Near the Pyramids of Giza"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "beijing",
+        "name": "Beijing",
+        "hints": [
+          "The capital of China",
+          "Home to the Forbidden City"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "canberra",
+        "name": "Canberra",
+        "hints": [
+          "The capital of Australia",
+          "A planned city with Lake Burley Griffin"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "brasilia",
+        "name": "Brasília",
+        "hints": [
+          "The capital of Brazil",
+          "Known for modernist architecture"
+        ],
+        "aliases": [
+          "Brasilia"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "ottawa",
+        "name": "Ottawa",
+        "hints": [
+          "The capital of Canada",
+          "On the Ottawa River"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "new-delhi",
+        "name": "New Delhi",
+        "hints": [
+          "The capital of India",
+          "Home to India Gate"
+        ],
+        "aliases": [
+          "Delhi"
+        ],
+        "group": "World"
+      }
+    ],
+    "whoWrotePrompts": [
+      {
+        "id": "who-wrote-1",
+        "text": "What is the funniest excuse for being late?"
+      },
+      {
+        "id": "who-wrote-2",
+        "text": "What is the strangest thing you have ever eaten?"
+      },
+      {
+        "id": "who-wrote-3",
+        "text": "What is the best way to cheer someone up?"
+      },
+      {
+        "id": "who-wrote-4",
+        "text": "What would you do with one free afternoon?"
+      },
+      {
+        "id": "who-wrote-5",
+        "text": "What is the most useless talent you have?"
+      },
+      {
+        "id": "who-wrote-6",
+        "text": "What is the funniest thing a pet could say?"
+      },
+      {
+        "id": "who-wrote-7",
+        "text": "What is the best snack for a road trip?"
+      },
+      {
+        "id": "who-wrote-8",
+        "text": "What is the worst song to sing at a wedding?"
+      },
+      {
+        "id": "who-wrote-9",
+        "text": "What is a completely normal thing that sounds suspicious?"
+      },
+      {
+        "id": "who-wrote-10",
+        "text": "What is the best gift you have ever received?"
+      },
+      {
+        "id": "who-wrote-11",
+        "text": "What is the most ridiculous thing you believed as a child?"
+      },
+      {
+        "id": "who-wrote-12",
+        "text": "What is the best excuse to avoid washing dishes?"
+      },
+      {
+        "id": "who-wrote-13",
+        "text": "What is the first thing you would do if you became invisible?"
+      },
+      {
+        "id": "who-wrote-14",
+        "text": "What is the strangest dream you can remember?"
+      },
+      {
+        "id": "who-wrote-15",
+        "text": "What is the best thing about a rainy day?"
+      },
+      {
+        "id": "who-wrote-16",
+        "text": "What is a movie you would watch again and again?"
+      },
+      {
+        "id": "who-wrote-17",
+        "text": "What is the funniest name for a family pet?"
+      },
+      {
+        "id": "who-wrote-18",
+        "text": "What is the best topping for momos?"
+      },
+      {
+        "id": "who-wrote-19",
+        "text": "What is the most creative way to avoid a phone call?"
+      },
+      {
+        "id": "who-wrote-20",
+        "text": "What would your superpower be, and why?"
+      }
+    ],
+    "truths": [
+      {
+        "id": "truth-1",
+        "text": "What is a small thing that always makes you happy?"
+      },
+      {
+        "id": "truth-2",
+        "text": "What is the silliest thing you have done in front of family?"
+      },
+      {
+        "id": "truth-3",
+        "text": "What is a secret talent you have?"
+      },
+      {
+        "id": "truth-4",
+        "text": "What is the most embarrassing song you know all the words to?"
+      },
+      {
+        "id": "truth-5",
+        "text": "What is a habit you want to change?"
+      },
+      {
+        "id": "truth-6",
+        "text": "What is the best compliment you have ever received?"
+      },
+      {
+        "id": "truth-7",
+        "text": "What is something you are proud of?"
+      },
+      {
+        "id": "truth-8",
+        "text": "What is the funniest thing you have seen at a wedding?"
+      },
+      {
+        "id": "truth-9",
+        "text": "What is a food you could eat every day?"
+      },
+      {
+        "id": "truth-10",
+        "text": "What is the last thing that made you laugh out loud?"
+      },
+      {
+        "id": "truth-11",
+        "text": "What is a place you really want to visit?"
+      },
+      {
+        "id": "truth-12",
+        "text": "What is a small mistake you still remember?"
+      },
+      {
+        "id": "truth-13",
+        "text": "What is the nicest thing someone has done for you?"
+      },
+      {
+        "id": "truth-14",
+        "text": "What is a movie or show you pretend to understand?"
+      },
+      {
+        "id": "truth-15",
+        "text": "What is the most useless fact you know?"
+      },
+      {
+        "id": "truth-16",
+        "text": "What is a tradition you love?"
+      },
+      {
+        "id": "truth-17",
+        "text": "What is the best advice you have received?"
+      },
+      {
+        "id": "truth-18",
+        "text": "What is something you would like to learn?"
+      },
+      {
+        "id": "truth-19",
+        "text": "What is a moment you wish you could relive?"
+      },
+      {
+        "id": "truth-20",
+        "text": "What is the most surprising thing about you?"
+      }
+    ],
+    "dares": [
+      {
+        "id": "dare-1",
+        "text": "Speak in a cartoon voice until your next turn."
+      },
+      {
+        "id": "dare-2",
+        "text": "Give a 10-second speech praising the person to your left."
+      },
+      {
+        "id": "dare-3",
+        "text": "Sing the first line of any song."
+      },
+      {
+        "id": "dare-4",
+        "text": "Do your best kind impression of a family member."
+      },
+      {
+        "id": "dare-5",
+        "text": "Tell a joke, even a bad one."
+      },
+      {
+        "id": "dare-6",
+        "text": "Dance for 15 seconds with no music."
+      },
+      {
+        "id": "dare-7",
+        "text": "Say the alphabet backward from Z to A."
+      },
+      {
+        "id": "dare-8",
+        "text": "Make up a new nickname for yourself and explain it."
+      },
+      {
+        "id": "dare-9",
+        "text": "Do five slow-motion high-fives with the room."
+      },
+      {
+        "id": "dare-10",
+        "text": "Describe your day using only three emojis."
+      },
+      {
+        "id": "dare-11",
+        "text": "Balance a spoon on your nose for five seconds."
+      },
+      {
+        "id": "dare-12",
+        "text": "Give a dramatic thank-you speech to your phone."
+      },
+      {
+        "id": "dare-13",
+        "text": "Do a runway walk across the room."
+      },
+      {
+        "id": "dare-14",
+        "text": "Invent a new snack and pitch it in one sentence."
+      },
+      {
+        "id": "dare-15",
+        "text": "Say momos in five different emotions."
+      },
+      {
+        "id": "dare-16",
+        "text": "Draw a self-portrait with your eyes closed."
+      },
+      {
+        "id": "dare-17",
+        "text": "Compliment every player in one breath."
+      },
+      {
+        "id": "dare-18",
+        "text": "Do your best animal impression."
+      },
+      {
+        "id": "dare-19",
+        "text": "Pretend to be a news anchor reading the room's latest headline."
+      },
+      {
+        "id": "dare-20",
+        "text": "Make a funny face and hold it for five seconds."
+      }
+    ],
+    "charades": [
+      {
+        "id": "charades-1",
+        "text": "Making momos",
+        "category": "Food"
+      },
+      {
+        "id": "charades-2",
+        "text": "Riding a bicycle",
+        "category": "Activity"
+      },
+      {
+        "id": "charades-3",
+        "text": "Brushing your teeth",
+        "category": "Daily life"
+      },
+      {
+        "id": "charades-4",
+        "text": "Taking a selfie",
+        "category": "Funny"
+      },
+      {
+        "id": "charades-5",
+        "text": "Flying a kite",
+        "category": "Activity"
+      },
+      {
+        "id": "charades-6",
+        "text": "Milking a cow",
+        "category": "Animal"
+      },
+      {
+        "id": "charades-7",
+        "text": "Climbing a mountain",
+        "category": "Travel"
+      },
+      {
+        "id": "charades-8",
+        "text": "Playing the madal",
+        "category": "Music"
+      },
+      {
+        "id": "charades-9",
+        "text": "Washing dishes",
+        "category": "Daily life"
+      },
+      {
+        "id": "charades-10",
+        "text": "Catching a bus",
+        "category": "Travel"
+      },
+      {
+        "id": "charades-11",
+        "text": "Blowing out birthday candles",
+        "category": "Festival"
+      },
+      {
+        "id": "charades-12",
+        "text": "Tying your shoelaces",
+        "category": "Daily life"
+      },
+      {
+        "id": "charades-13",
+        "text": "Swimming in a lake",
+        "category": "Sport"
+      },
+      {
+        "id": "charades-14",
+        "text": "Drinking hot tea",
+        "category": "Food"
+      },
+      {
+        "id": "charades-15",
+        "text": "Reading a scary book",
+        "category": "Funny"
+      },
+      {
+        "id": "charades-16",
+        "text": "Planting rice",
+        "category": "Activity"
+      },
+      {
+        "id": "charades-17",
+        "text": "Dancing at a wedding",
+        "category": "Festival"
+      },
+      {
+        "id": "charades-18",
+        "text": "Chasing a chicken",
+        "category": "Animal"
+      },
+      {
+        "id": "charades-19",
+        "text": "Riding a motorcycle",
+        "category": "Travel"
+      },
+      {
+        "id": "charades-20",
+        "text": "Opening an umbrella in the rain",
+        "category": "Funny"
+      },
+      {
+        "id": "charades-21",
+        "text": "Eating a very spicy momo",
+        "category": "Food"
+      },
+      {
+        "id": "charades-22",
+        "text": "Sleeping in class",
+        "category": "Funny"
+      },
+      {
+        "id": "charades-23",
+        "text": "Taking a photo of a tiger",
+        "category": "Animal"
+      },
+      {
+        "id": "charades-24",
+        "text": "Carrying water uphill",
+        "category": "Activity"
+      },
+      {
+        "id": "charades-25",
+        "text": "Playing cricket",
+        "category": "Sport"
+      },
+      {
+        "id": "charades-26",
+        "text": "Flying an airplane",
+        "category": "Travel"
+      },
+      {
+        "id": "charades-27",
+        "text": "Singing in the shower",
+        "category": "Music"
+      },
+      {
+        "id": "charades-28",
+        "text": "Slipping on a banana peel",
+        "category": "Funny"
+      },
+      {
+        "id": "charades-29",
+        "text": "Wrapping a gift",
+        "category": "Activity"
+      },
+      {
+        "id": "charades-30",
+        "text": "Waiting for the bus",
+        "category": "Daily life"
+      },
+      {
+        "id": "charades-31",
+        "text": "Feeding a goat",
+        "category": "Animal"
+      },
+      {
+        "id": "charades-32",
+        "text": "Praying at a temple",
+        "category": "Festival"
+      },
+      {
+        "id": "charades-33",
+        "text": "Combing your hair",
+        "category": "Daily life"
+      },
+      {
+        "id": "charades-34",
+        "text": "Making chiya",
+        "category": "Food"
+      },
+      {
+        "id": "charades-35",
+        "text": "Riding an elephant",
+        "category": "Animal"
+      },
+      {
+        "id": "charades-36",
+        "text": "Falling asleep on a bus",
+        "category": "Funny"
+      },
+      {
+        "id": "charades-37",
+        "text": "Putting on a jacket",
+        "category": "Daily life"
+      },
+      {
+        "id": "charades-38",
+        "text": "Fishing in a river",
+        "category": "Sport"
+      },
+      {
+        "id": "charades-39",
+        "text": "Winning a race",
+        "category": "Sport"
+      },
+      {
+        "id": "charades-40",
+        "text": "Losing your keys",
+        "category": "Funny"
+      }
+    ]
+  }
+}

@@ -30,7 +30,20 @@ await loadContent();
 
 const app = express();
 app.disable("x-powered-by");
-app.set("trust proxy", 1);
+
+// How many proxies sit in front of this process. "1" is correct for a single
+// reverse proxy (Wispbyte / Vercel). Set TRUST_PROXY=false when the API is
+// exposed directly, so a client cannot spoof its address with
+// X-Forwarded-For and slip the IP rate limits.
+const trustProxy = String(process.env.TRUST_PROXY ?? "1").trim();
+app.set(
+  "trust proxy",
+  trustProxy === "true"
+    ? true
+    : trustProxy === "false"
+      ? false
+      : Number(trustProxy) || 0,
+);
 
 app.use(
   cors({

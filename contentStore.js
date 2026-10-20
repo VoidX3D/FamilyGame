@@ -1,28 +1,23 @@
 /* Editable game content with optional file persistence.
  *
- * The built-in lists in server/games/content.js are the defaults. The host
- * console can replace any collection; edits are normalized, validated, and
- * written to server/data/content.json so they survive a restart.
+ * Defaults are loaded from server/data/default-content.json. The host console
+ * can replace any collection; edits are normalized, validated, and written to
+ * server/data/content.json so they survive a restart.
  *
  * Set CONTENT_FILE=:memory: to disable disk persistence (tests and previews).
  */
 
+import { readFileSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import {
-  CHARADES_PROMPTS,
-  DEFAULT_DARES,
-  DEFAULT_TRUTHS,
-  ONE_OF_US_WORDS,
-  PEOPLE,
-  PLACES,
-  WHO_IS_IT_QUESTIONS,
-  WHO_WROTE_PROMPTS,
-} from "./games/content.js";
-
 const here = path.dirname(fileURLToPath(import.meta.url));
+export const DEFAULT_CONTENT_FILE = path.join(
+  here,
+  "data",
+  "default-content.json",
+);
 export const CONTENT_FILE =
   process.env.CONTENT_FILE || path.join(here, "data", "content.json");
 const MEMORY_ONLY = CONTENT_FILE === ":memory:";
@@ -137,22 +132,26 @@ export const COLLECTIONS = [
   },
 ];
 
-const DEFAULT_ITEMS = {
-  oneOfUsWords: ONE_OF_US_WORDS,
-  whoIsItQuestions: WHO_IS_IT_QUESTIONS,
-  people: PEOPLE,
-  places: PLACES,
-  whoWrotePrompts: WHO_WROTE_PROMPTS,
-  truths: DEFAULT_TRUTHS.map((text, index) => ({
-    id: `truth-${index + 1}`,
-    text,
-  })),
-  dares: DEFAULT_DARES.map((text, index) => ({
-    id: `dare-${index + 1}`,
-    text,
-  })),
-  charades: CHARADES_PROMPTS,
-};
+function loadDefaultItems() {
+  let parsed;
+  try {
+    parsed = JSON.parse(readFileSync(DEFAULT_CONTENT_FILE, "utf8"));
+  } catch (error) {
+    throw new Error(
+      `Could not load default content from ${DEFAULT_CONTENT_FILE}: ${error.message}`,
+    );
+  }
+
+  const items = parsed?.collections;
+  if (!items || typeof items !== "object" || Array.isArray(items)) {
+    throw new Error(
+      `Default content file ${DEFAULT_CONTENT_FILE} must contain a collections object.`,
+    );
+  }
+  return items;
+}
+
+const DEFAULT_ITEMS = loadDefaultItems();
 
 const byKey = new Map(COLLECTIONS.map((collection) => [collection.key, collection]));
 const collections = new Map();
@@ -264,6 +263,19 @@ function resetToDefaults(key) {
 }
 
 for (const collection of COLLECTIONS) {
+  try {
+    DEFAULT_ITEMS[collection.key] = normalizeItems(
+      collection,
+      DEFAULT_ITEMS[collection.key],
+    );
+  } catch (error) {
+    const details = Array.isArray(error?.details)
+      ? error.details.join(" ")
+      : error.message;
+    throw new Error(
+      `Invalid default content for ${collection.key}: ${details}`,
+    );
+  }
   resetToDefaults(collection.key);
 }
 
@@ -294,6 +306,7 @@ export function contentSnapshot() {
     ),
     status: {
       file: MEMORY_ONLY ? null : CONTENT_FILE,
+      defaultFile: DEFAULT_CONTENT_FILE,
       persisted: MEMORY_ONLY ? true : persisted,
       error: lastError || null,
     },

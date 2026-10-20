@@ -227,6 +227,20 @@ export class RoomStore {
   gameEntry(room, reason = "ended") {
     if (!room.game) return null;
 
+    const participants = new Set(
+      (room.game.players ?? []).map((player) => player.id),
+    );
+
+    const scoreRows = (scores) =>
+      room.players
+        .map((player) => ({
+          playerId: player.id,
+          name: player.name,
+          points: scores[player.id] ?? 0,
+          played: participants.has(player.id),
+        }))
+        .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
+
     return {
       gameId: room.gameId,
       name: room.game.name,
@@ -234,20 +248,8 @@ export class RoomStore {
       round: room.game.round,
       maxRounds: room.game.maxRounds,
       reason,
-      scores: room.players
-        .map((player) => ({
-          playerId: player.id,
-          name: player.name,
-          points: room.scores[player.id] ?? 0,
-        }))
-        .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name)),
-      sessionScores: room.players
-        .map((player) => ({
-          playerId: player.id,
-          name: player.name,
-          points: room.sessionScores[player.id] ?? 0,
-        }))
-        .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name)),
+      scores: scoreRows(room.scores),
+      sessionScores: scoreRows(room.sessionScores),
     };
   }
 
