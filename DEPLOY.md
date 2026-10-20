@@ -9,6 +9,46 @@ The app has two independent pieces:
 Rooms are in memory, so use a single backend instance for v1. A restart or
 redeploy clears live rooms.
 
+## Updating the deployed server
+
+`backend` is **generated**, not edited. The sync workflow takes the `server/`
+folder from `main` and publishes it to `backend` as a single commit on top of
+the previous one, so the branch only ever moves forward.
+
+On the hosting machine, update it with:
+
+```bash
+npm run deploy:update
+```
+
+or by hand:
+
+```bash
+git fetch origin backend
+git branch --force backend origin/backend
+```
+
+**Do not merge `backend` into another branch.** It is a subtree of `main`
+with its own history, so Git cannot reconcile the two and stops with
+`refusing to merge unrelated histories` or `need to specify how to
+reconcile divergent branches`. Nothing is wrong with the repository; the
+two branches are simply not related.
+
+| If you want to… | Do this |
+| --- | --- |
+| Update the deployed server | `git fetch origin backend && git branch --force backend origin/backend` |
+| Update your working copy of `main` | `git checkout main && git pull --ff-only origin main` |
+| See the server code without switching branch | `git show origin/backend:index.js` |
+
+The same applies to a clone of this repository:
+
+```bash
+git config pull.ff only
+```
+
+That makes a pull refuse to create a merge commit instead of asking how to
+reconcile.
+
 ## 1. Backend (Wispbyte)
 
 Expected public URL: `https://familygame.wisp.uno`

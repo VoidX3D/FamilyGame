@@ -30,6 +30,9 @@ jobs:
         run: |
           set -euo pipefail
 
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           split_sha="$(git subtree split --prefix=server HEAD)"
 
           # The deployment branch must stay backend-only.
@@ -40,4 +43,18 @@ jobs:
           git cat-file -e "$split_sha:package.json"
           git cat-file -e "$split_sha:index.js"
 
-          git push --force origin "$split_sha:refs/heads/backend"
+          # Always add a commit on top of the current backend tip. Wispbyte runs
+          # `git pull` on restart, so the branch must advance without force.
+          if git ls-remote --exit-code --heads origin backend >/dev/null 2>&1; then
+            git fetch origin backend
+            parent="$(git rev-parse origin/backend)"
+            sync_commit="$(
+              git commit-tree "$split_sha^{tree}" \
+                -p "$parent" \
+                -m "Sync backend from main@${GITHUB_SHA::7}"
+            )"
+          else
+            sync_commit="$split_sha"
+          fi
+
+          git push origin "$sync_commit:refs/heads/backend"

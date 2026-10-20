@@ -100,14 +100,18 @@ The non-UI suite starts its own test servers and needs no running process:
 npm run smoke
 ```
 
-That runs three checks:
+That runs the checks:
 
+- `smoke:server`: the HTTP API is up and answers
+- `smoke:cors`: only the configured frontends may talk to the API
+- `smoke:config`: the server works with no configuration, and the passcode survives a restart
 - `smoke:foundation`: auth, rooms, sockets, reconnect, lock, reset
 - `smoke:engines`: every game engine driven to completion, including secret-leak checks
-- `smoke:games`: real Socket.IO play-through of One of Us
+- `smoke:games`: real Socket.IO play-through of all seven games
 
 Browser tests need the backend and web preview running, plus Chrome. They read
-`ADMIN_PASSCODE` from the environment or `server/.env`:
+`ADMIN_PASSCODE` from the environment, from `server/.env`, or from the
+generated `server/data/admin-passcode` file:
 
 ```bash
 npm run smoke:ui        # login, routes, invite links, lobby, layout, reset, 404
@@ -117,6 +121,33 @@ npm run smoke:ui-all    # the other six games end-to-end in Chrome
 
 Screenshots are written to `.shots/` (gitignored). Set `ADMIN_PASSCODE`,
 `WEB_URL`, `API_URL`, or `SCREENSHOT_DIR` to override defaults.
+
+`npm run passcode` prints the host passcode the server is using.
+
+## Branches and deployment
+
+| Branch | What it is | Where it goes |
+| --- | --- | --- |
+| `main` | The source of truth. Frontend in `web/`, backend in `server/`. | Vercel builds the frontend from it. |
+| `backend` | **Generated.** The `server/` folder on its own, published by a workflow. | The hosting panel pulls it and runs the API. |
+| `fix/audit` | Where the audit fixes were developed. | Merged into `main`. |
+
+`backend` is an output, not a working branch. It has its own history, so
+never merge it into another branch:
+
+```bash
+# wrong - Git cannot reconcile the two histories
+git pull origin backend
+
+# right - update the generated branch
+npm run deploy:update
+```
+
+On a fresh clone, `git config pull.ff only` makes a pull refuse to create a
+merge commit instead of stopping with *"need to specify how to reconcile
+divergent branches"*.
+
+See [DEPLOY.md](DEPLOY.md) for the full deployment notes.
 
 ## Project layout
 
@@ -146,6 +177,7 @@ web/
   admin.js          Host console
   admin.css         Host console layout and responsive styles
   games.js          Player screens for all seven games
+  dom.js            Small shared DOM helpers
   styles.css        Shared Material Expressive-inspired dark UI
   404.html           Custom not-found page
   404.css            Custom not-found styling
