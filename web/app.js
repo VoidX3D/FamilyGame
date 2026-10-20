@@ -1,4 +1,5 @@
 import { renderGameScreen } from "./games.js";
+import { avatar } from "./dom.js";
 import { hydrateIcons } from "./icons.js";
 import { createSocket, emitAck } from "./net.js";
 
@@ -174,7 +175,8 @@ function setBusy(button, busy, busyLabel, idleLabel) {
 function showStep(name) {
   if (!steps[name]) return;
 
-  const changed = currentView !== name;
+  // The very first paint is animated by intro(), so do not tween it twice.
+  const changed = currentView !== "" && currentView !== name;
   for (const [key, element] of Object.entries(steps)) {
     element.hidden = key !== name;
   }
@@ -197,28 +199,6 @@ function showStep(name) {
   }
 }
 
-function initials(name) {
-  const parts = String(name)
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2);
-
-  if (parts.length === 0) return "?";
-  return parts
-    .map((part) => Array.from(part)[0] ?? "")
-    .join("")
-    .toUpperCase();
-}
-
-function toneClass(playerId) {
-  let hash = 0;
-  for (const char of String(playerId)) {
-    hash = (hash * 31 + char.codePointAt(0)) >>> 0;
-  }
-  return `tone-${hash % 6}`;
-}
-
 function renderPlayers(players, youId) {
   dom.lobbyPlayers.replaceChildren();
 
@@ -235,16 +215,11 @@ function renderPlayers(players, youId) {
     item.className = "player-row";
     if (player.id === youId) item.classList.add("is-you");
 
-    const avatar = document.createElement("span");
-    avatar.className = `avatar ${toneClass(player.id)}`;
-    avatar.textContent = initials(player.name);
-    avatar.setAttribute("aria-hidden", "true");
-
     const name = document.createElement("span");
     name.className = "player-name";
     name.textContent = player.name;
 
-    item.append(avatar, name);
+    item.append(avatar(player.name, player.id), name);
 
     if (player.id === youId) {
       const you = document.createElement("span");
@@ -672,7 +647,7 @@ dom.lobbyInvite.addEventListener("click", async () => {
 function intro() {
   if (!window.gsap || prefersReducedMotion()) return;
 
-  const targets = document.querySelectorAll(".brand, .card, .foot");
+  const targets = document.querySelectorAll(".brand, .card");
   window.gsap.from(targets, {
     y: 18,
     autoAlpha: 0,

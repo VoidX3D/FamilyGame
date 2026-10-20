@@ -171,6 +171,23 @@ try {
     assert(clicked, "Could not ready a player");
   }
 
+  // The room votes for the same person, so the game is deterministic. The
+  // imposter is whoever their own screen says they are; the room does not
+  // know that, and the vote is made against the name on the button.
+  // The role card is only on screen during the reveal and clue phases, so
+  // the imposter has to be identified now, before the last clue is sent.
+  let imposterName = null;
+  for (let index = 0; index < players.length; index += 1) {
+    const role = await players[index].executeScript(
+      `return document.querySelector("#step-game .role-title")?.textContent?.trim() ?? "";`,
+    );
+    if (role === "Imposter") {
+      imposterName = names[index];
+      break;
+    }
+  }
+  assert(imposterName, "No player was shown the imposter role");
+
   for (const [index, player] of players.entries()) {
     await waitFor(
       player,
@@ -202,21 +219,31 @@ try {
   );
   assert(voteClicked, "Could not start voting");
 
-  for (const player of players) {
+  for (const [index, player] of players.entries()) {
     await waitFor(
       player,
       `document.querySelectorAll("#step-game .choice").length > 0`,
       "vote choices",
     );
-    await player.executeScript(
-      `document.querySelector("#step-game .choice")?.click(); return true;`,
+    // Nobody may vote for themselves, so the imposter votes for anyone else.
+    const clicked = await player.executeScript(
+      `const wanted = arguments[0];
+       const choices = [...document.querySelectorAll("#step-game .choice")];
+       const choice = wanted
+         ? choices.find((node) => node.textContent.includes(wanted))
+         : choices[0];
+       choice?.click();
+       return Boolean(choice);`,
+      names[index] === imposterName ? "" : imposterName,
     );
+    assert(clicked, `Could not vote for ${imposterName}`);
   }
 
   const guesser = await findDriverWith(
     players,
     '#step-game input[data-field*="|imposter-guess"]',
   );
+  assert(guesser, "The imposter guess input was not found");
   if (guesser) {
     await guesser.executeScript(
       `const input = document.querySelector('#step-game input[data-field*="|imposter-guess"]');
@@ -326,7 +353,8 @@ try {
   );
   assert(lateErrors.length === 0, `Late browser errors: ${lateErrors.join(" | ")}`);
   await late.quit();
-  drivers.pop();
+  const lateIndex = drivers.indexOf(late);
+  if (lateIndex >= 0) drivers.splice(lateIndex, 1);
 
   await admin.executeScript(
     `document.getElementById("toggle-lock").click(); return true;`,

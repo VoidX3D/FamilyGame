@@ -4,8 +4,10 @@ node_modules/
 .env
 .env.*
 !.env.example
-server/data/
+server/data/content.json
+server/data/content.json.tmp
 .vercel/
 *.log
 Thumbs.db
 .DS_Store
+session-af0cdd7a-d6f3-410b-a55a-6c261524a253.md

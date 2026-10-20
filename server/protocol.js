@@ -398,14 +398,6 @@ export function attachProtocol(io, store) {
           return fail(ack, "unknown_game", "That game was not found.");
         }
 
-        if (room.players.length < engine.meta.minPlayers) {
-          return fail(
-            ack,
-            "not_enough_players",
-            `${engine.meta.name} needs at least ${engine.meta.minPlayers} players.`,
-          );
-        }
-
         if (room.players.length > engine.meta.maxPlayers) {
           return fail(
             ack,
@@ -414,18 +406,23 @@ export function attachProtocol(io, store) {
           );
         }
 
-        if (store.connectedCount(room) < room.players.length) {
+        // Single games and playlists seat the same people: everyone who is
+        // connected right now. Anyone who is offline sits this game out and
+        // spectates until the next one.
+        const players = connectedPlayers(room);
+
+        if (players.length < engine.meta.minPlayers) {
           return fail(
             ack,
-            "players_offline",
-            "All players must be connected before a single game can start.",
+            "not_enough_players",
+            `${engine.meta.name} needs at least ${engine.meta.minPlayers} connected players.`,
           );
         }
 
         try {
           room.playlist = null;
           store.resetAllScores(room);
-          startEngine(store, room, engine, room.players);
+          startEngine(store, room, engine, players);
         } catch (error) {
           room.gameId = null;
           room.game = null;
@@ -477,9 +474,19 @@ export function attachProtocol(io, store) {
           return fail(ack, "no_game", "There is no game to replay.");
         }
 
+        const players = connectedPlayers(room);
+        if (players.length < engine.meta.minPlayers) {
+          return fail(
+            ack,
+            "not_enough_players",
+            `${engine.meta.name} needs at least ${engine.meta.minPlayers} connected players to start again.`,
+          );
+        }
+
         try {
           store.resetAllScores(room);
-          room.game = engine.create(room);
+          // Only connected players take a seat, exactly like a fresh start.
+          room.game = engine.create({ ...room, players });
           room.phase = "playing";
           store.touch(room);
         } catch (error) {
@@ -785,6 +792,17 @@ export function attachProtocol(io, store) {
       socket.on("room:join", (payload, ack) => {
         const gate = joinLimiter(clientIpFromSocket(socket));
         if (!gate.ok) return rateLimited(ack, gate);
+
+        // The IP limit alone is bypassable by spoofing X-Forwarded-For, so
+        // each connection also gets its own join budget.
+        socket.data.joinCount = (socket.data.joinCount ?? 0) + 1;
+        if (socket.data.joinCount > 12) {
+          return fail(
+            ack,
+            "rate_limited",
+            "Too many join attempts on this connection. Reconnect and try again.",
+          );
+        }
 
         const code = payload?.code;
         const room = store.getRoom(code);

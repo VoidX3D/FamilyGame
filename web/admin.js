@@ -1,4 +1,5 @@
 import { api, createSocket, emitAck } from "./net.js";
+import { avatar } from "./dom.js";
 import { gameIcon, hydrateIcons, icon } from "./icons.js";
 
 // Never accept or keep a passcode in the URL.
@@ -13,6 +14,8 @@ if (initialParams.has("passcode")) {
   );
 }
 
+/* Shared error sink. The browser smoke tests read this array, and it makes
+ * runtime problems visible without needing the developer tools. */
 window.__FG_ERRORS = [];
 window.addEventListener("error", (event) => {
   window.__FG_ERRORS.push(String(event.message || event.error || "error"));
@@ -55,6 +58,14 @@ const PHASE_HINTS = {
 
 const $ = (id) => document.getElementById(id);
 
+/* The DOM helper used everywhere in this file. */
+function make(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined && text !== null) node.textContent = String(text);
+  return node;
+}
+
 const dom = {
   banner: $("connection-banner"),
   toast: $("toast"),
@@ -94,7 +105,6 @@ const dom = {
   playlistGameControls: $("playlist-game-controls"),
   endGame: $("end-game"),
   replayGame: $("replay-game"),
-  playlistCard: $("playlist-card"),
   playlistHint: $("playlist-hint"),
   playlistBuilder: $("playlist-builder"),
   playlistPicker: $("playlist-picker"),
@@ -104,11 +114,11 @@ const dom = {
   startPlaylist: $("start-playlist"),
   clearPlaylist: $("clear-playlist"),
   playlistLive: $("playlist-live"),
+  playlistLiveBadge: $("playlist-live-badge"),
   playlistProgress: $("playlist-progress"),
   playlistUpcoming: $("playlist-upcoming"),
   upcomingPicker: $("upcoming-picker"),
   addUpcoming: $("add-upcoming"),
-  contentCard: $("content-card"),
   contentStatus: $("content-status"),
   contentCollection: $("content-collection"),
   contentSearch: $("content-search"),
@@ -119,7 +129,6 @@ const dom = {
   contentAdd: $("content-add"),
   contentSave: $("content-save"),
   contentDiscard: $("content-discard"),
-  gameCatalogCard: $("game-catalog-card"),
   gameGrid: $("game-grid"),
   historyCard: $("history-card"),
   historyCount: $("history-count"),
@@ -361,6 +370,9 @@ function showLogin(message = "") {
     socket = null;
   }
 
+  // A new host session must not inherit anything from the previous one.
+  resetHostState();
+
   document.body.dataset.view = "login";
   dom.dashboard.hidden = true;
   dom.login.hidden = false;
@@ -372,6 +384,23 @@ function showLogin(message = "") {
   setTimeout(() => dom.passcode.focus(), 50);
 }
 
+/* Clears every scrap of state that belongs to the signed-out host. */
+function resetHostState() {
+  currentState = null;
+  playlistDraft = [];
+  playlistBusy = false;
+  upcomingPickerOpen = false;
+  contentData = null;
+  contentKey = "";
+  contentDraft = [];
+  contentDirty = false;
+  contentLoading = false;
+  contentSearch = "";
+  playersSignature = "";
+  catalogSignature = "";
+  clearError(dom.contentError);
+}
+
 function showConsole() {
   document.body.dataset.view = "console";
   dom.login.hidden = true;
@@ -380,27 +409,6 @@ function showConsole() {
   switchAdminTab(activeTab, { historyMode: "replace" });
   connectAdmin();
   void loadContent();
-}
-
-function initials(name) {
-  const parts = String(name)
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2);
-  if (parts.length === 0) return "?";
-  return parts
-    .map((part) => Array.from(part)[0] ?? "")
-    .join("")
-    .toUpperCase();
-}
-
-function toneClass(playerId) {
-  let hash = 0;
-  for (const char of String(playerId)) {
-    hash = (hash * 31 + char.codePointAt(0)) >>> 0;
-  }
-  return `tone-${hash % 6}`;
 }
 
 function canStartGame(admin, game) {
@@ -417,7 +425,8 @@ function canStartGame(admin, game) {
   );
 }
 
-async function loadCatalog() {
+async function loadCatalog(force = false) {
+  if (catalogLoaded && !force && catalog.length > 0) return;
   try {
     const result = await api("/api/games");
     catalog = Array.isArray(result.games) ? result.games : [];
@@ -431,7 +440,19 @@ async function loadCatalog() {
   if (currentState) render(currentState);
 }
 
+/* Rebuilding a list replaces its buttons, so a click that is in flight can
+ * be lost. The lists are therefore only rebuilt when their content really
+ * changed. */
+let playersSignature = "";
+let catalogSignature = "";
+
 function renderPlayers(admin) {
+  const signature = (admin.players ?? [])
+    .map((player) => `${player.id}:${player.name}:${player.connected ? 1 : 0}`)
+    .join("|") + `#${admin.phase}`;
+  if (signature === playersSignature) return;
+  playersSignature = signature;
+
   dom.players.replaceChildren();
   const inLobby = admin.phase === "lobby";
 
@@ -454,10 +475,7 @@ function renderPlayers(admin) {
     row.className = "player-row";
     if (!player.connected) row.classList.add("is-offline");
 
-    const avatar = document.createElement("span");
-    avatar.className = `avatar ${toneClass(player.id)}`;
-    avatar.textContent = initials(player.name);
-    avatar.setAttribute("aria-hidden", "true");
+    const avatarNode = avatar(player.name, player.id);
 
     const name = document.createElement("span");
     name.className = "player-name";
@@ -472,7 +490,7 @@ function renderPlayers(admin) {
     if (!player.connected) dot.classList.add("is-offline");
     dot.title = player.connected ? "Connected" : "Offline";
 
-    row.append(avatar, name, state, dot);
+    row.append(avatarNode, name, state, dot);
 
     if (inLobby) {
       const remove = document.createElement("button");
@@ -506,23 +524,24 @@ function renderHint(admin) {
     return;
   }
 
-  if (admin.playerCount < 3) {
-    const remaining = 3 - admin.playerCount;
+  if (admin.locked) {
+    dom.startHint.textContent =
+      "The room is locked. Unlock it to let more players in, or start a game with this group.";
+    return;
+  }
+
+  const minPlayers = admin.minPlayers ?? 3;
+  if (admin.connectedCount < minPlayers) {
+    const remaining = minPlayers - admin.connectedCount;
     dom.startHint.textContent = `Need ${remaining} more ${
       remaining === 1 ? "player" : "players"
-    } before a game can start. You can build the playlist now.`;
+    } connected before a game can start. You can build the playlist now.`;
     return;
   }
 
   if (admin.connectedCount !== admin.playerCount) {
     dom.startHint.textContent =
-      "Some players are offline. Single games need everyone connected; playlists include everyone who is connected.";
-    return;
-  }
-
-  if (admin.locked) {
-    dom.startHint.textContent =
-      "The room is locked. Unlock it to let more players in, or start a game with this group.";
+      "Some players are offline. They will sit the next game out and rejoin automatically.";
     return;
   }
 
@@ -551,24 +570,42 @@ function renderGameStats(game) {
   }
 }
 
+/* Every host action goes through here so that an expired session, a rate
+ * limit or a rejected action always produces the same clear message. */
+async function emitAdmin(event, payload, fallback) {
+  let result;
+  try {
+    result = await emitAck(socket, event, payload ?? {});
+  } catch (error) {
+    showToast(error?.message || fallback);
+    return null;
+  }
+
+  if (!result?.ok) {
+    if (handleAdminFailure(result)) return null;
+    showToast(result?.message || fallback);
+    return null;
+  }
+
+  return result;
+}
+
 async function runControl(control, button) {
   button.disabled = true;
   try {
     if (control.event === "nextRound") {
-      const result = await emitAck(socket, "admin:nextRound", {});
-      if (!result?.ok) throw new Error(result?.message || "Could not advance.");
+      await emitAdmin("admin:nextRound", {}, "Could not advance.");
     } else if (control.event === "replay") {
-      const result = await emitAck(socket, "admin:replayGame", {});
-      if (!result?.ok) throw new Error(result?.message || "Could not restart.");
+      await emitAdmin("admin:replayGame", {}, "Could not restart.");
     } else {
-      const result = await emitAck(socket, "admin:gameAction", {
-        type: control.id,
-      });
-      if (!result?.ok) throw new Error(result?.message || "Action unavailable.");
+      await emitAdmin(
+        "admin:gameAction",
+        { type: control.id },
+        "Action unavailable.",
+      );
     }
-  } catch (error) {
+  } finally {
     button.disabled = false;
-    if (!handleAdminFailure(error)) showToast(error.message);
   }
 }
 
@@ -867,7 +904,11 @@ function removePlaylistDraft(index) {
 }
 
 function addPlaylistDraft(game) {
-  playlistDraft.push({ gameId: game.id, name: game.name });
+  playlistDraft.push({
+    gameId: game.id,
+    name: game.name,
+    minPlayers: game.minPlayers,
+  });
   if (currentState?.admin) renderPlaylist(currentState.admin);
 }
 
@@ -973,13 +1014,14 @@ function renderPlaylistBuilder(admin) {
   });
 
   const connected = admin.connectedCount ?? 0;
-  const ready = connected >= 3;
+  const minPlayers = playlistDraft[0]?.minPlayers ?? admin.minPlayers ?? 3;
+  const ready = connected >= minPlayers;
   const hasQueue = playlistDraft.length > 0;
   dom.startPlaylist.disabled = !hasQueue || !ready;
   dom.startPlaylist.title = !hasQueue
     ? "Add at least one game to the queue."
     : !ready
-      ? `Start needs 3 players online (${connected} online now).`
+      ? `Start needs ${minPlayers} players online (${connected} online now).`
       : "Start this playlist";
   dom.clearPlaylist.disabled = !hasQueue;
   dom.playlistShuffle.disabled = playlistDraft.length < 2;
@@ -989,7 +1031,7 @@ function renderPlaylistBuilder(admin) {
   } else if (!ready) {
     dom.playlistHint.textContent = `${playlistDraft.length} ${
       playlistDraft.length === 1 ? "game" : "games"
-    } queued. Start needs 3 players online.`;
+    } queued. Start needs ${minPlayers} players online.`;
   } else {
     dom.playlistHint.textContent = `${playlistDraft.length} ${
       playlistDraft.length === 1 ? "game" : "games"
@@ -1034,8 +1076,8 @@ function renderUpcomingPicker(admin, canEdit) {
 
   if (!catalogLoaded || catalog.length === 0) {
     const empty = document.createElement("p");
-    empty.className = "empty-state";
-    empty.textContent = "Games are still loading.";
+    empty.className = catalogError ? "empty-state is-error" : "empty-state";
+    empty.textContent = catalogError || "Games are still loading.";
     dom.upcomingPicker.append(empty);
     return;
   }
@@ -1062,6 +1104,14 @@ function renderPlaylistLive(admin) {
 
   const current = playlist.queue[playlist.index] ?? null;
   const currentName = current?.name ?? "None";
+
+  if (dom.playlistLiveBadge) {
+    dom.playlistLiveBadge.textContent = !playlist.active
+      ? "Finished"
+      : playlist.awaitingNext
+        ? "Waiting for you"
+        : "Host paced";
+  }
 
   if (!playlist.active) {
     dom.playlistProgress.textContent = `Finished after ${
@@ -1135,8 +1185,15 @@ function renderPlaylist(admin) {
   dom.playlistBuilder.hidden = !canBuild;
   dom.playlistLive.hidden = !playlist;
 
-  if (canBuild) renderPlaylistBuilder(admin);
-  else if (!playlist) {
+  if (canBuild) {
+    renderPlaylistBuilder(admin);
+    dom.playlistHint.textContent = playlist
+      ? "The game night is running. Add or remove the upcoming games below."
+      : "Add games to build the queue. You decide when each one starts.";
+  } else if (playlist) {
+    dom.playlistHint.textContent =
+      "The game night is running. Edit the upcoming games below.";
+  } else {
     dom.playlistHint.textContent =
       "Playlist editing unlocks when the current game is finished or the room returns to the lobby.";
   }
@@ -1152,6 +1209,18 @@ function canBuildPlaylist(admin) {
 }
 
 function renderCatalog(admin) {
+  const signature = [
+    catalog.map((game) => game.id).join(","),
+    catalogError,
+    admin.phase,
+    admin.playerCount,
+    admin.connectedCount,
+    admin.game ? "game" : "none",
+    admin.playlist?.active ? "playlist" : "lobby",
+  ].join("#");
+  if (signature === catalogSignature) return;
+  catalogSignature = signature;
+
   dom.gameGrid.replaceChildren();
 
   if (!catalogLoaded) {
@@ -1164,9 +1233,15 @@ function renderCatalog(admin) {
 
   if (catalog.length === 0) {
     const failed = document.createElement("p");
-    failed.className = "empty-state";
+    failed.className = "empty-state is-error";
     failed.textContent = catalogError || "No games are available.";
     dom.gameGrid.append(failed);
+
+    // A failed load must be recoverable without reloading the page.
+    const retry = make("button", "btn btn-tonal btn-inline", "Try again");
+    retry.type = "button";
+    retry.addEventListener("click", () => void loadCatalog(true));
+    dom.gameGrid.append(retry);
     return;
   }
 
@@ -1194,11 +1269,13 @@ function renderCatalog(admin) {
     const rounds = make(
       "span",
       "pill",
-      game.maxRounds > 1
-        ? `${game.maxRounds} rounds`
-        : game.maxRounds === 0
-          ? "Host-paced"
-          : "One turn each",
+      game.oneTurnEach
+        ? "One turn each"
+        : game.endless
+          ? "Endless turns"
+          : game.maxRounds > 1
+            ? `${game.maxRounds} rounds`
+            : "One round",
     );
     meta.append(players, rounds);
 
@@ -1292,12 +1369,6 @@ function renderHistory(admin) {
   }
 }
 
-function make(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined && text !== null) node.textContent = String(text);
-  return node;
-}
 
 function cloneJson(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
@@ -1426,8 +1497,28 @@ function renderContentRow(item, index, collection) {
         : String(item[field.key] ?? "");
       input.value = value;
       input.placeholder = "One per line";
+
+      const maxItems = field.maxItems ?? 8;
+      const maxLength = (field.max ?? 120) * maxItems + maxItems;
+      input.maxLength = maxLength;
+
+      const error = make("span", "content-field-error");
+      error.hidden = true;
+      label.append(error);
+
       input.addEventListener("input", () => {
-        item[field.key] = input.value;
+        const lines = input.value.split(/\r?\n/);
+        const filled = lines.filter((line) => line.trim().length > 0);
+        if (filled.length > maxItems) {
+          // The server would silently drop the extra lines. Say so instead.
+          input.value = filled.slice(0, maxItems).join("\n");
+          item[field.key] = input.value;
+          error.textContent = `Only ${maxItems} lines are kept.`;
+          error.hidden = false;
+        } else {
+          item[field.key] = input.value;
+          error.hidden = true;
+        }
         markContentDirty();
       });
     } else {
@@ -1454,8 +1545,13 @@ function renderContent() {
 
   if (!contentData) {
     updateContentStatus();
+    dom.contentCollection.disabled = true;
     dom.contentEditor.replaceChildren();
-    const empty = make("p", "empty-state", contentLoading ? "Loading…" : "No content loaded.");
+    const empty = make(
+      "p",
+      contentLoading ? "empty-state" : "empty-state is-error",
+      contentLoading ? "Loading…" : "No content loaded.",
+    );
     dom.contentEditor.append(empty);
     return;
   }
@@ -1464,7 +1560,11 @@ function renderContent() {
     ? contentData.collections
     : [];
   if (!collections.some((entry) => entry.key === contentKey)) {
+    // The collection disappeared (or was never loaded). The draft belongs to
+    // the old collection, so it must not be rendered against the new one.
     contentKey = collections[0]?.key ?? "";
+    contentDraft = cloneJson(contentData.items?.[contentKey] ?? []) ?? [];
+    contentDirty = false;
   }
 
   for (const collection of collections) {
@@ -1534,7 +1634,11 @@ async function loadContent({ force = false } = {}) {
     const data = await api("/api/admin/content", { token });
     contentData = data;
     const keys = (data.collections ?? []).map((entry) => entry.key);
-    if (!keys.includes(contentKey)) contentKey = keys[0] ?? "";
+    if (!keys.includes(contentKey)) {
+      contentKey = keys[0] ?? "";
+      contentDraft = cloneJson(data.items?.[contentKey] ?? []) ?? [];
+      contentDirty = false;
+    }
     if (!contentDirty || force) {
       contentDraft = cloneJson(data.items?.[contentKey] ?? []) ?? [];
       contentDirty = false;
@@ -1546,6 +1650,12 @@ async function loadContent({ force = false } = {}) {
       showLogin("Your admin session expired. Sign in again.");
       return;
     }
+    // The status line is rewritten by updateContentStatus(), so the real
+    // reason has to go into the error slot.
+    showError(
+      dom.contentError,
+      "Could not load game content. Check the server and refresh.",
+    );
     dom.contentStatus.textContent =
       "Could not load game content. Check the server and refresh.";
   } finally {
@@ -1578,11 +1688,52 @@ function addContentEntry() {
   contentDraft.push(blank);
   contentDirty = true;
   clearError(dom.contentError);
+  // A new entry may not match the active filter, so the filter is dropped.
+  contentSearch = "";
+  if (dom.contentSearch) dom.contentSearch.value = "";
   renderContent();
   dom.contentEditor.lastElementChild?.scrollIntoView({
     block: "nearest",
     behavior: prefersReducedMotion() ? "auto" : "smooth",
   });
+}
+
+/* Checks the draft the same way the server will, so a blank required field
+ * is reported here instead of failing the whole collection. */
+function validateContentDraft(collection, items) {
+  const problems = [];
+
+  items.forEach((item, index) => {
+    if (collection.kind === "text") {
+      if (!String(item.text ?? "").trim()) {
+        problems.push(`Entry ${index + 1}: text is required.`);
+      }
+      return;
+    }
+
+    for (const field of collection.fields ?? []) {
+      const value = item[field.key];
+      if (field.type === "lines") {
+        const lines = Array.isArray(value)
+          ? value
+          : String(value ?? "")
+              .split(/\r?\n/)
+              .map((line) => line.trim())
+              .filter(Boolean);
+        if (field.minItems && lines.length < field.minItems) {
+          problems.push(
+            `Entry ${index + 1}: add at least ${field.minItems} ${field.label.toLowerCase()}.`,
+          );
+        }
+      } else if (field.required && !String(value ?? "").trim()) {
+        problems.push(
+          `Entry ${index + 1}: ${field.label.toLowerCase()} is required.`,
+        );
+      }
+    }
+  });
+
+  return problems;
 }
 
 async function saveContent() {
@@ -1599,6 +1750,16 @@ async function saveContent() {
           .filter(Boolean);
       }
     }
+  }
+
+  const problems = validateContentDraft(collection, items);
+  if (problems.length > 0) {
+    showError(
+      dom.contentError,
+      `${problems[0]}${problems.length > 1 ? ` (+${problems.length - 1} more)` : ""}`,
+    );
+    showToast("Fix the highlighted entries before saving");
+    return;
   }
 
   clearError(dom.contentError);
@@ -1634,7 +1795,7 @@ async function resetContent() {
   const collection = currentCollection();
   if (!collection) return;
   if (
-    !window.confirm(
+    !confirmAction(
       `Reset ${collection.game} content to the built-in list? This replaces all edits in this collection.`,
     )
   ) {
@@ -1658,7 +1819,10 @@ async function resetContent() {
       showLogin("Your admin session expired. Sign in again.");
       return;
     }
-    showError(dom.contentError, error.message);
+    showError(
+      dom.contentError,
+      "Could not reset this collection. The server rejected the request.",
+    );
   } finally {
     renderContent();
   }
@@ -1699,16 +1863,13 @@ function render(state) {
 async function createRoom() {
   if (!socket?.connected) return;
 
-  try {
-    const result = await emitAck(socket, "admin:createRoom", {});
-    if (!result?.ok) {
-      handleAdminFailure(result);
-      return;
-    }
-    dom.code.textContent = result.code;
-  } catch (error) {
-    showToast(error.message);
-  }
+  const result = await emitAdmin(
+    "admin:createRoom",
+    {},
+    "Could not create the room.",
+  );
+  if (!result) return;
+  dom.code.textContent = result.code;
 }
 
 function handleAdminFailure(result) {
@@ -1782,73 +1943,64 @@ async function verifyStoredToken() {
 }
 
 async function removePlayer(player) {
-  if (!window.confirm(`Remove ${player.name} from the room?`)) return;
+  if (!confirmAction(`Remove ${player.name} from the room?`)) return;
 
-  try {
-    const result = await emitAck(socket, "admin:removePlayer", {
-      playerId: player.id,
-    });
-    if (!result?.ok) {
-      if (handleAdminFailure(result)) return;
-      showToast(result?.message || "Could not remove that player.");
-      return;
-    }
-    showToast(`${player.name} removed`);
-  } catch (error) {
-    showToast(error.message);
-  }
+  const result = await emitAdmin(
+    "admin:removePlayer",
+    { playerId: player.id },
+    "Could not remove that player.",
+  );
+  if (!result) return;
+  showToast(`${player.name} removed`);
 }
 
 async function startGame(game) {
   const admin = currentState?.admin;
   if (!admin) return;
 
+  const offlineNote =
+    admin.connectedCount < admin.playerCount
+      ? " Offline players will sit this game out."
+      : "";
   const extra = admin.playlist
     ? " This clears the finished playlist summary and starts a fresh session score."
     : "";
   if (
-    !window.confirm(
-      `Start ${game.name} with ${admin.playerCount} ${
-        admin.playerCount === 1 ? "player" : "players"
-      }?${extra}`,
+    !confirmAction(
+      `Start ${game.name} with ${admin.connectedCount} ${
+        admin.connectedCount === 1 ? "player" : "players"
+      }?${offlineNote}${extra}`,
     )
   ) {
     return;
   }
 
-  try {
-    const result = await emitAck(socket, "admin:startGame", {
-      gameId: game.id,
-    });
-    if (!result?.ok) {
-      if (handleAdminFailure(result)) return;
-      showToast(result?.message || "Could not start that game.");
-      return;
-    }
-    playlistDraft = [];
-    upcomingPickerOpen = false;
-    showToast(`${game.name} started`);
-  } catch (error) {
-    showToast(error.message);
-  }
+  const result = await emitAdmin(
+    "admin:startGame",
+    { gameId: game.id },
+    "Could not start that game.",
+  );
+  if (!result) return;
+  playlistDraft = [];
+  upcomingPickerOpen = false;
+  showToast(`${game.name} started`);
 }
 
 async function toggleLock() {
   const admin = currentState?.admin;
   if (!admin || admin.phase !== "lobby") return;
 
+  dom.toggleLock.disabled = true;
   try {
-    const result = await emitAck(socket, "admin:setLocked", {
-      locked: !admin.locked,
-    });
-    if (!result?.ok) {
-      if (handleAdminFailure(result)) return;
-      showToast(result?.message || "Could not change the lock.");
-      return;
-    }
+    const result = await emitAdmin(
+      "admin:setLocked",
+      { locked: !admin.locked },
+      "Could not change the lock.",
+    );
+    if (!result) return;
     showToast(result.locked ? "Room locked" : "Room unlocked");
-  } catch (error) {
-    showToast(error.message);
+  } finally {
+    dom.toggleLock.disabled = false;
   }
 }
 
@@ -1857,18 +2009,20 @@ async function endGame() {
   const message = playlistMode
     ? "End the current playlist game? Its scores are final, and the playlist will wait for you to start the next game."
     : "End the current game and return to the lobby?";
-  if (!window.confirm(message)) return;
+  if (!confirmAction(message)) return;
 
+  dom.endGame.disabled = true;
   try {
-    const result = await emitAck(socket, "admin:endGame", {});
-    if (!result?.ok) {
-      if (handleAdminFailure(result)) return;
-      showToast(result?.message || "Could not end the game.");
-      return;
-    }
+    const result = await emitAdmin(
+      "admin:endGame",
+      {},
+      "Could not end the game.",
+    );
+    if (!result) return;
+    upcomingPickerOpen = false;
     showToast(playlistMode ? "Current game ended" : "Game ended");
-  } catch (error) {
-    showToast(error.message);
+  } finally {
+    dom.endGame.disabled = false;
   }
 }
 
@@ -1878,20 +2032,21 @@ async function replayGame() {
     return;
   }
 
-  if (!window.confirm("Restart this game from round one? Scores will reset.")) {
+  if (!confirmAction("Restart this game from round one? Scores will reset.")) {
     return;
   }
 
+  dom.replayGame.disabled = true;
   try {
-    const result = await emitAck(socket, "admin:replayGame", {});
-    if (!result?.ok) {
-      if (handleAdminFailure(result)) return;
-      showToast(result?.message || "Could not restart the game.");
-      return;
-    }
+    const result = await emitAdmin(
+      "admin:replayGame",
+      {},
+      "Could not restart the game.",
+    );
+    if (!result) return;
     showToast("Game restarted");
-  } catch (error) {
-    showToast(error.message);
+  } finally {
+    dom.replayGame.disabled = false;
   }
 }
 
@@ -1900,18 +2055,21 @@ async function startPlaylist() {
   const admin = currentState?.admin;
   if (!admin) return;
 
-  if (admin.connectedCount < 3) {
-    showToast("At least 3 players must be connected to start.");
+  const first = playlistDraft[0];
+  const minPlayers = first.minPlayers ?? admin.minPlayers ?? 3;
+  if (admin.connectedCount < minPlayers) {
+    showToast(
+      `At least ${minPlayers} players must be connected to start.`,
+    );
     return;
   }
 
-  const first = playlistDraft[0];
   const offlineNote =
     admin.connectedCount < admin.playerCount
       ? " Offline players will sit out the first game and can rejoin later."
       : "";
   if (
-    !window.confirm(
+    !confirmAction(
       `Start a ${playlistDraft.length}-game playlist with ${first.name} first?${offlineNote}`,
     )
   ) {
@@ -1920,22 +2078,20 @@ async function startPlaylist() {
 
   playlistBusy = true;
   dom.startPlaylist.disabled = true;
+  if (currentState?.admin) renderPlaylist(currentState.admin);
   try {
-    const result = await emitAck(socket, "admin:startPlaylist", {
-      gameIds: playlistDraft.map((entry) => entry.gameId),
-    });
-    if (!result?.ok) {
-      if (handleAdminFailure(result)) return;
-      showToast(result?.message || "Could not start the playlist.");
-      return;
-    }
+    const result = await emitAdmin(
+      "admin:startPlaylist",
+      { gameIds: playlistDraft.map((entry) => entry.gameId) },
+      "Could not start the playlist.",
+    );
+    if (!result) return;
     playlistDraft = [];
     upcomingPickerOpen = false;
     showToast("Playlist started");
-  } catch (error) {
-    showToast(error.message);
   } finally {
     playlistBusy = false;
+    dom.startPlaylist.disabled = false;
     if (currentState?.admin) renderPlaylist(currentState.admin);
   }
 }
@@ -1950,16 +2106,14 @@ async function nextPlaylistGame() {
   playlistBusy = true;
   if (currentState?.admin) renderPlaylist(currentState.admin);
   try {
-    const result = await emitAck(socket, "admin:nextPlaylistGame", {});
-    if (!result?.ok) {
-      if (handleAdminFailure(result)) return;
-      showToast(result?.message || "Could not start the next game.");
-      return;
-    }
+    const result = await emitAdmin(
+      "admin:nextPlaylistGame",
+      {},
+      "Could not start the next game.",
+    );
+    if (!result) return;
     upcomingPickerOpen = false;
     showToast(result.finished ? "Playlist finished" : "Next game started");
-  } catch (error) {
-    showToast(error.message);
   } finally {
     playlistBusy = false;
     if (currentState?.admin) {
@@ -1974,7 +2128,7 @@ async function skipPlaylistGame() {
   const playlist = currentState?.admin?.playlist;
   const current = playlist?.queue?.[playlist.index];
   if (
-    !window.confirm(
+    !confirmAction(
       `Skip ${current?.name ?? "the current game"}? Its current scores are final for the game night total.`,
     )
   ) {
@@ -1982,17 +2136,16 @@ async function skipPlaylistGame() {
   }
 
   playlistBusy = true;
+  if (currentState?.admin) renderPlaylist(currentState.admin);
   try {
-    const result = await emitAck(socket, "admin:skipPlaylistGame", {});
-    if (!result?.ok) {
-      if (handleAdminFailure(result)) return;
-      showToast(result?.message || "Could not skip that game.");
-      return;
-    }
+    const result = await emitAdmin(
+      "admin:skipPlaylistGame",
+      {},
+      "Could not skip that game.",
+    );
+    if (!result) return;
     upcomingPickerOpen = false;
     showToast("Game skipped. Start the next one when the room is ready.");
-  } catch (error) {
-    showToast(error.message);
   } finally {
     playlistBusy = false;
     if (currentState?.admin) renderPlaylist(currentState.admin);
@@ -2002,7 +2155,7 @@ async function skipPlaylistGame() {
 async function endPlaylist() {
   if (playlistBusy) return;
   if (
-    !window.confirm(
+    !confirmAction(
       "End the game night playlist? Session scores will be kept in the final summary.",
     )
   ) {
@@ -2010,17 +2163,16 @@ async function endPlaylist() {
   }
 
   playlistBusy = true;
+  if (currentState?.admin) renderPlaylist(currentState.admin);
   try {
-    const result = await emitAck(socket, "admin:endPlaylist", {});
-    if (!result?.ok) {
-      if (handleAdminFailure(result)) return;
-      showToast(result?.message || "Could not end the playlist.");
-      return;
-    }
+    const result = await emitAdmin(
+      "admin:endPlaylist",
+      {},
+      "Could not end the playlist.",
+    );
+    if (!result) return;
     upcomingPickerOpen = false;
     showToast("Playlist ended");
-  } catch (error) {
-    showToast(error.message);
   } finally {
     playlistBusy = false;
     if (currentState?.admin) renderPlaylist(currentState.admin);
@@ -2030,22 +2182,21 @@ async function endPlaylist() {
 async function returnToLobby() {
   if (playlistBusy) return;
   playlistBusy = true;
+  if (currentState?.admin) renderPlaylist(currentState.admin);
   try {
-    const result = await emitAck(socket, "admin:returnToLobby", {});
-    if (!result?.ok) {
-      if (handleAdminFailure(result)) return;
-      showToast(result?.message || "Could not return to the lobby.");
-      return;
-    }
+    const result = await emitAdmin(
+      "admin:returnToLobby",
+      {},
+      "Could not return to the lobby.",
+    );
+    if (!result) return;
+    upcomingPickerOpen = false;
     showToast("Back in the lobby");
-  } catch (error) {
-    showToast(error.message);
   } finally {
     playlistBusy = false;
     if (currentState?.admin) renderPlaylist(currentState.admin);
   }
 }
-
 function toggleUpcomingPicker() {
   upcomingPickerOpen = !upcomingPickerOpen;
   if (currentState?.admin) renderPlaylist(currentState.admin);
@@ -2096,7 +2247,7 @@ dom.loginForm.addEventListener("submit", async (event) => {
 for (const item of dom.navItems) {
   item.addEventListener("click", (event) => {
     event.preventDefault();
-    switchAdminTab(item.dataset.adminTab);
+    switchAdminTab(item.dataset.adminTab, { focus: true });
   });
 }
 
@@ -2146,7 +2297,7 @@ dom.contentSearch.addEventListener("input", () => {
 dom.contentRefresh.addEventListener("click", () => {
   if (
     contentDirty &&
-    !window.confirm("Discard unsaved content changes and reload from the server?")
+    !confirmAction("Discard unsaved content changes and reload from the server?")
   ) {
     return;
   }
@@ -2175,7 +2326,7 @@ renderContent();
 
 dom.resetRoom.addEventListener("click", async () => {
   if (
-    !window.confirm(
+    !confirmAction(
       "Close this room and create a new code? Everyone will need to rejoin.",
     )
   ) {
@@ -2189,11 +2340,14 @@ dom.resetRoom.addEventListener("click", async () => {
       showToast(result?.message || "Could not create a new room.");
       return;
     }
+    const maxPlayers = currentState?.admin?.maxPlayers ?? 10;
     playlistDraft = [];
     upcomingPickerOpen = false;
     currentState = null;
+    playersSignature = "";
+    catalogSignature = "";
     dom.players.replaceChildren();
-    dom.heroPlayerCount.textContent = "0 / 10";
+    dom.heroPlayerCount.textContent = `0 / ${maxPlayers}`;
     dom.heroConnectedCount.textContent = "0 online";
     showToast(`New room: ${result.code}`);
   } catch (error) {

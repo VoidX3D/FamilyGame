@@ -1,7 +1,10 @@
 /* Host console */
 
 .admin-body {
-  overflow-x: hidden;
+  /* 
+INFO: Type "CLIP /?" for usage. keeps the body from becoming a scroll container, so the sticky
+   * navigation below keeps working. */
+  overflow-x: clip;
 }
 
 .admin-topbar {
@@ -37,7 +40,7 @@
 }
 
 body.admin-body[data-view="login"] .admin-shell {
-  min-height: calc(100dvh - 112px);
+  min-height: calc(100dvh - var(--admin-topbar-height, 104px));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -130,6 +133,14 @@ body.admin-body[data-view="login"] .admin-shell {
   flex: 0 0 auto;
 }
 
+.admin-nav-item .nav-title {
+  display: block;
+  min-width: 0;
+  font-size: inherit;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
 /* Panels and cards */
 
 .admin-panels,
@@ -152,7 +163,7 @@ body.admin-body[data-view="login"] .admin-shell {
   padding: 28px;
 }
 
-.card-head {
+.admin-panel .card-head {
   justify-content: space-between;
   gap: 16px;
 }
@@ -164,7 +175,7 @@ body.admin-body[data-view="login"] .admin-shell {
   gap: 14px;
 }
 
-.card-head h2 {
+.admin-panel .card-head h2 {
   font-size: 20px;
   line-height: 1.2;
 }
@@ -210,19 +221,6 @@ body.admin-body[data-view="login"] .admin-shell {
   gap: 8px;
 }
 
-.btn-inline {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.btn .btn-icon,
-.btn .icon {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 auto;
-}
 
 .btn-small {
   min-height: 38px;
@@ -240,16 +238,6 @@ body.admin-body[data-view="login"] .admin-shell {
   gap: 4px;
 }
 
-.pill-accent {
-  background: rgba(94, 234, 212, 0.13);
-  color: var(--secondary);
-}
-
-.pill-session {
-  background: rgba(196, 181, 253, 0.13);
-  color: var(--tertiary);
-}
-
 /* Room */
 
 .room-hero {
@@ -257,7 +245,7 @@ body.admin-body[data-view="login"] .admin-shell {
   grid-template-columns: minmax(0, 1.3fr) minmax(340px, 0.7fr);
   align-items: stretch;
   gap: 36px;
-  padding: 34px !important;
+  padding: 34px;
 }
 
 .room-hero-main {
@@ -687,7 +675,7 @@ body.admin-body[data-view="login"] .admin-shell {
 
 .playlist-add-meta {
   color: var(--on-surface-muted);
-  font-size: 9.5px;
+  font-size: 10.5px;
   font-weight: 800;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -783,18 +771,6 @@ body.admin-body[data-view="login"] .admin-shell {
   min-width: 0;
 }
 
-.field select,
-.field-input {
-  width: 100%;
-  min-height: 46px;
-  padding: 10px 14px;
-  border: 1px solid var(--outline);
-  border-radius: 14px;
-  background: var(--surface-2);
-  color: var(--on-surface);
-  font-size: 15px;
-}
-
 .field select {
   cursor: pointer;
 }
@@ -802,7 +778,12 @@ body.admin-body[data-view="login"] .admin-shell {
 .field select:focus,
 .field-input:focus {
   border-color: var(--secondary);
-  outline: none;
+}
+
+.field select:focus-visible,
+.field-input:focus-visible {
+  outline: 2px solid var(--secondary);
+  outline-offset: 2px;
 }
 
 .search-input {
@@ -919,7 +900,14 @@ body.admin-body[data-view="login"] .admin-shell {
 .content-field .field-input {
   min-height: 40px;
   padding: 8px 11px;
-  font-size: 14px;
+  /* 16px keeps Safari from zooming the page when the field is focused. */
+  font-size: 16px;
+}
+
+.content-field-error {
+  color: var(--error);
+  font-size: 11.5px;
+  font-weight: 650;
 }
 
 .content-field .field-textarea {
@@ -946,7 +934,7 @@ body.admin-body[data-view="login"] .admin-shell {
   display: grid;
   justify-items: center;
   gap: 12px;
-  padding: 64px 28px;
+  padding: 44px 24px;
   text-align: center;
 }
 
@@ -1069,7 +1057,7 @@ body.admin-body[data-view="login"] .admin-shell {
   border-top: 1px solid var(--border-faint);
 }
 
-.history-list {
+.admin-panel .history-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 10px;
@@ -1242,10 +1230,6 @@ body.admin-body[data-view="login"] .admin-shell {
   .admin-player-list {
     max-height: 340px;
   }
-
-  .game-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 860px) {
@@ -1279,8 +1263,9 @@ body.admin-body[data-view="login"] .admin-shell {
     gap: 5px;
     padding: 7px 2px;
     border-radius: 15px;
-    font-size: 10.5px;
+    font-size: 11.5px;
     letter-spacing: 0;
+    white-space: normal;
   }
 
   .admin-nav-item .nav-icon,
@@ -1293,8 +1278,8 @@ body.admin-body[data-view="login"] .admin-shell {
     padding: 22px;
   }
 
-  .room-hero {
-    padding: 24px !important;
+  .admin-panel > .room-hero {
+    padding: 24px;
   }
 
   .room-hero-side {
@@ -1336,7 +1321,7 @@ body.admin-body[data-view="login"] .admin-shell {
   }
 
   .admin-nav-item {
-    font-size: 10.5px;
+    font-size: 11px;
   }
 
   .admin-nav-item .nav-icon,
@@ -1346,7 +1331,7 @@ body.admin-body[data-view="login"] .admin-shell {
   }
 
   .admin-panel {
-    --head-offset: 48px;
+    --head-offset: 52px;
     gap: 18px;
   }
 
@@ -1368,8 +1353,8 @@ body.admin-body[data-view="login"] .admin-shell {
     gap: 10px;
   }
 
-  .room-hero {
-    padding: 20px !important;
+  .admin-panel > .room-hero {
+    padding: 20px;
     gap: 22px;
   }
 

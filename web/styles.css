@@ -14,7 +14,6 @@
   --on-primary-container: #ffdbd2;
 
   --secondary: #5eead4;
-  --on-secondary: #00201c;
   --tertiary: #c4b5fd;
   --error: #ffb4ab;
   --error-container: #5a1f12;
@@ -23,7 +22,7 @@
   --border-soft: rgba(255, 255, 255, 0.09);
   --border-faint: rgba(255, 255, 255, 0.055);
   --on-surface-faint: rgba(174, 184, 208, 0.72);
-  --field-placeholder: rgba(174, 184, 208, 0.5);
+  --field-placeholder: rgba(174, 184, 208, 0.72);
   --card-sheen: rgba(255, 255, 255, 0.045);
   --shadow-card: 0 24px 70px rgba(0, 0, 0, 0.35);
   --shadow-pop: 0 14px 40px rgba(0, 0, 0, 0.4);
@@ -40,13 +39,10 @@
   --space-3: 12px;
   --space-4: 16px;
   --space-5: 24px;
-  --space-6: 32px;
 
   --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --duration-fast: 180ms;
   --duration-base: 280ms;
-  --duration-slow: 420ms;
 
   --font-sans: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system,
     "Noto Sans Devanagari", "Mangal", sans-serif;
@@ -68,7 +64,9 @@ html {
 body {
   margin: 0;
   min-height: 100dvh;
-  overflow-x: hidden;
+  /* `clip` stops the body from becoming a scroll container, which would
+   * break the sticky admin navigation. */
+  overflow-x: clip;
   font-family: var(--font-sans);
   color: var(--on-surface);
   background:
@@ -174,11 +172,6 @@ body[data-view="name"] .shell {
   gap: clamp(14px, 2.6vh, 24px);
 }
 
-body[data-view="code"] .foot,
-body[data-view="name"] .foot {
-  margin-top: 0;
-}
-
 body[data-view="code"] .join-card,
 body[data-view="name"] .join-card {
   width: 100%;
@@ -201,16 +194,12 @@ body[data-view="game"] .shell {
   padding-top: max(12px, env(safe-area-inset-top));
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
+body[data-view="game"] .join-card {
   padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
   border: 0;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
 }
 
 .brand-lockup {
@@ -348,7 +337,11 @@ body[data-view="game"] .shell {
 .field input:focus {
   border-color: var(--secondary);
   background: var(--surface-3);
-  outline: none;
+}
+
+.field input:focus-visible {
+  outline: 2px solid var(--secondary);
+  outline-offset: 2px;
 }
 
 .code-input {
@@ -375,6 +368,7 @@ body[data-view="game"] .shell {
   transition:
     transform var(--duration-fast) var(--ease-emphasized),
     background var(--duration-fast) var(--ease-emphasized),
+    color var(--duration-fast) var(--ease-emphasized),
     opacity var(--duration-fast) var(--ease-emphasized);
 }
 
@@ -417,6 +411,30 @@ body[data-view="game"] .shell {
 .btn-inline {
   width: auto;
   padding: 0 var(--space-5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Icons inside a button keep their own box so the label never sits on top of
+ * them, and the gap between the two stays even. */
+.btn .btn-icon,
+.btn .icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+}
+
+.icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
 }
 
 .form-error {
@@ -472,6 +490,19 @@ body[data-view="game"] .shell {
   font-weight: 750;
   letter-spacing: 0.18em;
   cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease-emphasized),
+    background var(--duration-fast) var(--ease-emphasized),
+    transform var(--duration-fast) var(--ease-emphasized);
+}
+
+.code-chip:hover {
+  border-color: var(--secondary);
+  background: var(--surface-2);
+}
+
+.code-chip:active {
+  transform: scale(0.98);
 }
 
 .pill {
@@ -573,8 +604,8 @@ body[data-view="game"] .shell {
 }
 
 .connection-dot.is-offline {
-  background: var(--outline);
-  box-shadow: none;
+  background: var(--on-surface-muted);
+  box-shadow: 0 0 0 4px rgba(174, 184, 208, 0.12);
 }
 
 .empty-state {
@@ -584,6 +615,12 @@ body[data-view="game"] .shell {
   color: var(--on-surface-muted);
   font-size: 14px;
   text-align: center;
+}
+
+/* An empty state that reports a failure, not just "nothing here". */
+.empty-state.is-error {
+  border-color: rgba(255, 180, 171, 0.45);
+  color: var(--error);
 }
 
 .game-stage {
@@ -616,6 +653,39 @@ body[data-view="game"] .shell {
 .pill-accent {
   background: rgba(94, 234, 212, 0.14);
   color: var(--secondary);
+}
+
+.pill-session {
+  background: rgba(196, 181, 253, 0.16);
+  color: var(--tertiary);
+}
+
+/* Two buttons side by side on a phone, stacked when there is no room. */
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.button-row .btn {
+  flex: 1 1 140px;
+  width: auto;
+}
+
+/* The running list of wrong guesses. */
+.guess-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.guess-row {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 13.5px;
 }
 
 .game-block {
@@ -669,7 +739,17 @@ body[data-view="game"] .shell {
 
 .field-input:focus {
   border-color: var(--secondary);
-  outline: none;
+}
+
+.field-input:focus-visible {
+  outline: 2px solid var(--secondary);
+  outline-offset: 2px;
+}
+
+/* A field the player still has to fill in. */
+.field-input.is-invalid {
+  border-color: var(--error);
+  background: var(--error-container);
 }
 
 .field-textarea {
@@ -697,8 +777,13 @@ body[data-view="game"] .shell {
   text-align: left;
 }
 
-.choice:hover {
+.choice:hover:not(:disabled) {
   border-color: rgba(94, 234, 212, 0.35);
+}
+
+.choice:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .choice .choice-name {
@@ -802,7 +887,6 @@ body[data-view="game"] .shell {
 .vote-count-list,
 .score-list,
 .clue-list,
-.assignment-list,
 .result-list,
 .history-list {
   display: grid;
@@ -815,9 +899,7 @@ body[data-view="game"] .shell {
 .vote-count-row,
 .score-row,
 .result-row,
-.history-row,
-.number-row,
-.assignment-row {
+.history-row {
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -825,6 +907,18 @@ body[data-view="game"] .shell {
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.03);
+}
+
+/* A player who sat this game out. */
+.score-row.is-spectator {
+  opacity: 0.62;
+}
+
+.session-points {
+  color: var(--on-surface-muted);
+  font-size: 10.5px;
+  font-weight: 650;
+  white-space: nowrap;
 }
 
 .score-row .player-name {
@@ -905,43 +999,12 @@ body[data-view="game"] .shell {
   font-weight: 800;
 }
 
-.assignment-copy {
-  min-width: 0;
-  flex: 1;
-  display: grid;
-  gap: 3px;
-}
-
-.assignment-name {
-  margin: 0;
-  color: var(--secondary);
-  font-size: 15px;
-  font-weight: 700;
-}
-
 .hints {
   margin: 0;
   padding-left: 18px;
   color: var(--on-surface-muted);
   font-size: 12.5px;
   line-height: 1.5;
-}
-
-.assignment-row .pill {
-  margin-left: auto;
-}
-
-.result-copy {
-  min-width: 0;
-  flex: 1;
-  display: grid;
-  gap: 2px;
-}
-
-.result-guess {
-  margin: 0;
-  color: var(--on-surface-muted);
-  font-size: 12.5px;
 }
 
 .result-row.is-you {
@@ -1082,18 +1145,10 @@ body[data-view="game"] .shell {
   padding-top: var(--space-2);
 }
 
-.foot {
-  margin-top: auto;
-  padding: var(--space-2) 0;
-  color: rgba(174, 184, 208, 0.72);
-  font-size: 12px;
-  text-align: center;
-}
-
 .banner {
-  position: fixed;
+  position: sticky;
   z-index: 50;
-  inset: 0 0 auto;
+  top: 0;
   padding: 10px var(--space-4);
   border-bottom: 1px solid var(--outline);
   background: var(--banner-bg);
@@ -1115,6 +1170,7 @@ body[data-view="game"] .shell {
   z-index: 60;
   bottom: max(20px, env(safe-area-inset-bottom));
   left: 50%;
+  max-width: calc(100vw - 32px);
   padding: 10px 16px;
   border: 1px solid var(--outline);
   border-radius: var(--radius-pill);
@@ -1122,6 +1178,8 @@ body[data-view="game"] .shell {
   box-shadow: var(--shadow-pop);
   font-size: 13px;
   font-weight: 650;
+  text-align: center;
+  overflow-wrap: anywhere;
   opacity: 0;
   pointer-events: none;
   transform: translate(-50%, 8px);
@@ -1267,10 +1325,6 @@ body[data-view="game"] .shell {
     min-height: 44px;
   }
 
-  body[data-view="code"] .foot,
-  body[data-view="name"] .foot {
-    display: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1281,5 +1335,71 @@ body[data-view="game"] .shell {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* The host console is sometimes printed for a family member who cannot see
+ * the screen. Without this, a dark UI prints as white on white. */
+@media print {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  .blob,
+  .toast,
+  .banner,
+  .admin-nav,
+  .game-footer,
+  .admin-actions,
+  .btn {
+    display: none !important;
+  }
+
+  .card,
+  .admin-panel > .card {
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  .code-display,
+  .code-chip,
+  .invite-url,
+  .player-name,
+  .score-points,
+  .pill {
+    color: #111 !important;
+    background: transparent !important;
+  }
+
+  .player-list,
+  .score-list,
+  .history-list {
+    display: block !important;
+  }
+}
+
+/* High contrast mode drops box shadows and background tints, so anything
+ * that relied on them needs an outline instead. */
+@media (forced-colors: active) {
+  .admin-nav-item.is-active,
+  .choice:disabled,
+  .card,
+  .game-block {
+    outline: 1px solid CanvasText;
+  }
+
+  .badge-correct,
+  .badge-wrong,
+  .pill,
+  .connection-dot {
+    forced-color-adjust: none;
+    border: 1px solid CanvasText;
   }
 }

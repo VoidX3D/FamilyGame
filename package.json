@@ -12,7 +12,7 @@
     "smoke:foundation": "node scripts/smoke-foundation.mjs",
     "smoke:engines": "node scripts/smoke-engines.mjs",
     "smoke:games": "node scripts/smoke-games.mjs",
-    "smoke": "npm run smoke:foundation && npm run smoke:engines && npm run smoke:games",
+    "smoke": "npm run smoke:server && npm run smoke:foundation && npm run smoke:engines && npm run smoke:games",
     "smoke:ui": "node scripts/smoke-ui.mjs",
     "smoke:game-ui": "node scripts/smoke-game-ui.mjs",
     "smoke:ui-all": "node scripts/smoke-all-games-ui.mjs"

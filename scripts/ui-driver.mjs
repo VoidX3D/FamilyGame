@@ -87,8 +87,8 @@ export async function waitFor(driver, expression, label, timeout = 15000) {
         return false;
       }
     }, timeout, label);
-  } catch {
-    throw new Error(`Timed out waiting for ${label}`);
+  } catch (error) {
+    throw new Error(`Timed out waiting for ${label}: ${error?.message ?? error}`);
   }
 }
 
@@ -139,7 +139,9 @@ export async function checkServers() {
   try {
     backend = await fetch(`${API}/healthz`);
   } catch {
-    throw new Error(`Backend is not reachable at ${API}. Start it first.`);
+    throw new Error(
+      `Backend is not reachable at ${API}. Start it with "npm run dev:server" first.`,
+    );
   }
   assert(backend.ok, `Backend health check failed (${backend.status}).`);
 
@@ -147,7 +149,9 @@ export async function checkServers() {
   try {
     web = await fetch(`${WEB}/`);
   } catch {
-    throw new Error(`Web preview is not reachable at ${WEB}. Start it first.`);
+    throw new Error(
+      `Web preview is not reachable at ${WEB}. Start it with "npm run dev:web" first.`,
+    );
   }
   assert(web.ok, `Web preview health check failed (${web.status}).`);
 }

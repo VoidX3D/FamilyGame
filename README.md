@@ -6,8 +6,8 @@ code, and the host starts a game. The server owns every room, turn, score, and
 secret assignment.
 
 No database is required. Rooms live in server memory. The built-in question bank
-is in `server/games/content.js`; edits made in the host console are saved to
-`server/data/content.json`.
+is in `server/data/default-content.json`; edits made in the host console are
+saved to `server/data/content.json`.
 
 ## Games in v1
 
@@ -128,11 +128,11 @@ server/
   protocol.js       Socket.IO lifecycle, broadcasts, player/admin actions
   rooms.js          In-memory room store, players, scores, history
   data/
-    content.json    Saved content edits, created on first save and gitignored
+    default-content.json  Built-in words, questions, people, places, prompts
+    content.json          Saved content edits, created on first save
   games/
     index.js        Game registry
     common.js       Shared engine helpers and state shapes
-    content.js      Built-in words, questions, people, places, prompts
     actItOut.js
     oneOfUs.js
     whoIsIt.js
@@ -169,7 +169,7 @@ scripts/            Foundation, engine, protocol, and Chrome UI smoke tests
 ## Content bank
 
 English is the only v1 locale. The built-in content lives in
-`server/games/content.js`:
+`server/data/default-content.json`:
 
 | Collection | Entries |
 | --- | --- |
@@ -202,7 +202,7 @@ records and the `/api/games` locale field without changing the protocol.
 
 See [DEPLOY.md](DEPLOY.md). The production backend is expected at
 `https://familygame.wisp.uno` and the frontend at
-`https://familygame.vercel.app`. Set the frontend origin in the backend's
+`https://funfamilygame.vercel.app`. Set the frontend origin in the backend's
 `FRONTEND_ORIGINS` before testing.
 
 ## Notes and limits

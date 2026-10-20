@@ -21,17 +21,6 @@ function firstOther(players, id) {
   return players.find((player) => player.id !== id).id;
 }
 
-function drive(engine, room, players, steps) {
-  const game = engine.create(room);
-  const context = { room, players, game, engine };
-
-  for (const step of steps) {
-    step(context);
-  }
-
-  return game;
-}
-
 function expectOk(result, label) {
   assert(result?.ok, `${label} failed: ${JSON.stringify(result)}`);
 }
@@ -158,7 +147,7 @@ for (const gameId of ["who-am-i", "where-am-i"]) {
           "Clue-givers should see the hidden answer",
         );
         assert(
-          !JSON.stringify(view).includes("hints"),
+          !("hints" in (view.assignment ?? {})),
           "Host notes leaked to a player",
         );
       }
@@ -187,6 +176,16 @@ for (const gameId of ["who-am-i", "where-am-i"]) {
       );
       assert(game.phase === "reveal", "Correct guess should reveal");
       assert(room.scores[activeId] === 1, `${gameId} scoring mismatch`);
+      // Only the guesser may score on their turn, and only one point each.
+      const points = Object.values(room.scores);
+      assert(
+        points.filter((value) => value > 0).length === turn + 1,
+        `${gameId} scored a player who was not the guesser`,
+      );
+      assert(
+        points.every((value) => value <= 1),
+        `${gameId} awarded more than one point to a single player`,
+      );
       assert(
         room.sessionScores[activeId] === 1,
         `${gameId} session scoring mismatch`,
@@ -291,11 +290,16 @@ check("who-wrote-that full run", () => {
     }
     assert(game.phase === "guessing", "Expected guessing phase");
 
-    const publicText = JSON.stringify(engine.publicView(game, room));
-    assert(
-      !publicText.includes("authorId"),
-      "Answer authors leaked before reveal",
-    );
+    const publicView = engine.publicView(game, room);
+    const publicText = JSON.stringify(publicView);
+    assert(!publicText.includes("authorId"), "Answer authors leaked before reveal");
+    // Each published answer carries only its text, never who wrote it.
+    for (const answer of publicView.answers ?? []) {
+      assert(
+        !("authorId" in answer) && !("authorName" in answer) && !("author" in answer),
+        "A published answer carries its author",
+      );
+    }
 
     for (const player of room.players) {
       const guesses = {};
@@ -320,7 +324,10 @@ check("who-wrote-that full run", () => {
 
   assert(game.phase === "complete", "Who Wrote That should be complete");
   for (const player of room.players) {
-    assert(room.scores[player.id] === 9, "Who Wrote That scoring mismatch");
+    assert(
+      room.scores[player.id] === 3 * (room.players.length - 1),
+      "Who Wrote That scoring mismatch",
+    );
   }
 });
 

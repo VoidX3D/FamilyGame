@@ -80,6 +80,10 @@ export function publicBase(game) {
     players: game.players,
     canNextRound: game.round < game.maxRounds,
     isFinal: game.round >= game.maxRounds,
+    // Identifies this specific run of the game. A replay creates a new
+    // instance, so clients can scope drafts to it instead of reusing text
+    // from the previous run.
+    startedAt: game.startedAt ?? 0,
   };
 }
 

@@ -284,7 +284,7 @@ Active engines:
 - `truthOrDare.js`
 - `whoWroteThat.js`
 
-The parked `server/prototypes/numberGame.js` is not in the registry.
+The parked `prototypes/numberGame.js` is not in the registry.
 
 ### 5.4 Player state and spectators
 

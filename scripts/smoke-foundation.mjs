@@ -2,7 +2,9 @@ import { spawn } from "node:child_process";
 import crypto from "node:crypto";
 import { io } from "socket.io-client";
 
-const port = 3101;
+// A free port per run, so a leftover server from an earlier run can never
+// be mistaken for this one.
+const port = 3100 + Math.floor(Math.random() * 400);
 const base = `http://127.0.0.1:${port}`;
 const passcode = crypto.randomBytes(12).toString("hex");
 
@@ -14,6 +16,8 @@ const child = spawn(process.execPath, ["server/index.js"], {
     NODE_ENV: "test",
     ADMIN_PASSCODE: passcode,
     FRONTEND_ORIGINS: "*",
+    // The suite must not depend on whatever the host last saved.
+    CONTENT_FILE: ":memory:",
   },
   stdio: ["ignore", "pipe", "pipe"],
 });

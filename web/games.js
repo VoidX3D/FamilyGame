@@ -1,6 +1,8 @@
 /* Player-side game screens. Every screen is rendered from server state:
  * no secret ever lives in this file, and no timer is started here. */
 
+import { avatar, initials, toneClass } from "./dom.js";
+
 const drafts = new Map();
 
 const PHASE_LABELS = {
@@ -18,6 +20,14 @@ const PHASE_LABELS = {
   collect: "Write your prompts",
   play: "Turns",
   between: "Between games",
+};
+
+/* Games that reuse a phase name with a different meaning. In Who Am I? and
+ * Where Am I? the "reveal" phase means the answer is being shown, not that a
+ * role is being revealed. */
+const PHASE_LABEL_OVERRIDES = {
+  "who-am-i": { reveal: "The answer" },
+  "where-am-i": { reveal: "The answer" },
 };
 
 function el(tag, className, text) {
@@ -57,57 +67,35 @@ function note(text, tone = "") {
   return node;
 }
 
+function errorSlot() {
+  const node = note("");
+  node.dataset.tone = "error";
+  node.hidden = true;
+  return node;
+}
+
+function showInlineError(node, message) {
+  if (!node) return;
+  node.textContent = message;
+  node.hidden = false;
+}
+
 function waiting(text) {
   return el("p", "game-wait", text);
-}
-
-function initials(name) {
-  const parts = String(name ?? "?")
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2);
-  if (parts.length === 0) return "?";
-  return parts
-    .map((part) => Array.from(part)[0] ?? "")
-    .join("")
-    .toUpperCase();
-}
-
-function toneClass(playerId) {
-  let hash = 0;
-  for (const char of String(playerId ?? "")) {
-    hash = (hash * 31 + char.codePointAt(0)) >>> 0;
-  }
-  return `tone-${hash % 6}`;
-}
-
-function avatar(name, id) {
-  const node = el("span", `avatar ${toneClass(id)}`, initials(name));
-  node.setAttribute("aria-hidden", "true");
-  return node;
 }
 
 function youBadge() {
   return el("span", "you-badge", "You");
 }
 
-function playerRow(name, id, right = []) {
-  const row = el("li", "player-row game-player-row");
-  add(row, avatar(name, id), el("span", "player-name", name));
-  if (id) row.dataset.playerId = id;
-  for (const node of right) {
-    if (node) row.append(node);
-  }
-  return row;
-}
-
 function pill(text, className = "pill") {
   return el("span", className, text);
 }
 
+/* Drafts are scoped to this specific run of the game. `startedAt` changes on
+ * every replay, so a restarted game never pre-fills the previous run's text. */
 function keyOf(game, field) {
-  return `${game.id}|${game.round}|${game.phase}|${field}`;
+  return `${game.id}|${game.startedAt ?? 0}|${game.round}|${game.phase}|${field}`;
 }
 
 function bindInput(node, key) {
@@ -130,6 +118,20 @@ function bindSelect(node, key) {
     else drafts.delete(key);
   });
   return node;
+}
+
+/* Removes a draft once its content has been accepted by the server. */
+function clearDraft(key) {
+  drafts.delete(key);
+}
+
+/* Drops drafts that can no longer be reached, so a long game night does not
+ * keep growing the map. */
+function pruneDrafts(game) {
+  const prefix = `${game.id}|${game.startedAt ?? 0}|`;
+  for (const key of drafts.keys()) {
+    if (!key.startsWith(prefix)) drafts.delete(key);
+  }
 }
 
 function textInput(placeholder, key, options = {}) {
@@ -183,11 +185,45 @@ function restoreFocus(root, focus) {
 function actOn(node, actions, payload, fallback) {
   return () => {
     node.disabled = true;
-    Promise.resolve(actions.send(payload)).catch((error) => {
-      node.disabled = false;
-      actions.toast(error?.message || fallback || "That action did not work.");
-    });
+    Promise.resolve(actions.send(payload))
+      .then(() => {
+        node.disabled = false;
+      })
+      .catch((error) => {
+        node.disabled = false;
+        actions.toast(error?.message || fallback || "That action did not work.");
+      });
   };
+}
+
+/* Shared submit flow for every text form in the game screens.
+ * `read` returns the action payload, or null when the input is not valid. */
+function formSubmit({ button: btn, actions, read, fallback, errorNode, onSuccess }) {
+  btn.addEventListener("click", () => {
+    const payload = read();
+    if (!payload) {
+      actions.toast(fallback ?? "Fill that in first.");
+      if (errorNode) showInlineError(errorNode, fallback ?? "Fill that in first.");
+      return;
+    }
+
+    if (errorNode) errorNode.hidden = true;
+    btn.disabled = true;
+
+    Promise.resolve(actions.send(payload))
+      .then((result) => {
+        btn.disabled = false;
+        onSuccess?.(result);
+      })
+      .catch((error) => {
+        btn.disabled = false;
+        const message = error?.message || fallback || "That did not go through.";
+        actions.toast(message);
+        if (errorNode) showInlineError(errorNode, message);
+      });
+  });
+
+  return btn;
 }
 
 function phaseLabel(game) {
@@ -195,7 +231,8 @@ function phaseLabel(game) {
     if (game.contentType === "place") return "Place clues";
     if (game.contentType === "person") return "Person clues";
   }
-  return PHASE_LABELS[game.phase] ?? "In progress";
+  const override = PHASE_LABEL_OVERRIDES[game.id]?.[game.phase];
+  return override ?? PHASE_LABELS[game.phase] ?? "In progress";
 }
 
 function gameHeader(state, game) {
@@ -235,6 +272,27 @@ function progressBar(completed, total) {
   return wrap;
 }
 
+/* One score list, used for the current game and for the running total. */
+function scoreList(rows, state, { showSession = false } = {}) {
+  const list = el("ul", "score-list");
+  rows.forEach((row, index) => {
+    const item = el("li", "score-row");
+    if (row.inGame === false) item.classList.add("is-spectator");
+
+    item.append(el("span", "score-rank", String(index + 1)));
+    item.append(avatar(row.name, row.id));
+    item.append(el("span", "player-name", row.name));
+    if (row.id === state.you?.playerId) item.append(youBadge());
+    if (row.inGame === false) item.append(pill("Sat out", "pill"));
+    item.append(el("span", "score-points", String(row.points)));
+    if (showSession) {
+      item.append(el("span", "session-points", `${row.session} session`));
+    }
+    list.append(item);
+  });
+  return list;
+}
+
 function scoreboard(state, game, title = "Scores") {
   if (!game.hasScore) return null;
   const playlistMode = Boolean(state.public.playlist);
@@ -258,26 +316,7 @@ function scoreboard(state, game, title = "Scores") {
         a.name.localeCompare(b.name),
     );
 
-  const list = el("ul", "score-list");
-  rows.forEach((row, index) => {
-    const item = el("li", "score-row");
-    if (!row.inGame && playlistMode) item.classList.add("is-spectator");
-
-    item.append(el("span", "score-rank", String(index + 1)));
-    item.append(avatar(row.name, row.id));
-    item.append(el("span", "player-name", row.name));
-    if (row.id === state.you?.playerId) item.append(youBadge());
-    if (!row.inGame && playlistMode) item.append(pill("Sat out", "pill"));
-    item.append(el("span", "score-points", String(row.points)));
-    if (playlistMode) {
-      item.append(
-        el("span", "session-points", `${row.session} session`),
-      );
-    }
-    list.append(item);
-  });
-
-  return block(blockTitle(title), list);
+  return block(blockTitle(title), scoreList(rows, state, { showSession: playlistMode }));
 }
 
 function sessionScoreboard(state, title = "Game night totals") {
@@ -287,38 +326,45 @@ function sessionScoreboard(state, title = "Game night totals") {
   const rows = players
     .map((player) => ({
       ...player,
+      inGame: true,
+      points: state.public.sessionScores?.[player.id] ?? 0,
       session: state.public.sessionScores?.[player.id] ?? 0,
     }))
     .sort(
       (a, b) => b.session - a.session || a.name.localeCompare(b.name),
     );
 
-  const list = el("ul", "score-list");
-  rows.forEach((row, index) => {
-    const item = el("li", "score-row");
-    item.append(el("span", "score-rank", String(index + 1)));
-    item.append(avatar(row.name, row.id));
-    item.append(el("span", "player-name", row.name));
-    if (row.id === state.you?.playerId) item.append(youBadge());
-    item.append(el("span", "score-points", String(row.session)));
-    list.append(item);
-  });
-
-  return block(blockTitle(title), list);
+  return block(blockTitle(title), scoreList(rows, state));
 }
 
-function voteChoices(state, game, actions, type = "vote", label = "Vote") {
+/* One tappable list of people. Every voting-style game uses the same
+ * control, only the action and the label change. */
+function choiceList(players, { actions, label, payloadFor, fallback }) {
   const list = el("div", "choice-list");
-  for (const player of game.players ?? []) {
-    if (player.id === state.you?.playerId) continue;
+  for (const player of players ?? []) {
     const node = el("button", "choice");
     node.type = "button";
     node.append(avatar(player.name, player.id), el("span", "choice-name", player.name));
     node.append(el("span", "choice-action", label));
-    node.addEventListener("click", actOn(node, actions, { type, targetId: player.id }));
+    node.addEventListener(
+      "click",
+      actOn(node, actions, payloadFor(player), fallback),
+    );
     list.append(node);
   }
   return list;
+}
+
+function voteChoices(state, game, actions) {
+  const players = (game.players ?? []).filter(
+    (player) => player.id !== state.you?.playerId,
+  );
+  return choiceList(players, {
+    actions,
+    label: "Vote",
+    fallback: "That vote did not go through.",
+    payloadFor: (player) => ({ type: "vote", targetId: player.id }),
+  });
 }
 
 function roleWordCard(game, mine) {
@@ -352,7 +398,7 @@ function oneOfUs(state, game, mine, actions) {
       const ready = button("Got it, I'm ready");
       ready.addEventListener(
         "click",
-        actOn(ready, actions, { type: "ready" }),
+        actOn(ready, actions, { type: "ready" }, "That did not go through."),
       );
       nodes.push(ready);
     } else {
@@ -380,20 +426,19 @@ function oneOfUs(state, game, mine, actions) {
         maxLength: 90,
       });
       form.append(input);
+      const error = errorSlot();
+      form.append(error);
       const submit = button("Submit clue");
-      submit.addEventListener("click", () => {
-        const value = input.value.trim();
-        if (!value) {
-          actions.toast("Write a clue first.");
-          return;
-        }
-        submit.disabled = true;
-        Promise.resolve(actions.send({ type: "clue", clue: value })).catch(
-          (error) => {
-            submit.disabled = false;
-            actions.toast(error?.message || "That clue did not go through.");
-          },
-        );
+      formSubmit({
+        button: submit,
+        actions,
+        errorNode: error,
+        fallback: "Write a clue first.",
+        read: () => {
+          const value = input.value.trim();
+          return value ? { type: "clue", clue: value } : null;
+        },
+        onSuccess: () => clearDraft(keyOf(game, "clue")),
       });
       form.append(submit);
       nodes.push(form);
@@ -407,6 +452,8 @@ function oneOfUs(state, game, mine, actions) {
   }
 
   if (game.phase === "vote") {
+    // The room's clues are the context for the vote, so they stay on screen.
+    nodes.push(block(blockTitle("Clues from the room"), clueList(game)));
     if (mine.yourVote) {
       const target = game.players.find((player) => player.id === mine.yourVote);
       nodes.push(block(blockTitle("Your vote"), note(`You voted for ${target?.name ?? "someone"}.`)));
@@ -437,20 +484,19 @@ function oneOfUs(state, game, mine, actions) {
         maxLength: 90,
       });
       form.append(input);
+      const error = errorSlot();
+      form.append(error);
       const submit = button("Submit guess");
-      submit.addEventListener("click", () => {
-        const value = input.value.trim();
-        if (!value) {
-          actions.toast("Type your guess first.");
-          return;
-        }
-        submit.disabled = true;
-        Promise.resolve(actions.send({ type: "guess", guess: value })).catch(
-          (error) => {
-            submit.disabled = false;
-            actions.toast(error?.message || "That guess did not go through.");
-          },
-        );
+      formSubmit({
+        button: submit,
+        actions,
+        errorNode: error,
+        fallback: "Type your guess first.",
+        read: () => {
+          const value = input.value.trim();
+          return value ? { type: "guess", guess: value } : null;
+        },
+        onSuccess: () => clearDraft(keyOf(game, "imposter-guess")),
       });
       form.append(submit);
       nodes.push(form);
@@ -463,6 +509,7 @@ function oneOfUs(state, game, mine, actions) {
 
   if (game.phase === "results" || game.phase === "complete") {
     const crewWon = game.winner === "crew";
+    const wasCaught = game.caught === true;
     const banner = el("section", `result-banner ${crewWon ? "is-win" : "is-loss"}`);
     banner.append(
       el("h3", "result-title", crewWon ? "Crew wins!" : "Imposter wins!"),
@@ -471,7 +518,9 @@ function oneOfUs(state, game, mine, actions) {
       note(
         crewWon
           ? `${game.imposterName} was caught.`
-          : `${game.imposterName} fooled the room.`,
+          : wasCaught
+            ? `${game.imposterName} was caught, but guessed the word anyway.`
+            : `${game.imposterName} fooled the room.`,
       ),
     );
     nodes.push(banner);
@@ -493,6 +542,13 @@ function oneOfUs(state, game, mine, actions) {
       }
       reveal.append(list);
     }
+    if (Array.isArray(game.voteBreakdown) && game.voteBreakdown.length > 0) {
+      const breakdown = voteBreakdown(game.voteBreakdown);
+      if (breakdown) {
+        reveal.append(blockTitle("Who voted for whom"));
+        reveal.append(breakdown);
+      }
+    }
     nodes.push(reveal);
     nodes.push(
       note(
@@ -501,7 +557,9 @@ function oneOfUs(state, game, mine, actions) {
           : "You were part of the crew.",
       ),
     );
+    nodes.push(block(blockTitle("Clues from the room"), clueList(game)));
     nodes.push(scoreboard(state, game));
+    if (state.public.playlist) nodes.push(sessionScoreboard(state));
     nodes.push(
       game.phase === "complete"
         ? waiting("All rounds are complete. The host can play again.")
@@ -566,26 +624,18 @@ function whoIsIt(state, game, mine, actions) {
     if (game.topNames?.length) {
       nodes.push(
         block(
-          blockTitle(game.topNames.length === 1 ? "The room picked" : "The room picked"),
+          blockTitle(
+            game.topNames.length === 1 ? "The room picked" : "The room tied",
+          ),
           el("p", "top-names", game.topNames.join(" · ")),
         ),
       );
     }
     nodes.push(block(blockTitle("Every vote"), countList(game.results?.counts)));
-    if (game.results?.voters?.length) {
-      const details = el("details", "vote-breakdown");
-      details.append(el("summary", null, "See who voted for whom"));
-      const list = el("ul", "vote-count-list");
-      for (const vote of game.results.voters) {
-        const item = el("li", "vote-count-row");
-        item.append(el("span", "player-name", vote.voterName));
-        item.append(el("span", "vote-count", `Voted for ${vote.targetName}`));
-        list.append(item);
-      }
-      details.append(list);
-      nodes.push(details);
-    }
+    const breakdown = voteBreakdown(game.results?.voters);
+    if (breakdown) nodes.push(breakdown);
     nodes.push(scoreboard(state, game));
+    if (state.public.playlist) nodes.push(sessionScoreboard(state));
     nodes.push(
       game.phase === "complete"
         ? waiting("All rounds are complete. The host can play again.")
@@ -618,6 +668,22 @@ function countList(rows) {
   return list;
 }
 
+/* "See who voted for whom", used by every voting game. */
+function voteBreakdown(rows) {
+  if (!Array.isArray(rows) || rows.length === 0) return null;
+  const details = el("details", "vote-breakdown");
+  details.append(el("summary", null, "See who voted for whom"));
+  const list = el("ul", "vote-count-list");
+  for (const row of rows) {
+    const item = el("li", "vote-count-row");
+    item.append(el("span", "player-name", row.voterName));
+    item.append(el("span", "vote-count", `Voted for ${row.targetName}`));
+    list.append(item);
+  }
+  details.append(list);
+  return details;
+}
+
 function actItOut(state, game, mine, actions) {
   const nodes = [];
 
@@ -638,10 +704,10 @@ function actItOut(state, game, mine, actions) {
       const skip = button("New prompt", "btn btn-tonal");
       skip.addEventListener(
         "click",
-        actOn(skip, actions, { type: "skipPrompt" }),
+        actOn(skip, actions, { type: "skipPrompt" }, "Could not get a new prompt."),
       );
       const give = button("Give up", "btn btn-text");
-      give.addEventListener("click", actOn(give, actions, { type: "giveUp" }));
+      give.addEventListener("click", actOn(give, actions, { type: "giveUp" }, "Could not give up the turn."));
       controls.append(skip, give);
       nodes.push(controls);
 
@@ -649,22 +715,14 @@ function actItOut(state, game, mine, actions) {
         blockTitle("Who guessed it first?"),
         note("Tap the first correct guesser. You both score 1."),
       );
-      const list = el("div", "choice-list");
-      for (const player of mine.guessChoices ?? []) {
-        const node = el("button", "choice");
-        node.type = "button";
-        node.append(
-          avatar(player.name, player.id),
-          el("span", "choice-name", player.name),
-        );
-        node.append(el("span", "choice-action", "Correct"));
-        node.addEventListener(
-          "click",
-          actOn(node, actions, { type: "correct", playerId: player.id }),
-        );
-        list.append(node);
-      }
-      choices.append(list);
+      choices.append(
+        choiceList(mine.guessChoices, {
+          actions,
+          label: "Correct",
+          fallback: "That did not go through.",
+          payloadFor: (player) => ({ type: "correct", playerId: player.id }),
+        }),
+      );
       nodes.push(choices);
     } else {
       nodes.push(
@@ -712,7 +770,7 @@ function actItOut(state, game, mine, actions) {
 
     if (mine.canNext) {
       const next = button("Next actor");
-      next.addEventListener("click", actOn(next, actions, { type: "next" }));
+      next.addEventListener("click", actOn(next, actions, { type: "next" }, "Could not move on."));
       nodes.push(next);
     } else if (game.phase === "complete") {
       nodes.push(waiting("That was the last acting turn. Waiting for the host."));
@@ -775,7 +833,7 @@ function turnGuess(state, game, mine, actions) {
       }
 
       const give = button("I give up, reveal the answer", "btn btn-text");
-      give.addEventListener("click", actOn(give, actions, { type: "giveUp" }));
+      give.addEventListener("click", actOn(give, actions, { type: "giveUp" }, "Could not give up the turn."));
       nodes.push(give);
     } else {
       const assignment = mine.assignment;
@@ -793,7 +851,7 @@ function turnGuess(state, game, mine, actions) {
     }
   }
 
-  if (game.phase === "reveal" || game.phase === "complete") {
+  if (game.phase === "reveal") {
     const result = game.result;
     const correct = Boolean(result?.correct);
     const title = correct
@@ -830,10 +888,8 @@ function turnGuess(state, game, mine, actions) {
 
     if (mine.canNext) {
       const next = button("Next turn");
-      next.addEventListener("click", actOn(next, actions, { type: "next" }));
+      next.addEventListener("click", actOn(next, actions, { type: "next" }, "Could not move on."));
       nodes.push(next);
-    } else if (game.phase === "complete") {
-      nodes.push(waiting("Waiting for the host."));
     } else {
       nodes.push(
         waiting(
@@ -844,7 +900,33 @@ function turnGuess(state, game, mine, actions) {
   }
 
   if (game.phase === "complete") {
+    // The host ended the game. Show the final standings rather than a stale
+    // turn result, which may not exist at all.
+    nodes.push(
+      block(
+        blockTitle("That's a wrap"),
+        note("The host finished the game. Here is the final score."),
+      ),
+    );
+    if (game.result) {
+      nodes.push(
+        block(
+          blockTitle("Last turn"),
+          el("p", "word-display", game.result.answer?.name ?? "-"),
+          note(
+            game.result.correct
+              ? `${game.result.playerName} guessed it. +1 point.`
+              : game.result.gaveUp
+                ? `${game.result.playerName} gave up.`
+                : "No points that turn.",
+          ),
+        ),
+      );
+    }
+    nodes.push(scoreboard(state, game));
+    if (state.public.playlist) nodes.push(sessionScoreboard(state));
     nodes.push(turnHistory(game));
+    nodes.push(waiting("Waiting for the host."));
   }
 
   return nodes;
@@ -978,6 +1060,50 @@ function playlistBreak(state) {
   return nodes;
 }
 
+/* The parts of a running game that are public. A spectator may as well watch
+ * along - it is what the rest of the room is looking at. */
+function publicGameContent(game) {
+  if (!game) return null;
+
+  if (game.question) {
+    return block(blockTitle("The question"), el("p", "prompt-big", game.question));
+  }
+  if (game.prompt?.text) {
+    return block(
+      blockTitle("The question"),
+      el("p", "prompt-big", game.prompt.text),
+    );
+  }
+  if (game.category) {
+    return block(
+      blockTitle("Category"),
+      el("p", "prompt-big", game.category),
+      game.actorName ? note(`${game.actorName} is acting.`) : null,
+    );
+  }
+  if (game.activePlayerName) {
+    return block(
+      blockTitle("Current turn"),
+      el("p", "prompt-big", game.activePlayerName),
+      note("Everyone except the guesser can see the answer."),
+    );
+  }
+  if (game.currentType) {
+    return block(
+      blockTitle("Current turn"),
+      el(
+        "p",
+        "prompt-big",
+        `${game.currentPlayerName ?? "Someone"} · ${game.currentType}`,
+      ),
+    );
+  }
+  if (Array.isArray(game.clues) && game.clues.length > 0) {
+    return block(blockTitle("Clues from the room"), clueList(game));
+  }
+  return null;
+}
+
 function spectatorScreen(state) {
   const game = state.public.game;
   const nodes = [];
@@ -1009,6 +1135,10 @@ function spectatorScreen(state) {
     }
     progress.append(pill(phaseLabel(game), "pill pill-accent"));
     nodes.push(block(blockTitle("Current game"), progress));
+
+    const content = publicGameContent(game);
+    if (content) nodes.push(content);
+
     nodes.push(scoreboard(state, game, "Current game scores"));
   }
 
@@ -1035,20 +1165,19 @@ function whoWroteThat(state, game, mine, actions) {
       const form = block(blockTitle("Write your answer"));
       const input = textarea("Keep it short and funny", keyOf(game, "answer"));
       form.append(input);
+      const error = errorSlot();
+      form.append(error);
       const submit = button("Submit answer");
-      submit.addEventListener("click", () => {
-        const value = input.value.trim();
-        if (!value) {
-          actions.toast("Write an answer first.");
-          return;
-        }
-        submit.disabled = true;
-        Promise.resolve(actions.send({ type: "answer", answer: value })).catch(
-          (error) => {
-            submit.disabled = false;
-            actions.toast(error?.message || "That answer did not go through.");
-          },
-        );
+      formSubmit({
+        button: submit,
+        actions,
+        errorNode: error,
+        fallback: "Write an answer first.",
+        read: () => {
+          const value = input.value.trim();
+          return value ? { type: "answer", answer: value } : null;
+        },
+        onSuccess: () => clearDraft(keyOf(game, "answer")),
       });
       form.append(submit);
       nodes.push(form);
@@ -1075,7 +1204,10 @@ function whoWroteThat(state, game, mine, actions) {
           const select = el("select", "field-input");
           select.dataset.answer = answer.id;
           select.setAttribute("aria-label", `Author for answer ${index + 1}`);
-          select.append(el("option", null, "Choose an author…"));
+          // An empty value means "not chosen yet" and is never submitted.
+          const placeholder = el("option", null, "Choose an author…");
+          placeholder.value = "";
+          select.append(placeholder);
           for (const player of game.players ?? []) {
             if (player.id === state.you?.playerId) continue;
             const option = el("option", null, player.name);
@@ -1083,32 +1215,33 @@ function whoWroteThat(state, game, mine, actions) {
             select.append(option);
           }
           bindSelect(select, keyOf(game, `guess-${answer.id}`));
-          const saved = mine.yourGuesses?.[answer.id];
-          if (saved) select.value = saved;
           card.append(select);
         }
         list.append(card);
       });
       form.append(list);
+      const error = errorSlot();
+      form.append(error);
       const submit = button("Submit my guesses");
-      submit.addEventListener("click", () => {
-        const guesses = {};
-        let missing = false;
-        for (const select of list.querySelectorAll("select[data-answer]")) {
-          if (!select.value) missing = true;
-          guesses[select.dataset.answer] = select.value;
-        }
-        if (missing) {
-          actions.toast("Pick an author for every answer.");
-          return;
-        }
-        submit.disabled = true;
-        Promise.resolve(actions.send({ type: "guesses", guesses })).catch(
-          (error) => {
-            submit.disabled = false;
-            actions.toast(error?.message || "Those guesses did not go through.");
-          },
-        );
+      formSubmit({
+        button: submit,
+        actions,
+        errorNode: error,
+        fallback: "Pick an author for every answer.",
+        read: () => {
+          const guesses = {};
+          let missing = false;
+          for (const select of list.querySelectorAll("select[data-answer]")) {
+            if (!select.value) {
+              missing = true;
+              select.classList.add("is-invalid");
+            } else {
+              select.classList.remove("is-invalid");
+            }
+            guesses[select.dataset.answer] = select.value;
+          }
+          return missing ? null : { type: "guesses", guesses };
+        },
       });
       form.append(submit);
       nodes.push(form);
@@ -1144,6 +1277,7 @@ function whoWroteThat(state, game, mine, actions) {
       ),
     );
     nodes.push(scoreboard(state, game));
+    if (state.public.playlist) nodes.push(sessionScoreboard(state));
     nodes.push(
       game.phase === "complete"
         ? waiting("All rounds are complete. The host can play again.")
@@ -1185,20 +1319,23 @@ function truthOrDare(state, game, mine, actions) {
       const dare = textarea("Give a safe, silly challenge", keyOf(game, "dare"));
       form.append(dare);
       const submit = button("Submit both");
-      submit.addEventListener("click", () => {
-        const truthValue = truth.value.trim();
-        const dareValue = dare.value.trim();
-        if (!truthValue || !dareValue) {
-          actions.toast("Write both a truth and a dare.");
-          return;
-        }
-        submit.disabled = true;
-        Promise.resolve(
-          actions.send({ type: "submit", truth: truthValue, dare: dareValue }),
-        ).catch((error) => {
-          submit.disabled = false;
-          actions.toast(error?.message || "Those prompts did not go through.");
-        });
+      const error = errorSlot();
+      form.append(error);
+      formSubmit({
+        button: submit,
+        actions,
+        errorNode: error,
+        fallback: "Write both a truth and a dare.",
+        read: () => {
+          const truthValue = truth.value.trim();
+          const dareValue = dare.value.trim();
+          if (!truthValue || !dareValue) return null;
+          return { type: "submit", truth: truthValue, dare: dareValue };
+        },
+        onSuccess: () => {
+          clearDraft(keyOf(game, "truth"));
+          clearDraft(keyOf(game, "dare"));
+        },
       });
       form.append(submit);
       nodes.push(form);
@@ -1226,7 +1363,7 @@ function truthOrDare(state, game, mine, actions) {
       card.append(el("p", "prompt-big", mine.currentTurn.text));
       card.append(note("Read it out, do it, then pass the turn on."));
       const done = button("Done, next turn");
-      done.addEventListener("click", actOn(done, actions, { type: "done" }));
+      done.addEventListener("click", actOn(done, actions, { type: "done" }, "Could not finish the turn."));
       card.append(done);
       nodes.push(card);
     } else {
@@ -1254,8 +1391,16 @@ function truthOrDare(state, game, mine, actions) {
 }
 
 function historyList(game) {
+  const rows = [...(game.history ?? [])].reverse();
+  if (rows.length === 0) {
+    return block(
+      blockTitle("Turn history"),
+      el("p", "empty-state", "No turns yet."),
+    );
+  }
+
   const list = el("ul", "history-list");
-  for (const turn of [...(game.history ?? [])].reverse()) {
+  for (const turn of rows) {
     const item = el("li", "history-row");
     item.append(el("span", "player-name", turn.name));
     item.append(el("span", "history-type", turn.type));
@@ -1284,45 +1429,67 @@ function gameFooter(actions) {
   return foot;
 }
 
-export function renderGameScreen(root, state, actions) {
-  const game = state?.public?.game ?? null;
-  const focus = captureFocus(root);
-  root.replaceChildren();
+/* Puts the new content on screen. The DOM is only replaced when the result
+ * actually changed, so a broadcast from another player cannot wipe the text
+ * you are typing or steal the focus from your input. */
+function paint(root, nodes, focus) {
+  const stage = document.createElement("div");
+  for (const node of nodes) {
+    if (node) stage.append(node);
+  }
 
-  if (state?.you?.spectator) {
-    for (const node of spectatorScreen(state)) {
-      if (node) root.append(node);
-    }
-    root.append(gameFooter(actions));
+  if (stage.innerHTML === root.innerHTML) {
     restoreFocus(root, focus);
     return;
   }
 
+  root.replaceChildren(...stage.childNodes);
+  restoreFocus(root, focus);
+}
+
+export function renderGameScreen(root, state, actions) {
+  const game = state?.public?.game ?? null;
+  const focus = captureFocus(root);
+  const nodes = [];
+
   if (!game) {
     if (state?.public?.phase === "between") {
-      for (const node of playlistBreak(state)) {
-        if (node) root.append(node);
-      }
+      nodes.push(...playlistBreak(state));
     } else {
-      root.append(waiting("Starting the game…"));
+      nodes.push(waiting("Starting the game…"));
     }
-    root.append(gameFooter(actions));
-    restoreFocus(root, focus);
+    nodes.push(gameFooter(actions));
+    paint(root, nodes, focus);
+    return;
+  }
+
+  if (state?.you?.spectator) {
+    nodes.push(...spectatorScreen(state));
+    nodes.push(gameFooter(actions));
+    paint(root, nodes, focus);
     return;
   }
 
   const mine = state.you?.game ?? {};
-  root.append(gameHeader(state, game));
+  nodes.push(gameHeader(state, game));
+
+  // Drafts from an earlier run of this game (or an earlier game in a
+  // playlist) can never be submitted again, so drop them.
+  pruneDrafts(game);
 
   const renderer = RENDERERS[game.id];
   if (renderer) {
-    for (const node of renderer(state, game, mine, actions)) {
-      if (node) root.append(node);
+    const rendered = renderer(state, game, mine, actions).filter(Boolean);
+    // A phase the screen does not know about must never render as a blank
+    // page.
+    if (rendered.length === 0) {
+      rendered.push(note("Waiting for the host…"));
     }
+    nodes.push(...rendered);
   } else {
-    root.append(note("This game screen is not available yet."));
+    nodes.push(note("This game screen is not available yet."));
   }
 
-  root.append(gameFooter(actions));
-  restoreFocus(root, focus);
+  nodes.push(gameFooter(actions));
+  paint(root, nodes, focus);
 }
