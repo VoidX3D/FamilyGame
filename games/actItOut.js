@@ -5,6 +5,7 @@ import {
   gameState,
   pickUnused,
   playerInGame,
+  roomMemory,
   playerName,
   publicBase,
   shuffle,
@@ -67,7 +68,8 @@ export function create(room) {
   const game = gameState(meta, room);
   game.turnOrder = shuffle(game.players.map((player) => player.id));
   game.turnIndex = 0;
-  game.usedPromptIds = [];
+  // The prompts a room has already used, for the whole session.
+  game.usedPromptIds = roomMemory(room, "charades");
   game.history = [];
   game.skippedPrompts = [];
   game.prompt = null;

@@ -75,10 +75,14 @@ function normalizeOrigin(value) {
 function parseOrigins(raw) {
   const value = String(raw ?? "").trim();
   if (value === "*") return ["*"];
-  return value
-    .split(",")
-    .map((origin) => normalizeOrigin(origin))
-    .filter(Boolean);
+  return [
+    ...new Set(
+      value
+        .split(",")
+        .map((origin) => normalizeOrigin(origin))
+        .filter(Boolean),
+    ),
+  ];
 }
 
 /* A pattern may use a single "*" in the host part, for example
@@ -184,5 +188,6 @@ export const config = {
     check: Number(setting("RATE_LIMIT_CHECK", 60)),
     join: Number(setting("RATE_LIMIT_JOIN", 30)),
     action: Number(setting("RATE_LIMIT_ACTION", 180)),
+    stroke: Number(setting("RATE_LIMIT_STROKE", 900)),
   },
 };

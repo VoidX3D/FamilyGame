@@ -9,6 +9,7 @@ import {
   playerInGame,
   playerName,
   publicBase,
+  roomMemory,
   shuffle,
 } from "./common.js";
 
@@ -81,7 +82,8 @@ function createEngine({ id, name, tagline, contentType, contentKey, note }) {
     const game = gameState(meta, room);
     game.contentType = contentType;
     game.note = note ?? null;
-    game.usedIds = [];
+    // The people or places a room has already used, for the whole session.
+    game.usedIds = roomMemory(room, contentKey);
     game.pass = 0;
     game.history = [];
     game.assignment = null;
