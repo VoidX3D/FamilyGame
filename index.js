@@ -1,4 +1,7 @@
 import http from "node:http";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import express from "express";
 import cors from "cors";
 import { Server } from "socket.io";
@@ -25,6 +28,17 @@ import {
 import { GAME_LIST } from "./games/index.js";
 import { attachProtocol } from "./protocol.js";
 import { RoomStore } from "./rooms.js";
+
+/* The version comes from the package file, so it is never out of date. */
+const packageVersion = (() => {
+  try {
+    const here = path.dirname(fileURLToPath(import.meta.url));
+    const raw = readFileSync(path.join(here, "package.json"), "utf8");
+    return JSON.parse(raw).version ?? "0.0.0";
+  } catch {
+    return "0.0.0";
+  }
+})();
 
 await loadContent();
 
@@ -97,7 +111,11 @@ function bearerToken(req) {
 }
 
 app.get("/", (req, res) => {
-  res.json({ service: "familygame-api", status: "ok", version: "0.1.0" });
+  res.json({
+    service: "familygame-api",
+    status: "ok",
+    version: packageVersion,
+  });
 });
 
 app.get("/healthz", (req, res) => {
@@ -256,16 +274,18 @@ server.listen(config.port, config.host, () => {
         : config.allowedOrigins
     }`,
   );
-  if (config.nodeEnv === "production" && !config.allowedOrigins.includes("*")) {
-    console.log(
-      "[cors] The frontend must be listed in FRONTEND_ORIGINS. A pattern " +
-        "like https://*.vercel.app covers a domain change.",
-    );
-  }
+  console.log(
+    `Content file: ${
+      process.env.CONTENT_FILE || "server/data/content.json"
+    }${process.env.CONTENT_FILE === ":memory:" ? " (memory only)" : ""}`,
+  );
 
   if (config.generatedPasscode) {
     console.log(
-      `[admin] generated passcode: ${config.generatedPasscode} (set ADMIN_PASSCODE to keep it stable)`,
+      `[admin] passcode: ${config.generatedPasscode}`,
+    );
+    console.log(
+      `[admin] it is stored in ${config.passcodeFile} and stays the same after a restart. Set ADMIN_PASSCODE in server/.env to choose your own.`,
     );
   } else {
     console.log("[admin] passcode configured from ADMIN_PASSCODE");
