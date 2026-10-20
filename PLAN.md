@@ -1,11 +1,23 @@
 # Family Game Hub — Project Specification
 
-**Status:** working prototype, being finalized
+**Status:** first prototype complete and live (seven games). Next up: the
+drawing game, the first one with a clock.
 **Type:** private, browser-based family party-game platform
 **Players:** 3–10 per room
 **Host:** one admin console per room
-**Brand:** Family Game Hub — “7 Fun2Play Games”
+**Brand:** Family Game Hub — “7 Fun2Play Games” (becomes eight when Draw It ships)
 **Primary language:** English (the content model leaves room for Nepali later)
+**Live:** frontend `https://funfamilygame.vercel.app`, backend
+`https://familygame.wisp.uno`
+
+### What the prototype proved
+
+- The platform holds up: one room engine, one scoring model, one admin
+  console, one playlist, seven games.
+- Private information stays private. Every engine keeps its secrets in the
+  server, and the browser suites now play all seven games end to end.
+- The "no timers" rule works for every game that has shipped. It is also
+  the one rule the next game breaks on purpose (see §2.8).
 
 ---
 
@@ -14,6 +26,7 @@
 1. **Private rooms, real people.** A family member opens the host console and creates a room. Everyone else joins with a five-character code. No public matchmaking.
 2. **IRL first.** The website handles prompts, private information, scoring, and synchronization. The actual talking, acting, laughing, and clue-giving happen in the room.
 3. **No timers.** No game advances because time ran out. Games advance when players submit something or when the host takes an action. This keeps the games usable on slow phones and with family members who need a moment.
+   - **One exception, on purpose:** the drawing game (§2.8) runs on a clock, because a turn that never ends is not a game. That game is the only place in the platform where a countdown can end a turn.
 4. **Server-authoritative secrets.** Unrevealed words, people, places, roles, and prompts never enter another player’s payload.
 5. **One shared platform.** Rooms, players, reconnects, scoring, history, and admin controls work the same way for every game.
 6. **Fast flow.** The host can play one game or queue a whole game night without asking players to rejoin or re-enter the room code.
@@ -22,7 +35,7 @@
 
 ## 2. Games
 
-There are **seven active games**.
+There are **seven active games**, and one more on the way.
 
 ### 2.1 Act It Out
 
@@ -156,6 +169,61 @@ An anonymous-answer matching game.
 - No timer.
 - Content: editable anonymous-answer prompts.
 
+### 2.8 Draw It — next
+
+A drawing-and-guessing game, in the spirit of Skribble. **This is the
+first game with a clock**, and the first one that is not made of text.
+
+**Flow**
+1. The room picks a drawer. The drawer rotates through the players so
+   everyone draws once per round.
+2. The drawer privately receives a word from the drawing-word collection.
+   Nobody else sees it, not even the word's category.
+3. A countdown starts. The drawer draws on a shared canvas; everyone else
+   watches the strokes arrive live and types guesses.
+4. A correct guess locks in as a revealed tile and the guesser scores
+   1 point. The drawer cannot see the guesses at all.
+5. The turn ends early when every other player has guessed, or when the
+   drawer presses **Done**, or when the clock runs out.
+6. On a timeout the word is revealed, the drawer scores 1 point, and
+   nobody else scores that turn.
+7. The next player draws. After everyone has drawn, the round is over and
+   the game is complete.
+
+**Rules**
+- The drawer cannot guess, and the drawer never sees the guess list.
+- A guess is compared case-insensitively, ignoring spaces and
+  punctuation. A near miss ("draw ing") does not count.
+- One point per correct guess, one point to the drawer when the word is
+  guessed in time.
+- Content: editable drawing words, with categories.
+
+**The timer — the one clock in the platform**
+- The host picks the turn length before the game starts: 30, 45, 60, or
+  90 seconds. Sixty is the default.
+- When the time is up, the word is revealed for 10 seconds and the next
+  turn begins.
+- The server owns the clock. It sends the turn deadline with the game
+  state, and every client draws its own countdown from that deadline. A
+  client that misses an event, or whose phone sleeps, never decides that
+  time is up.
+- The turn also ends early if everyone guesses, so a fast word does not
+  cost the family the rest of the round.
+
+**What this needs that the other seven games do not**
+- A `<canvas>` on the player page, with pointer and touch support, sized
+  for the device pixel ratio.
+- A separate stroke channel. Drawing is a stream of coordinates, and
+  pushing the whole game state on every pointer move will not scale to
+  eight phones. Strokes go out on their own event, batched while the
+  finger is down, and carry an id so the server can order them.
+- The server keeps the strokes of the current turn, so a player who
+  reconnects, or a player who joins mid-turn, sees the drawing so far
+  and the guess list without the drawer losing their turn.
+- A guess list that the server validates. The word never enters another
+  player's payload, and the revealed tiles are the only feedback a
+  guesser gets.
+
 ---
 
 ## 3. Parked prototype
@@ -275,6 +343,21 @@ Each engine exports:
 
 Game engines must never put unrevealed secrets into `publicView` or another player’s `playerView`.
 
+**The one exception to the state model.** Everything above assumes a game
+is a snapshot: the server publishes a state, the client renders it. Drawing
+is not a snapshot, it is a stream. The drawing game therefore adds a second
+channel next to the ordinary one:
+
+- `draw:stroke` — a point on the canvas, sent by the drawer only.
+- The server keeps the strokes of the current turn and hands them to a
+  player who joins or reconnects mid-turn.
+- The turn deadline travels in the ordinary game state, so a late joiner
+  still sees the clock running.
+
+The engine interface itself does not change. A drawing engine still
+exports the same seven functions, and its `playerView` carries the canvas
+state and the guess list.
+
 Active engines:
 
 - `actItOut.js`
@@ -302,6 +385,8 @@ Player payloads contain `{ public, you }`.
 - Act It Out: only the actor receives the prompt; others see the category.
 - Truth or Dare: only the selected player receives the prompt text.
 - Who Wrote That?!: answer authors are hidden until the reveal.
+- Draw It: the word reaches only the drawer, and the drawer never sees
+  the guess list. The revealed tiles are the only feedback a guesser gets.
 - Number? prototype: never exposed; not registered.
 
 ---
@@ -320,6 +405,7 @@ Player payloads contain `{ public, you }`.
 | `truths` | Truth or Dare | truth text |
 | `dares` | Truth or Dare | dare text |
 | `charades` | Act It Out | prompt, category |
+| `drawingWords` | Draw It | word, category |
 
 Host notes are never shown to players. They are available to the host in the admin console during a turn.
 
@@ -411,6 +497,7 @@ The admin console is discreet and host-only.
 - Results and reveals are synchronized.
 - No game is advanced by a timer.
 - Spectator screen for players who joined the room but are not in the current game.
+- A canvas screen for Draw It, which is the one game whose interface is not made of text. The canvas fills the width of the phone, the guess list sits under it, and the countdown is the only thing on screen that moves on its own.
 - Session scoreboard shown alongside the current game score in playlist mode.
 - Mobile-first layout: phones, iPad, short landscape, and desktop.
 
@@ -476,6 +563,20 @@ Single-game mode is the same flow with a queue of one game.
 - `npm run smoke:ui-all` — the remaining active games and new game flows.
 - Firefox is the default test browser.
 
+### The drawing game
+
+The drawing game is the first one that is not a snapshot, so it needs its
+own kind of test:
+
+- The stroke channel: two clients draw, and both see the same canvas.
+- A late joiner receives the strokes of the turn so far and the guess
+  list, and the drawer keeps their turn.
+- The clock is the server's: a client that stops receiving events cannot
+  end the turn.
+- A guess is only accepted from the server's own comparison, never from
+  the client.
+- The word never appears in another player's payload.
+
 ### Manual checks
 
 - 3, 4, and 10 players.
@@ -514,7 +615,7 @@ Single-game mode is the same flow with a queue of one game.
 - Public matchmaking.
 - Voice chat, text chat, or live translation.
 - Automatic text-to-speech.
-- Timed games.
+- Timed games, except Draw It, which is timed on purpose.
 - Number? until its rules are finalized.
 - Hot or Cold and The Round Table.
 - Wrong Answers Only, Chaos Mode, Family Court, and other future ideas.
