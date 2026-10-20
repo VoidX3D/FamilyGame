@@ -23,11 +23,22 @@ async function loadPasscode() {
     const value = line?.slice("ADMIN_PASSCODE=".length).trim().replace(/^["']|["']$/g, "");
     if (value) return value;
   } catch {
+    // Fall through to the generated passcode.
+  }
+
+  // The server makes a passcode when none is configured and keeps it here.
+  try {
+    const generated = (
+      await readFile(path.resolve("server/data/admin-passcode"), "utf8")
+    ).trim();
+    if (generated) return generated;
+  } catch {
     // Fall through to the error below.
   }
 
   throw new Error(
-    "ADMIN_PASSCODE is not set. Add it to the environment or server/.env.",
+    "ADMIN_PASSCODE is not set. Add it to the environment, or start the " +
+      "server once so it generates one (npm run passcode shows it).",
   );
 }
 

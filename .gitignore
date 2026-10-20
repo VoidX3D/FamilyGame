@@ -4,6 +4,7 @@ node_modules/
 .env
 .env.*
 !.env.example
+!server/.env
 server/data/content.json
 server/data/content.json.tmp
 .vercel/

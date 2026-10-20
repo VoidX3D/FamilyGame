@@ -13,6 +13,10 @@ redeploy clears live rooms.
 
 Expected public URL: `https://familygame.wisp.uno`
 
+**No configuration is required.** The repository ships `server/.env`, the
+server reads it itself, and the defaults already point at the deployed
+frontend. The panel only needs to set a port, if it does not already.
+
 Settings depend on how the panel is pointed at the repository:
 
 - If the project root is the repository root:
@@ -22,48 +26,67 @@ Settings depend on how the panel is pointed at the repository:
   - Install: `npm install`
   - Start: `npm start`
 
-Required environment variables:
+The server reads `server/.env` no matter which of those is used, and a real
+environment variable always wins over the file. `npm start` also passes
+`--env-file-if-exists=.env`, so both paths are covered.
+
+### What the defaults are
+
+| Setting | Default | Notes |
+| --- | --- | --- |
+| `PORT` | `3000` | The panel's own port wins. |
+| `FRONTEND_ORIGINS` | `http://localhost:5173, http://127.0.0.1:5173, https://funfamilygame.vercel.app` | The deployed frontend is included, so the site works out of the box. A pattern such as `https://*.vercel.app` survives a domain change. |
+| `ADMIN_PASSCODE` | generated | See below. |
+| `ADMIN_LOGIN_ATTEMPTS` | `10` per address in ten minutes | |
+| `TRUST_PROXY` | `1` | Correct for one proxy. Use `false` if the API is exposed directly. |
+| `CONTENT_FILE` | `server/data/content.json` | Use `:memory:` to keep edits in memory only. |
+| `RATE_LIMIT_CHECK` / `_JOIN` / `_ACTION` | `60` / `30` / `180` per minute | |
+
+### The host passcode
+
+`server/.env` sets `ADMIN_PASSCODE`, and the server uses it as it is:
 
 ```text
-NODE_ENV=production
-PORT=<port assigned by Wispbyte, if required>
-ADMIN_PASSCODE=<strong private passcode, at least 12 characters>
-FRONTEND_ORIGINS=https://funfamilygame.vercel.app
+[admin] passcode configured from ADMIN_PASSCODE
 ```
 
-`FRONTEND_ORIGINS` must list the exact origin the frontend is served from.
-A wrong value makes the browser block every request from the site: the page
-loads but the host console cannot sign in, and the console shows
-`Could not reach the game server`. The backend logs the refused origin:
+If `ADMIN_PASSCODE` is ever removed, the server makes a strong one (24
+random characters), writes it to `server/data/admin-passcode`, which is not
+committed, and prints it in the startup log. It stays the same after a
+restart or a redeploy, so the host is not locked out. `npm run passcode`
+prints whichever one is in use.
+
+Note that this repository is public, so the passcode in `server/.env` is
+readable by anyone. That is fine for a game that only your family uses, but
+it is worth knowing.
+
+The startup log says where the passcode came from:
+
+```text
+Family Game API listening on http://0.0.0.0:12800 (production)
+Allowed frontend origins: http://localhost:5173, http://127.0.0.1:5173, https://funfamilygame.vercel.app
+Content file: server/data/content.json
+[admin] passcode configured from ADMIN_PASSCODE
+```
+
+### If the site loads but the host console cannot sign in
+
+The browser blocks the request before the server sees it, and the console
+shows:
+
+```text
+Cross-Origin Request Blocked: ... (Reason: CORS header 'Access-Control-Allow-Origin' missing)
+```
+
+The frontend's origin is not in `FRONTEND_ORIGINS`. The server logs the
+refused origin, with the line to add:
 
 ```text
 [cors] Refused https://wrong.example.com. Add it to FRONTEND_ORIGINS on the backend.
 ```
 
-The list accepts a pattern, so a domain change does not break the deploy:
-
-```text
-FRONTEND_ORIGINS=https://funfamilygame.vercel.app,https://*.vercel.app
-```
-
-`TRUST_PROXY` sets how many proxies sit in front of the API. The default `1`
-is correct for Wispbyte; use `false` if the API is exposed directly, so a
-client cannot spoof its address and slip the IP rate limits.
-
-Production startup fails if `ADMIN_PASSCODE` is missing or shorter than 12
-characters. A development server can generate a temporary passcode when the
-variable is omitted, but production never does.
-
-Optional:
-
-```text
-ADMIN_LOGIN_ATTEMPTS=5
-CONTENT_FILE=/path/on/a/persistent/volume/content.json
-```
-
-Saved content defaults to `server/data/content.json`. Keep that path on a
-writable, persistent volume if host edits should survive restarts and redeploys.
-Set `CONTENT_FILE=:memory:` to disable disk persistence.
+Production startup fails if `ADMIN_PASSCODE` is set but shorter than 12
+characters.
 
 After deployment, verify:
 
@@ -71,12 +94,11 @@ After deployment, verify:
 curl https://familygame.wisp.uno/healthz
 # {"ok":true,...,"games":7}
 
-curl https://familygame.wisp.uno/api/games
-# {"ok":true,"locale":"en","games":[...]}
+curl -H "Origin: https://funfamilygame.vercel.app" \
+  -D - -o /dev/null https://familygame.wisp.uno/api/games | grep -i access-control
+# Access-Control-Allow-Origin: https://funfamilygame.vercel.app
 ```
 
-If the public hostname changes, update `API_URL` in `web/config.js` (the
-production branch currently uses `https://familygame.wisp.uno`).
 
 ## 2. Frontend (Vercel)
 

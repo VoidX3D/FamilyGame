@@ -7,9 +7,18 @@ import { clientIpFromSocket, now } from "./util.js";
 const adminChannel = (code) => `admin:${code}`;
 const playerChannel = (code) => `room:${code}`;
 
-const checkLimiter = createRateLimiter({ limit: 60, windowMs: 60_000 });
-const joinLimiter = createRateLimiter({ limit: 30, windowMs: 60_000 });
-const actionLimiter = createRateLimiter({ limit: 180, windowMs: 60_000 });
+const checkLimiter = createRateLimiter({
+  limit: config.rateLimits.check,
+  windowMs: 60_000,
+});
+const joinLimiter = createRateLimiter({
+  limit: config.rateLimits.join,
+  windowMs: 60_000,
+});
+const actionLimiter = createRateLimiter({
+  limit: config.rateLimits.action,
+  windowMs: 60_000,
+});
 
 function reply(ack, payload) {
   if (typeof ack === "function") ack(payload);

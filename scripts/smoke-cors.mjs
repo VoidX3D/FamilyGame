@@ -50,6 +50,13 @@ function grantFor(origin) {
 
 try {
   await waitForHealth();
+  // The port is random, but a server left over from an earlier run could
+  // still be listening on it. Make sure this is our own server.
+  assert(
+    child.exitCode === null && output.includes("Family Game API listening"),
+    `The test server did not start (exit code ${child.exitCode}).
+${output}`,
+  );
 
   assert(
     (await grantFor(allowed)) === allowed,
