@@ -200,6 +200,18 @@ body[data-view="game"] .join-card {
   background: none;
   box-shadow: none;
   border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - max(24px, env(safe-area-inset-top)));
+}
+
+/* The game fills the screen, so the leave button can sit at the bottom
+ * instead of under the last card. */
+body[data-view="game"] .game-stage {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: var(--space-4);
 }
 
 .brand-lockup {
@@ -621,6 +633,95 @@ body[data-view="game"] .join-card {
 .empty-state.is-error {
   border-color: rgba(255, 180, 171, 0.45);
   color: var(--error);
+}
+
+/* The drawing board */
+
+.draw-board {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.draw-canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  background: #0d1526;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.draw-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.draw-who {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.draw-who-label {
+  color: var(--on-surface-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.draw-who-name {
+  font-size: 17px;
+  font-weight: 750;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.draw-clock {
+  flex: 0 0 auto;
+  min-width: 64px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  color: var(--secondary);
+  font-family: var(--font-mono);
+  font-size: 19px;
+  font-weight: 750;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.draw-clock.is-urgent {
+  background: var(--error-container);
+  color: var(--error);
+}
+
+.draw-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.draw-tile {
+  padding: 7px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  color: var(--on-surface-muted);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.draw-tile.is-found {
+  border-color: rgba(94, 234, 212, 0.4);
+  background: rgba(94, 234, 212, 0.14);
+  color: var(--secondary);
 }
 
 .game-stage {
@@ -1139,10 +1240,21 @@ body[data-view="game"] .join-card {
   margin-top: var(--space-3);
 }
 
+/* The leave button is pushed to the bottom of the screen, away from the
+ * game, so nobody presses it by accident. */
 .game-footer {
   display: grid;
   gap: var(--space-2);
-  padding-top: var(--space-2);
+  margin-top: auto;
+  padding-top: var(--space-5);
+}
+
+.btn-leave {
+  justify-self: stretch;
+  min-height: 44px;
+  color: var(--on-surface-muted);
+  font-size: 13px;
+  font-weight: 650;
 }
 
 .banner {

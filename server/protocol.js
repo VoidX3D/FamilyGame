@@ -19,6 +19,15 @@ const actionLimiter = createRateLimiter({
   limit: config.rateLimits.action,
   windowMs: 60_000,
 });
+/* Strokes arrive far more often than game actions, so they get their own
+ * budget. It is still a limit, so a stuck client cannot flood the room. */
+const strokeLimiter = createRateLimiter({
+  limit: config.rateLimits.stroke,
+  windowMs: 60_000,
+});
+
+/* When each room last published its state because of a stroke. */
+const strokePublish = new Map();
 
 function reply(ack, payload) {
   if (typeof ack === "function") ack(payload);
@@ -906,7 +915,6 @@ export function attachProtocol(io, store) {
       socket.on("game:action", (payload, ack) => {
         const gate = actionLimiter(clientIpFromSocket(socket));
         if (!gate.ok) return rateLimited(ack, gate);
-
         const room = store.getRoom(socket.data.roomCode);
         if (!room || !room.game) {
           return fail(ack, "no_game", "There is no active game.");
@@ -939,8 +947,90 @@ export function attachProtocol(io, store) {
         }
 
         store.touch(room);
-        reply(ack, { ok: true });
+        // The engine may return extra feedback, such as whether a guess was
+        // right, so the player does not have to wait for the next state.
+        reply(ack, { ok: true, ...result });
         publish(io, store, room);
+      });
+
+      /* The drawing board. Strokes are a stream, so they do not travel in
+       * the game state: they go out on their own event, and the state only
+       * carries the stroke count. */
+      socket.on("draw:stroke", (payload, ack) => {
+        const gate = strokeLimiter(clientIpFromSocket(socket));
+        if (!gate.ok) return rateLimited(ack, gate);
+
+        const room = store.getRoom(socket.data.roomCode);
+        if (!room || !room.game) {
+          return fail(ack, "no_game", "There is no active game.");
+        }
+
+        const engine = roomEngine(room);
+        if (!engine?.acceptStroke) {
+          return fail(ack, "not_supported", "This game has no drawing board.");
+        }
+
+        const player = store.findPlayerBySocket(room, socket.id);
+        if (!player) {
+          return fail(ack, "not_in_room", "Rejoin the room to continue.");
+        }
+
+        let result;
+        try {
+          result = engine.acceptStroke(room, room.game, player.id, payload);
+        } catch (error) {
+          console.error("[draw] stroke failed", error);
+          return fail(ack, "game_error", "That stroke could not be added.");
+        }
+
+        if (!result?.ok) {
+          return fail(
+            ack,
+            result?.code ?? "invalid_stroke",
+            result?.message ?? "That stroke was refused.",
+          );
+        }
+
+        store.touch(room);
+        io.to(playerChannel(room.code)).emit("draw:stroke", result.stroke);
+
+        /* The stroke count travels in the state, so a player who joins
+         * mid-turn can tell that there is a drawing to catch up on. It is
+         * published on a throttle, because a fast drawing would otherwise
+         * push the whole state on every pointer move. */
+        const last = strokePublish.get(room.code) ?? 0;
+        if (now() - last >= 500) {
+          strokePublish.set(room.code, now());
+          publish(io, store, room);
+        }
+        reply(ack, { ok: true });
+      });
+
+      /* A player who joins or reconnects mid-turn asks for the drawing so
+       * far, so the drawer does not lose their turn to a phone that slept. */
+      socket.on("draw:sync", (payload, ack) => {
+        const room = store.getRoom(socket.data.roomCode);
+        if (!room || !room.game) {
+          return fail(ack, "no_game", "There is no active game.");
+        }
+
+        const engine = roomEngine(room);
+        if (!engine?.strokeHistory) {
+          return fail(ack, "not_supported", "This game has no drawing board.");
+        }
+
+        const player = store.findPlayerBySocket(room, socket.id);
+        if (!player) {
+          return fail(ack, "not_in_room", "Rejoin the room to continue.");
+        }
+
+        const strokes = engine.strokeHistory(room.game);
+        socket.emit("draw:sync", {
+          strokes,
+          strokeCount: strokes.length,
+          turn: room.game.turnIndex ?? 0,
+        });
+        reply(ack, { ok: true });
       });
     }
 
@@ -949,4 +1039,39 @@ export function attachProtocol(io, store) {
       if (result) broadcast(io, store, result.room);
     });
   });
+
+  /* The one clock in the platform. The server owns it: a turn ends when
+   * its deadline passes, and the reveal moves on when it is over. Clients
+   * only draw a countdown from the deadline they were given, so a phone
+   * that sleeps or misses an event can never end a turn. */
+  const clock = setInterval(() => {
+    const current = now();
+    for (const room of store.rooms.values()) {
+      const game = room.game;
+      if (!game) continue;
+
+      const engine = getGame(room.gameId);
+      if (!engine?.meta?.timed) continue;
+
+      const drawingDue =
+        game.phase === "drawing" && game.deadline && current >= game.deadline;
+      const revealDue =
+        game.phase === "reveal" && game.revealUntil && current >= game.revealUntil;
+      if (!drawingDue && !revealDue) continue;
+
+      let result;
+      try {
+        result = engine.adminAction(room, game, "timeout", {});
+      } catch (error) {
+        console.error(`[clock:${room.gameId}] tick failed`, error);
+        continue;
+      }
+
+      if (result?.ok) {
+        store.touch(room);
+        publish(io, store, room);
+      }
+    }
+  }, 500);
+  clock.unref?.();
 }

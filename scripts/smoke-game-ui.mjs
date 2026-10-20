@@ -53,7 +53,7 @@ try {
   );
   await waitFor(
     admin,
-    `document.querySelectorAll("#game-grid .game-card").length === 7`,
+    `document.querySelectorAll("#game-grid .game-card").length === 8`,
     "dynamic game catalog",
   );
   await waitFor(
@@ -162,20 +162,11 @@ try {
 
   await screenshot(players[0], "game-role");
 
-  for (const player of players) {
-    const clicked = await clickText(
-      player,
-      "#step-game button",
-      "Got it, I'm ready",
-    );
-    assert(clicked, "Could not ready a player");
-  }
-
   // The room votes for the same person, so the game is deterministic. The
   // imposter is whoever their own screen says they are; the room does not
   // know that, and the vote is made against the name on the button.
-  // The role card is only on screen during the reveal and clue phases, so
-  // the imposter has to be identified now, before the last clue is sent.
+  // The role card is only on screen during the reveal and hint phases, so
+  // the imposter has to be identified now, before the hints start.
   let imposterName = null;
   for (let index = 0; index < players.length; index += 1) {
     const role = await players[index].executeScript(
@@ -188,37 +179,38 @@ try {
   }
   assert(imposterName, "No player was shown the imposter role");
 
-  for (const [index, player] of players.entries()) {
-    await waitFor(
+  for (const player of players) {
+    const clicked = await clickText(
       player,
-      `Boolean(document.querySelector('#step-game input[data-field*="|clue"]'))`,
-      `clue input ${index + 1}`,
+      "#step-game button",
+      "Got it, I'm ready",
     );
-    await player.executeScript(
-      `const input = document.querySelector('#step-game input[data-field*="|clue"]');
-       input.value = arguments[0];
-       input.dispatchEvent(new Event("input", { bubbles: true }));
-       const submit = [...document.querySelectorAll("#step-game button")]
-         .find((node) => node.textContent.includes("Submit clue"));
-       submit?.click();
-       return true;`,
-      `A clue from ${names[index]}`,
-    );
+    assert(clicked, "Could not ready a player");
   }
 
-  await waitFor(
-    admin,
-    `[...document.querySelectorAll("#game-controls button")]
-       .some((node) => node.textContent.trim() === "Start voting")`,
-    "start voting control",
-  );
-  const voteClicked = await clickText(
-    admin,
-    "#game-controls button",
-    "Start voting",
-  );
-  assert(voteClicked, "Could not start voting");
+  // The clues are spoken out loud. The screen only hands the turn along,
+  // so the test presses "Done, next person" on whoever is speaking, for
+  // two rounds of hints.
+  for (let hint = 0; hint < players.length * 2; hint += 1) {
+    let handed = false;
+    for (const player of players) {
+      const done = await player.executeScript(
+        `const button = [...document.querySelectorAll("#step-game button")]
+           .find((node) => node.textContent.includes("Done, next person"));
+         if (!button) return false;
+         button.click();
+         return true;`,
+      );
+      if (done) {
+        handed = true;
+        break;
+      }
+    }
+    assert(handed, "Nobody could hand over the speaking turn");
+    await sleep(250);
+  }
 
+  // The vote starts on its own. The host does not touch anything.
   for (const [index, player] of players.entries()) {
     await waitFor(
       player,

@@ -156,123 +156,393 @@
     "whoIsItQuestions": [
       {
         "id": "who-is-it-1",
-        "text": "Who is most likely to forget where they put their phone?"
+        "text": "Who in this room will still be single in five years?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-2",
-        "text": "Who is most likely to fall asleep during a movie?"
+        "text": "Who forgets their own birthday, but remembers everybody else's?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-3",
-        "text": "Who tells the best stories?"
+        "text": "Who eats the last piece of something and pretends it was not there?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-4",
-        "text": "Who is the first to laugh at their own joke?"
+        "text": "Who has the worst handwriting in this room but still writes notes to themselves?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-5",
-        "text": "Who is most likely to sing in the shower?"
+        "text": "Who cries at a commercial but claims they do not cry?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-6",
-        "text": "Who is most likely to order extra food just in case?"
+        "text": "Who has more unfinished projects on their phone than apps?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-7",
-        "text": "Who is most likely to get lost even with a map?"
+        "text": "Who says \"I will do it later\" and actually means \"never\"?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-8",
-        "text": "Who is the calmest in a crisis?"
+        "text": "Who apologises for things that were not their fault?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-9",
-        "text": "Who is most likely to dance at a wedding?"
+        "text": "Who is the last person to reply in the family group chat?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-10",
-        "text": "Who is most likely to cry at a happy ending?"
+        "text": "Who turns every small decision into a committee meeting?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-11",
-        "text": "Who is most likely to win a debate?"
+        "text": "Who has a phone full of photos of food they never ate?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-12",
-        "text": "Who is most likely to be late?"
+        "text": "Who talks to themselves when they are alone?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-13",
-        "text": "Who is the biggest tea lover?"
+        "text": "Who cannot walk past a street dog without feeding it?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-14",
-        "text": "Who is most likely to take a hundred photos?"
+        "text": "Who has strong opinions about rice and dal and will argue about it?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-15",
-        "text": "Who is most likely to adopt a stray animal?"
+        "text": "Who forgets to drink water until they get a headache?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-16",
-        "text": "Who is most likely to give the best advice?"
+        "text": "Who is the family member who knows every single family secret?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-17",
-        "text": "Who is the most competitive at board games?"
+        "text": "Who would survive a zombie apocalypse, and who would feed the zombie?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-18",
-        "text": "Who is most likely to make everyone laugh?"
+        "text": "Who replies \"hmm\" to everything and somehow always has a point?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-19",
-        "text": "Who is most likely to plan a surprise?"
+        "text": "Who has a chair at home that only they sit on?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-20",
-        "text": "Who spends the longest choosing a movie?"
+        "text": "Who is the first to be bored and the last to admit it?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-21",
-        "text": "Who is the best cook?"
+        "text": "Who hides snacks in a place they will forget?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-22",
-        "text": "Who is most likely to talk to strangers?"
+        "text": "Who talks with their hands and knocks something over every time?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-23",
-        "text": "Who is most likely to forget an anniversary?"
+        "text": "Who can find a single needle in a haystack, but cannot find their keys?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-24",
-        "text": "Who is most likely to keep a secret?"
+        "text": "Who sends a message and then checks whether it was delivered, five times?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-25",
-        "text": "Who is most likely to start a group chat?"
+        "text": "Who has ever blamed the dog for something they did?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-26",
-        "text": "Who is the loudest person in the room?"
+        "text": "Who argues with the television when the football is on?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-27",
-        "text": "Who is most likely to take an afternoon nap?"
+        "text": "Who is the one who knows which drawer the scissors are in?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-28",
-        "text": "Who is most likely to try a new food first?"
+        "text": "Who always takes the last slice and says they will pay next time?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-29",
-        "text": "Who would win a staring contest?"
+        "text": "Who has a plan for everything except their own life?",
+        "category": "Everyone"
       },
       {
         "id": "who-is-it-30",
-        "text": "Who is most likely to become famous?"
+        "text": "Who says \"basement\" and means the storage room in the kitchen?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-31",
+        "text": "Who would rather be late than admit they were wrong?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-32",
+        "text": "Who sings in the shower and thinks nobody can hear?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-33",
+        "text": "Who has a favourite chair in the whole house and defends it?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-34",
+        "text": "Who is the reason the family group chat has a hundred unread messages?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-35",
+        "text": "Who buys a new phone and keeps the old one in a drawer for two years?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-36",
+        "text": "Who eats the crispy bit of the samosa and leaves the soft one for somebody else?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-37",
+        "text": "Who is the family member who says \"I told you so\" the most?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-38",
+        "text": "Who has lost the same set of keys three times?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-39",
+        "text": "Who finishes other people's sentences and gets it wrong?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-40",
+        "text": "Who cannot be trusted with the last slice of cake, and knows it?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-41",
+        "text": "Who is the one who always offers food and never accepts it?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-42",
+        "text": "Who has a phone case older than the phone itself?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-43",
+        "text": "Who becomes a completely different person after the second half of a film?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-44",
+        "text": "Who is the one who replies to every message with \"ok\" or \"hmm\"?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-45",
+        "text": "Who keeps every gift wrapper in a drawer, just in case?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-46",
+        "text": "Who has strong feelings about who sits where at the dinner table?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-47",
+        "text": "Who is the one who can fix anything with a piece of tape?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-48",
+        "text": "Who checks the oven four times while waiting for something to bake?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-49",
+        "text": "Who has a story about a time they met a celebrity and it is not true?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-50",
+        "text": "Who turns every small talk into a deep conversation?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-51",
+        "text": "Who is the one who knows the price of everything in the shop?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-52",
+        "text": "Who has a favourite pen and will not use any other?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-53",
+        "text": "Who cannot walk through a room without rearranging something?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-54",
+        "text": "Who is the one who remembers what everybody said three years ago?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-55",
+        "text": "Who has ever won an argument by simply giving up and walking out?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-56",
+        "text": "Who is the family member who turns a two-minute job into a two-hour project?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-57",
+        "text": "Who always says \"I am just looking\" and comes back with six things?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-58",
+        "text": "Who has the most screenshots of other people's messages?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-59",
+        "text": "Who is the one who can be trusted to water the plants, but only once?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-60",
+        "text": "Who laughs at their own joke before they finish telling it?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-61",
+        "text": "Who has the most photos of food they never ate?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-62",
+        "text": "Who says \"I will do it later\" and means never?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-63",
+        "text": "Who forgets their own birthday but remembers everybody else's?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-64",
+        "text": "Who has a phone full of screenshots and no photos?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-65",
+        "text": "Who finds a needle in a haystack but cannot find their keys?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-66",
+        "text": "Who replies \"hmm\" to everything and always has a point?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-67",
+        "text": "Who takes the last slice and promises to pay next time?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-68",
+        "text": "Who says \"basement\" and means the cupboard under the stairs?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-69",
+        "text": "Who can fix anything with a piece of tape?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-70",
+        "text": "Who eats the crispy bit of the samosa and leaves the soft one?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-71",
+        "text": "Who says \"I told you so\" the most?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-72",
+        "text": "Who is the one who checks the oven four times while waiting?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-73",
+        "text": "Who always offers food and never accepts it?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-74",
+        "text": "Who remembers what everybody said three years ago?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-75",
+        "text": "Who would feed a street dog before eating their own food?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-76",
+        "text": "Who is the family member who gives the best advice and takes the least?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-77",
+        "text": "Who has ever replied \"hmm\" and then apologised an hour later?",
+        "category": "Everyone"
+      },
+      {
+        "id": "who-is-it-78",
+        "text": "Who is the one who is always slightly too early and slightly too late?",
+        "category": "Everyone"
       }
     ],
     "people": [
@@ -1587,6 +1857,408 @@
         "id": "charades-40",
         "text": "Losing your keys",
         "category": "Funny"
+      }
+    ],
+    "drawingWords": [
+      {
+        "id": "draw-1",
+        "word": "Momos",
+        "category": "Food"
+      },
+      {
+        "id": "draw-2",
+        "word": "Samosa",
+        "category": "Food"
+      },
+      {
+        "id": "draw-3",
+        "word": "Churros",
+        "category": "Food"
+      },
+      {
+        "id": "draw-4",
+        "word": "Ice cream",
+        "category": "Food"
+      },
+      {
+        "id": "draw-5",
+        "word": "Pizza",
+        "category": "Food"
+      },
+      {
+        "id": "draw-6",
+        "word": "Burger",
+        "category": "Food"
+      },
+      {
+        "id": "draw-7",
+        "word": "Pancakes",
+        "category": "Food"
+      },
+      {
+        "id": "draw-8",
+        "word": "Lollipop",
+        "category": "Food"
+      },
+      {
+        "id": "draw-9",
+        "word": "Donut",
+        "category": "Food"
+      },
+      {
+        "id": "draw-10",
+        "word": "Popcorn",
+        "category": "Food"
+      },
+      {
+        "id": "draw-11",
+        "word": "Watermelon",
+        "category": "Food"
+      },
+      {
+        "id": "draw-12",
+        "word": "Mushroom",
+        "category": "Food"
+      },
+      {
+        "id": "draw-13",
+        "word": "Sunflower",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-14",
+        "word": "Cactus",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-15",
+        "word": "Butterfly",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-16",
+        "word": "Thunderstorm",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-17",
+        "word": "Waterfall",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-18",
+        "word": "Snowflake",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-19",
+        "word": "Rainbow",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-20",
+        "word": "Volcano",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-21",
+        "word": "Spider web",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-22",
+        "word": "Oxygen",
+        "category": "Science"
+      },
+      {
+        "id": "draw-23",
+        "word": "Atom",
+        "category": "Science"
+      },
+      {
+        "id": "draw-24",
+        "word": "Telescope",
+        "category": "Science"
+      },
+      {
+        "id": "draw-25",
+        "word": "Magnet",
+        "category": "Science"
+      },
+      {
+        "id": "draw-26",
+        "word": "Rocket ship",
+        "category": "Science"
+      },
+      {
+        "id": "draw-27",
+        "word": "Microscope",
+        "category": "Science"
+      },
+      {
+        "id": "draw-28",
+        "word": "Lightning",
+        "category": "Science"
+      },
+      {
+        "id": "draw-29",
+        "word": "Dinosaur",
+        "category": "Animals"
+      },
+      {
+        "id": "draw-30",
+        "word": "Penguin",
+        "category": "Animals"
+      },
+      {
+        "id": "draw-31",
+        "word": "Elephant",
+        "category": "Animals"
+      },
+      {
+        "id": "draw-32",
+        "word": "Flamingo",
+        "category": "Animals"
+      },
+      {
+        "id": "draw-34",
+        "word": "Turtle",
+        "category": "Animals"
+      },
+      {
+        "id": "draw-35",
+        "word": "Octopus",
+        "category": "Animals"
+      },
+      {
+        "id": "draw-36",
+        "word": "Snail",
+        "category": "Animals"
+      },
+      {
+        "id": "draw-37",
+        "word": "Beekeeper",
+        "category": "People"
+      },
+      {
+        "id": "draw-38",
+        "word": "Astronaut",
+        "category": "People"
+      },
+      {
+        "id": "draw-39",
+        "word": "Firefighter",
+        "category": "People"
+      },
+      {
+        "id": "draw-40",
+        "word": "Barber",
+        "category": "People"
+      },
+      {
+        "id": "draw-41",
+        "word": "Grandma",
+        "category": "People"
+      },
+      {
+        "id": "draw-42",
+        "word": "Postman",
+        "category": "People"
+      },
+      {
+        "id": "draw-43",
+        "word": "Puppeteer",
+        "category": "People"
+      },
+      {
+        "id": "draw-44",
+        "word": "Skeleton",
+        "category": "People"
+      },
+      {
+        "id": "draw-45",
+        "word": "Castle",
+        "category": "Places"
+      },
+      {
+        "id": "draw-46",
+        "word": "Eiffel Tower",
+        "category": "Places"
+      },
+      {
+        "id": "draw-47",
+        "word": "Waterfall bridge",
+        "category": "Places"
+      },
+      {
+        "id": "draw-48",
+        "word": "Lighthouse",
+        "category": "Places"
+      },
+      {
+        "id": "draw-49",
+        "word": "Windmill",
+        "category": "Places"
+      },
+      {
+        "id": "draw-50",
+        "word": "Igloo",
+        "category": "Places"
+      },
+      {
+        "id": "draw-51",
+        "word": "Bridge",
+        "category": "Places"
+      },
+      {
+        "id": "draw-52",
+        "word": "Temple",
+        "category": "Places"
+      },
+      {
+        "id": "draw-53",
+        "word": "Hospital",
+        "category": "Places"
+      },
+      {
+        "id": "draw-54",
+        "word": "Airport",
+        "category": "Places"
+      },
+      {
+        "id": "draw-55",
+        "word": "Football",
+        "category": "Sports"
+      },
+      {
+        "id": "draw-56",
+        "word": "Skiing",
+        "category": "Sports"
+      },
+      {
+        "id": "draw-57",
+        "word": "Boxing",
+        "category": "Sports"
+      },
+      {
+        "id": "draw-58",
+        "word": "Surfing",
+        "category": "Sports"
+      },
+      {
+        "id": "draw-59",
+        "word": "Tennis",
+        "category": "Sports"
+      },
+      {
+        "id": "draw-60",
+        "word": "Archery",
+        "category": "Sports"
+      },
+      {
+        "id": "draw-61",
+        "word": "Skateboard",
+        "category": "Sports"
+      },
+      {
+        "id": "draw-62",
+        "word": "Trophy",
+        "category": "Sports"
+      },
+      {
+        "id": "draw-63",
+        "word": "Umbrella",
+        "category": "Things"
+      },
+      {
+        "id": "draw-64",
+        "word": "Lighthouse lamp",
+        "category": "Things"
+      },
+      {
+        "id": "draw-65",
+        "word": "Backpack",
+        "category": "Things"
+      },
+      {
+        "id": "draw-66",
+        "word": "Toothbrush",
+        "category": "Things"
+      },
+      {
+        "id": "draw-67",
+        "word": "Scissors",
+        "category": "Things"
+      },
+      {
+        "id": "draw-68",
+        "word": "Clock",
+        "category": "Things"
+      },
+      {
+        "id": "draw-69",
+        "word": "Kite",
+        "category": "Things"
+      },
+      {
+        "id": "draw-70",
+        "word": "Lantern",
+        "category": "Things"
+      },
+      {
+        "id": "draw-71",
+        "word": "Sunflower seed",
+        "category": "Things"
+      },
+      {
+        "id": "draw-72",
+        "word": "Treehouse",
+        "category": "Things"
+      },
+      {
+        "id": "draw-73",
+        "word": "Rain boots",
+        "category": "Things"
+      },
+      {
+        "id": "draw-74",
+        "word": "Guitar",
+        "category": "Music"
+      },
+      {
+        "id": "draw-75",
+        "word": "Drum",
+        "category": "Music"
+      },
+      {
+        "id": "draw-76",
+        "word": "Microphone",
+        "category": "Music"
+      },
+      {
+        "id": "draw-77",
+        "word": "Headphones",
+        "category": "Music"
+      },
+      {
+        "id": "draw-78",
+        "word": "Saxophone",
+        "category": "Music"
+      },
+      {
+        "id": "draw-79",
+        "word": "Tambourine",
+        "category": "Music"
+      },
+      {
+        "id": "draw-80",
+        "word": "DJ turntable",
+        "category": "Music"
+      },
+      {
+        "id": "draw-81",
+        "word": "Piano keys",
+        "category": "Music"
       }
     ]
   }

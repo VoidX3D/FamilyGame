@@ -18,6 +18,15 @@ export class RoomStore {
     return this.rooms.size;
   }
 
+  /* How many players are in the room right now, across every room. */
+  playerCount() {
+    let total = 0;
+    for (const room of this.rooms.values()) {
+      total += room.players.length;
+    }
+    return total;
+  }
+
   createRoom(adminToken) {
     let code;
     do {

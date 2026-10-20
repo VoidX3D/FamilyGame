@@ -7,8 +7,7 @@ const drafts = new Map();
 
 const PHASE_LABELS = {
   reveal: "Reveal your role",
-  clues: "Clue round",
-  discuss: "Discussion",
+  hints: "Clue round",
   vote: "Voting",
   "imposter-guess": "The imposter guesses",
   guess: "Guessing",
@@ -410,50 +409,49 @@ function oneOfUs(state, game, mine, actions) {
     }
   }
 
-  if (game.phase === "clues") {
+  /* The hint round. The clues are spoken out loud, so the screen only
+   * keeps the room in step: it shows whose turn it is, and the next
+   * phone lights up when they are done. */
+  if (game.phase === "hints") {
     nodes.push(roleWordCard(game, mine));
-    if (mine.yourClue) {
-      nodes.push(block(blockTitle("Your clue"), note(mine.yourClue)));
-      nodes.push(
-        waiting(`${game.clueCount} of ${game.totalPlayers} clues submitted.`),
+
+    const round = `Round ${game.hintRound ?? 1} of ${game.hintRounds ?? 2}`;
+
+    if (mine.isSpeaker) {
+      const card = el("section", "role-card is-speaker");
+      card.append(el("p", "role-label", "Your turn"));
+      card.append(el("h3", "role-title", "Say your clue"));
+      card.append(
+        note(
+          "Say one clue out loud. Do not say the word itself, and keep it vague.",
+        ),
       );
+      card.append(el("p", "role-caption", round));
+      nodes.push(card);
+
+      const done = button("Done, next person");
+      done.addEventListener(
+        "click",
+        actOn(done, actions, { type: "nextHint" }, "Could not hand over the turn."),
+      );
+      nodes.push(done);
     } else {
-      const form = block(blockTitle("Give one clue"));
-      form.append(
-        note("One short clue about the word. Do not say the word itself."),
+      nodes.push(
+        block(
+          blockTitle(`Waiting for ${game.speakerName ?? "the next player"}`),
+          note("They are giving a clue. Listen, and think about who might be faking it."),
+          el("p", "role-caption", round),
+        ),
       );
-      const input = textInput("e.g. steamed, spicy, folded", keyOf(game, "clue"), {
-        maxLength: 90,
-      });
-      form.append(input);
-      const error = errorSlot();
-      form.append(error);
-      const submit = button("Submit clue");
-      formSubmit({
-        button: submit,
-        actions,
-        errorNode: error,
-        fallback: "Write a clue first.",
-        read: () => {
-          const value = input.value.trim();
-          return value ? { type: "clue", clue: value } : null;
-        },
-        onSuccess: () => clearDraft(keyOf(game, "clue")),
-      });
-      form.append(submit);
-      nodes.push(form);
+      nodes.push(
+        waiting(
+          `${game.spokenCount ?? 0} of ${game.totalSpeakers ?? game.totalPlayers} clues given this round.`,
+        ),
+      );
     }
   }
 
-  if (game.phase === "discuss") {
-    nodes.push(block(blockTitle("Clues from the room"), clueList(game)));
-    nodes.push(note("Talk it through. The host will start the vote."));
-    nodes.push(waiting("Waiting for the host to open voting…"));
-  }
-
   if (game.phase === "vote") {
-    // The room's clues are the context for the vote, so they stay on screen.
-    nodes.push(block(blockTitle("Clues from the room"), clueList(game)));
     if (mine.yourVote) {
       const target = game.players.find((player) => player.id === mine.yourVote);
       nodes.push(block(blockTitle("Your vote"), note(`You voted for ${target?.name ?? "someone"}.`)));
@@ -464,7 +462,7 @@ function oneOfUs(state, game, mine, actions) {
       nodes.push(
         block(
           blockTitle("Who is the imposter?"),
-          note("Vote for the player you think is faking it."),
+          note("Vote for the player you think was faking it."),
           voteChoices(state, game, actions, "vote", "Vote"),
         ),
       );
@@ -557,7 +555,6 @@ function oneOfUs(state, game, mine, actions) {
           : "You were part of the crew.",
       ),
     );
-    nodes.push(block(blockTitle("Clues from the room"), clueList(game)));
     nodes.push(scoreboard(state, game));
     if (state.public.playlist) nodes.push(sessionScoreboard(state));
     nodes.push(
@@ -568,24 +565,6 @@ function oneOfUs(state, game, mine, actions) {
   }
 
   return nodes;
-}
-
-function clueList(game) {
-  const list = el("ul", "clue-list");
-  if (!Array.isArray(game.clues) || game.clues.length === 0) {
-    list.append(el("li", "empty-state", "No clues yet."));
-    return list;
-  }
-  for (const clue of game.clues) {
-    const item = el("li", "clue-row");
-    item.append(avatar(clue.name, clue.playerId));
-    const copy = el("div", "clue-copy");
-    copy.append(el("p", "player-name", clue.name));
-    copy.append(el("p", "clue-text", clue.text));
-    item.append(copy);
-    list.append(item);
-  }
-  return list;
 }
 
 function whoIsIt(state, game, mine, actions) {
@@ -1099,7 +1078,17 @@ function publicGameContent(game) {
     );
   }
   if (Array.isArray(game.clues) && game.clues.length > 0) {
-    return block(blockTitle("Clues from the room"), clueList(game));
+    const list = el("ul", "clue-list");
+    for (const clue of game.clues) {
+      const item = el("li", "clue-row");
+      item.append(avatar(clue.name, clue.playerId));
+      const copy = el("div", "clue-copy");
+      copy.append(el("p", "player-name", clue.name));
+      copy.append(el("p", "clue-text", clue.text));
+      item.append(copy);
+      list.append(item);
+    }
+    return block(blockTitle("Clues from the room"), list);
   }
   return null;
 }
@@ -1410,8 +1399,413 @@ function historyList(game) {
   return block(blockTitle("Turn history"), list);
 }
 
+/* The drawing board.
+ *
+ * The canvas is one node that is created once and moved around, never
+ * rebuilt. That matters: the rest of the screen is re-rendered on every
+ * state push, and a fresh canvas element would come up blank in the
+ * middle of somebody's drawing.
+ */
+const drawState = {
+  canvas: null,
+  ctx: null,
+  strokes: [],
+  turnKey: "",
+  ownIds: new Set(),
+  actions: null,
+  canDraw: false,
+  countdownNode: null,
+  deadline: 0,
+  buffer: [],
+  lastFlush: 0,
+  counter: 0,
+  painting: false,
+  clock: null,
+  observer: null,
+};
+
+const STROKE_COLOR = "#f4f1ff";
+const STROKE_WIDTH = 0.012;
+const FLUSH_MS = 120;
+
+function drawTurnKey(game) {
+  return `${game.id}|${game.turnNumber ?? 0}|${game.phase}`;
+}
+
+function ensureDrawCanvas(game) {
+  if (drawState.canvas) return drawState.canvas;
+
+  const canvas = el("canvas", "draw-canvas");
+  canvas.width = 800;
+  canvas.height = 600;
+  canvas.setAttribute("aria-label", "The drawing board");
+
+  const ctx = canvas.getContext("2d");
+  drawState.canvas = canvas;
+  drawState.ctx = ctx;
+
+  const pointFrom = (event) => {
+    const rect = canvas.getBoundingClientRect();
+    if (!rect.width || !rect.height) return null;
+    return [
+      (event.clientX - rect.left) / rect.width,
+      (event.clientY - rect.top) / rect.height,
+    ];
+  };
+
+  canvas.addEventListener("pointerdown", (event) => {
+    if (!drawState.canDraw) return;
+    event.preventDefault();
+    canvas.setPointerCapture?.(event.pointerId);
+    drawState.painting = true;
+    const point = pointFrom(event);
+    if (point) drawState.buffer = [point];
+  });
+
+  canvas.addEventListener("pointermove", (event) => {
+    if (!drawState.painting || !drawState.canDraw) return;
+    event.preventDefault();
+    const point = pointFrom(event);
+    if (!point) return;
+    drawState.buffer.push(point);
+    drawSegment(point);
+    flushStroke(false);
+  });
+
+  const stop = (event) => {
+    if (!drawState.painting) return;
+    drawState.painting = false;
+    canvas.releasePointerCapture?.(event.pointerId);
+    flushStroke(true);
+  };
+  canvas.addEventListener("pointerup", stop);
+  canvas.addEventListener("pointercancel", stop);
+  canvas.addEventListener("pointerleave", stop);
+
+  /* The canvas is sized by the layout, so it follows the width of the
+   * phone. The observer also catches the screen being turned. */
+  if (typeof ResizeObserver !== "undefined") {
+    drawState.observer = new ResizeObserver(() => resizeDrawCanvas(canvas));
+    drawState.observer.observe(canvas);
+  } else {
+    window.addEventListener("resize", () => resizeDrawCanvas(canvas));
+  }
+
+  return canvas;
+}
+
+function resizeDrawCanvas(canvas) {
+  const rect = canvas.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+  const ratio = window.devicePixelRatio || 1;
+  const width = Math.round(rect.width * ratio);
+  const height = Math.round(rect.height * ratio);
+  if (canvas.width === width && canvas.height === height) return;
+  canvas.width = width;
+  canvas.height = height;
+  redrawBoard();
+}
+
+function strokePoint(ctx, point, width, height) {
+  return [point[0] * width, point[1] * height];
+}
+
+function drawSegment(point) {
+  const ctx = drawState.ctx;
+  const canvas = drawState.canvas;
+  if (!ctx || !canvas) return;
+
+  const points = drawState.buffer;
+  if (points.length < 2) return;
+
+  const [from, to] = [points[points.length - 2], points[points.length - 1]];
+  ctx.strokeStyle = STROKE_COLOR;
+  ctx.lineWidth = STROKE_WIDTH * canvas.width;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  const a = strokePoint(ctx, from, canvas.width, canvas.height);
+  const b = strokePoint(ctx, to, canvas.width, canvas.height);
+  ctx.moveTo(a[0], a[1]);
+  ctx.lineTo(b[0], b[1]);
+  ctx.stroke();
+}
+
+function redrawBoard() {
+  const ctx = drawState.ctx;
+  const canvas = drawState.canvas;
+  if (!ctx || !canvas) return;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (const stroke of drawState.strokes) {
+    drawStroke(stroke);
+  }
+}
+
+function drawStroke(stroke) {
+  const ctx = drawState.ctx;
+  const canvas = drawState.canvas;
+  if (!ctx || !canvas || !Array.isArray(stroke.points)) return;
+
+  ctx.strokeStyle = stroke.color || STROKE_COLOR;
+  ctx.lineWidth = (stroke.width || STROKE_WIDTH) * canvas.width;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+
+  stroke.points.forEach((point, index) => {
+    const [x, y] = strokePoint(ctx, point, canvas.width, canvas.height);
+    if (index === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+}
+
+function flushStroke(force) {
+  const now = Date.now();
+  if (!force && now - drawState.lastFlush < FLUSH_MS) return;
+  if (drawState.buffer.length < 2) {
+    if (force) drawState.buffer = [];
+    return;
+  }
+
+  drawState.lastFlush = now;
+  const points = drawState.buffer;
+  drawState.buffer = [];
+
+  drawState.counter += 1;
+  const id = `c${drawState.counter}`;
+  drawState.ownIds.add(id);
+
+  drawState.actions?.stroke?.({
+    id,
+    points,
+    color: STROKE_COLOR,
+    width: STROKE_WIDTH,
+  });
+}
+
+/* Called by the app when the server sends a stroke. */
+export function applyDrawStroke(stroke) {
+  if (!stroke?.id) return;
+  if (drawState.strokes.some((entry) => entry.id === stroke.id)) return;
+  drawState.strokes.push(stroke);
+  if (drawState.ownIds.has(stroke.id)) return;
+  drawStroke(stroke);
+}
+
+/* Called by the app when a player joins or reconnects mid-turn. */
+export function syncDrawBoard(payload) {
+  if (!payload) return;
+  const strokes = Array.isArray(payload.strokes) ? payload.strokes : [];
+  drawState.strokes = strokes;
+  drawState.ownIds.clear();
+  redrawBoard();
+}
+
+export function resetDrawBoard() {
+  drawState.strokes = [];
+  drawState.ownIds.clear();
+  drawState.buffer = [];
+  drawState.turnKey = "";
+}
+
+function formatClock(ms) {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+function startDrawClock() {
+  if (drawState.clock) return;
+  drawState.clock = setInterval(() => {
+    const node = drawState.countdownNode;
+    if (!node || !node.isConnected) return;
+    const remaining = drawState.deadline - Date.now();
+    node.textContent = formatClock(remaining);
+    node.classList.toggle("is-urgent", remaining <= 10_000);
+  }, 250);
+}
+
+function drawIt(state, game, mine, actions) {
+  const nodes = [];
+  drawState.actions = actions;
+  drawState.canDraw = Boolean(mine?.canDraw);
+
+  const turnKey = drawTurnKey(game);
+  if (turnKey !== drawState.turnKey) {
+    drawState.turnKey = turnKey;
+    drawState.strokes = [];
+    drawState.ownIds.clear();
+    drawState.buffer = [];
+    redrawBoard();
+  }
+
+  /* If the server has more strokes than this screen has, this player
+   * joined or reconnected mid-turn. Ask for the drawing so far. */
+  if ((game.strokeCount ?? 0) > drawState.strokes.length) {
+    actions.requestSync?.();
+  }
+
+  if (game.phase === "setup") {
+    nodes.push(
+      block(
+        blockTitle("Waiting for the host"),
+        note(
+          "The host picks how long each turn lasts, then the first player starts drawing.",
+        ),
+      ),
+    );
+    return nodes;
+  }
+
+  if (game.phase === "complete") {
+    nodes.push(
+      block(
+        blockTitle("That's a wrap"),
+        note("Every player has had a turn."),
+      ),
+    );
+    nodes.push(scoreboard(state, game));
+    if (state.public.playlist) nodes.push(sessionScoreboard(state));
+    nodes.push(drawHistory(game));
+    return nodes;
+  }
+
+  // The board itself. The head sits above it, so the clock is on screen
+  // while the drawer is drawing.
+  const head = el("div", "draw-head");
+  const who = el("div", "draw-who");
+  who.append(el("span", "draw-who-label", "Drawing now"));
+  who.append(el("span", "draw-who-name", game.drawerName ?? "Someone"));
+  const clock = el(
+    "span",
+    "draw-clock",
+    formatClock(Math.max(0, (game.deadline ?? 0) - Date.now())),
+  );
+  head.append(who, clock);
+  drawState.countdownNode = clock;
+  drawState.deadline = game.deadline ?? 0;
+  startDrawClock();
+
+  const board = el("div", "draw-board");
+  board.append(ensureDrawCanvas(game));
+
+  nodes.push(head, board);
+
+  if (mine.isDrawer) {
+    nodes.push(
+      block(
+        blockTitle("Your word"),
+        el("p", "word-display", mine.yourWord?.text ?? "-"),
+        note(
+          `Category: ${mine.yourWord?.category ?? "Fun"}. Draw it, and never say it out loud.`,
+        ),
+      ),
+    );
+
+    const tools = el("div", "button-row");
+    const done = button("Done, reveal the word");
+    done.addEventListener(
+      "click",
+      actOn(done, actions, { type: "done" }, "Could not end the turn."),
+    );
+    const clear = button("Clear the board", "btn btn-text");
+    clear.addEventListener(
+      "click",
+      actOn(clear, actions, { type: "clear" }, "Could not clear the board."),
+    );
+    tools.append(done, clear);
+    nodes.push(tools);
+  } else {
+    const form = block(blockTitle("Your guess"));
+    const input = textInput("Type what you think it is", keyOf(game, "guess"), {
+      maxLength: 60,
+    });
+    form.append(input);
+    const error = errorSlot();
+    form.append(error);
+    const submit = button("Submit guess");
+    formSubmit({
+      button: submit,
+      actions,
+      errorNode: error,
+      fallback: "Type a guess first.",
+      read: () => {
+        const value = input.value.trim();
+        return value ? { type: "guess", text: value } : null;
+      },
+      onSuccess: (result) => {
+        if (result?.correct) clearDraft(keyOf(game, "guess"));
+      },
+    });
+    form.append(submit);
+    nodes.push(form);
+  }
+
+  // The revealed tiles, and how close the room is.
+  const tiles = el("div", "draw-tiles");
+  if (mine.youGuessed) {
+    tiles.append(el("span", "draw-tile is-found", "You got it"));
+  } else if (game.phase === "reveal" && game.word) {
+    tiles.append(el("span", "draw-tile is-found", game.word.text));
+  }
+  if (game.guessedCount > 0 && !mine.youGuessed) {
+    tiles.append(
+      el("span", "draw-tile", `${game.guessedCount} got it`),
+    );
+  }
+  if (game.wrongCount > 0) {
+    tiles.append(el("span", "draw-tile", `${game.wrongCount} wrong`));
+  }
+  if (tiles.childElementCount > 0) {
+    nodes.push(block(blockTitle("The room"), tiles));
+  }
+
+  if (game.phase === "reveal") {
+    nodes.push(
+      block(
+        blockTitle("The word was"),
+        el("p", "word-display", game.word?.text ?? "-"),
+        note(
+          game.result?.guessed
+            ? `${game.drawerName} drew "${game.word?.text}".`
+            : `Nobody got "${game.word?.text}" in time.`,
+        ),
+      ),
+    );
+  }
+
+  nodes.push(scoreboard(state, game));
+  if (state.public.playlist) nodes.push(sessionScoreboard(state));
+
+  return nodes;
+}
+
+function drawHistory(game) {
+  const rows = [...(game.history ?? [])].reverse();
+  if (rows.length === 0) return null;
+
+  const list = el("ul", "history-list");
+  for (const row of rows) {
+    const item = el("li", "history-row");
+    item.append(el("span", "player-name", row.drawerName));
+    item.append(el("span", "history-type", row.word));
+    item.append(
+      pill(
+        row.guessed ? `${row.guesserCount} got it` : "Nobody",
+        row.guessed ? "badge badge-correct" : "badge badge-wrong",
+      ),
+    );
+    list.append(item);
+  }
+  return block(blockTitle("Turn history"), list);
+}
+
 const RENDERERS = {
   "act-it-out": actItOut,
+  "draw-it": drawIt,
   "one-of-us": oneOfUs,
   "who-is-it": whoIsIt,
   "who-am-i": turnGuess,
@@ -1420,10 +1814,12 @@ const RENDERERS = {
   "truth-or-dare": truthOrDare,
 };
 
+/* The leave button sits at the bottom of the screen, well away from the
+ * game, because it is a button people can press by accident. */
 function gameFooter(actions) {
   const foot = el("div", "game-footer");
   if (actions.onLeave) {
-    const leave = button("Leave room", "btn btn-text", actions.onLeave);
+    const leave = button("Leave this room", "btn btn-tonal btn-leave", actions.onLeave);
     foot.append(leave);
   }
   return foot;

@@ -45,24 +45,33 @@ check("one-of-us full run", () => {
         "ready",
       );
     }
-    assert(game.phase === "clues", "Expected clues phase");
+    assert(game.phase === "hints", "Expected the hint round");
 
-    for (const player of players) {
+    // The clues are spoken, so the screen only hands the turn along.
+    for (let hint = 0; hint < players.length * 2; hint += 1) {
+      const speaker = game.speakerId;
+      assert(speaker, "There should always be a speaker");
+
+      // Only the speaker may hand over the turn.
+      const notSpeaker = players.find((player) => player.id !== speaker);
+      const refused = engine.action(room, game, notSpeaker.id, {
+        type: "nextHint",
+      });
+      assert(!refused.ok, "Only the speaker may hand over the turn");
+
       expectOk(
-        engine.action(room, game, player.id, {
-          type: "clue",
-          clue: `Clue from ${player.name}`,
-        }),
-        "clue",
+        engine.action(room, game, speaker, { type: "nextHint" }),
+        "nextHint",
       );
     }
-    assert(game.phase === "discuss", "Expected discuss phase");
+
+    // After two rounds of hints the room votes by itself.
+    assert(game.phase === "vote", "The vote should start on its own");
 
     const publicView = engine.publicView(game, room);
     assert(publicView.word === null, "Word leaked before reveal");
     assert(publicView.imposterId === null, "Imposter leaked before reveal");
 
-    expectOk(engine.adminAction(room, game, "startVote"), "startVote");
     for (const player of players) {
       expectOk(
         engine.action(room, game, player.id, {
@@ -372,9 +381,135 @@ check("truth-or-dare full run", () => {
   assert(game.completedTurns === 6, "Truth or Dare turn count mismatch");
 });
 
+check("draw-it full run", () => {
+  const room = makeRoom(3);
+  const engine = getGame("draw-it");
+  const game = engine.create(room);
+  const players = room.players;
+
+  // The host picks the turn length, and the turn starts.
+  assert(game.phase === "setup", "Draw It should start in setup");
+  assert(
+    engine.adminAction(room, game, "time30").ok,
+    "The host should be able to pick the turn length",
+  );
+  assert(game.phase === "drawing", "Draw It should be drawing");
+  assert(game.deadline > Date.now(), "The turn should have a deadline");
+
+  const drawer = players.find((player) => player.id === game.drawerId);
+  const guesser = players.find((player) => player.id !== game.drawerId);
+  const word = game.word.text;
+
+  // Only the drawer sees the word.
+  assert(
+    engine.playerView(game, drawer.id).yourWord?.text === word,
+    "The drawer should see the word",
+  );
+  assert(
+    engine.playerView(game, guesser.id).yourWord === null,
+    "A guesser must not see the word",
+  );
+  assert(
+    !JSON.stringify(engine.publicView(game, room)).includes(word),
+    "The word leaked into the public state",
+  );
+
+  // Only the drawer can draw.
+  assert(
+    engine.acceptStroke(room, game, drawer.id, {
+      id: "s1",
+      points: [[0.1, 0.1], [0.2, 0.2]],
+    }).ok,
+    "The drawer should be able to draw",
+  );
+  const refused = engine.acceptStroke(room, game, guesser.id, {
+    id: "s2",
+    points: [[0.3, 0.3], [0.4, 0.4]],
+  });
+  assert(!refused.ok, "A guesser must not be able to draw");
+  assert(game.strokes.length === 1, "Only the drawer's stroke should be kept");
+
+  // The drawer cannot guess.
+  const drawerGuess = engine.action(room, game, drawer.id, {
+    type: "guess",
+    text: word,
+  });
+  assert(!drawerGuess.ok, "The drawer must not be able to guess");
+
+  // A wrong guess scores nothing.
+  const wrong = engine.action(room, game, guesser.id, {
+    type: "guess",
+    text: "something else",
+  });
+  expectOk(wrong, "wrong guess");
+  assert(wrong.correct === false, "A wrong guess must not be correct");
+  assert(room.scores[guesser.id] === 0, "A wrong guess must not score");
+
+  // A right guess scores, whatever the spelling.
+  const right = engine.action(room, game, guesser.id, {
+    type: "guess",
+    text: ` ${word.toUpperCase()}! `,
+  });
+  expectOk(right, "right guess");
+  assert(right.correct === true, "The right word should be correct");
+  assert(room.scores[guesser.id] === 1, "A correct guess must score one");
+
+  // The word is still private from the other players.
+  for (const player of players) {
+    if (player.id === drawer.id) continue;
+    assert(
+      engine.playerView(game, player.id).yourWord === null,
+      "A guesser must not see the word after guessing",
+    );
+  }
+
+  // The turn ends when everybody has guessed.
+  const other = players.find(
+    (player) => player.id !== drawer.id && player.id !== guesser.id,
+  );
+  expectOk(
+    engine.action(room, game, other.id, { type: "guess", text: word }),
+    "last guess",
+  );
+  assert(game.phase === "reveal", "The turn should end when everybody guessed");
+  assert(room.scores[drawer.id] === 1, "The drawer should score when guessed");
+
+  // The word is public once the turn is over.
+  assert(
+    engine.publicView(game, room).word?.text === word,
+    "The word should be public after the turn",
+  );
+
+  // The host moves on.
+  expectOk(engine.adminAction(room, game, "nextTurn"), "nextTurn");
+  assert(game.phase === "drawing", "The next turn should be drawing");
+  assert(game.strokes.length === 0, "The board should be cleared for the next turn");
+
+  // The clock is the server's. A turn that runs out ends on its own.
+  game.deadline = Date.now() - 1;
+  const timedOut = engine.adminAction(room, game, "timeout", {});
+  expectOk(timedOut, "timeout");
+  assert(game.phase === "reveal", "A turn that ran out should end");
+  assert(
+    engine.publicView(game, room).word === null ||
+      game.phase === "reveal",
+    "A timed out turn should reveal the word",
+  );
+
+  // The reveal moves on by itself once it is over.
+  game.revealUntil = Date.now() - 1;
+  expectOk(engine.adminAction(room, game, "timeout", {}), "timeout again");
+  assert(game.phase === "drawing", "The reveal should move to the next turn");
+
+  // Nobody may end a turn before the clock is up.
+  const early = engine.adminAction(room, game, "timeout", {});
+  assert(!early.ok, "The clock must not end a turn early");
+});
+
 check("catalog shape", () => {
   const expected = [
     "act-it-out",
+    "draw-it",
     "one-of-us",
     "who-is-it",
     "who-am-i",
@@ -382,11 +517,11 @@ check("catalog shape", () => {
     "truth-or-dare",
     "who-wrote-that",
   ];
-  assert(GAME_LIST.length === 7, "Expected seven games in the catalog");
+  assert(GAME_LIST.length === 8, "Expected eight games in the catalog");
   assert(
     GAME_LIST.map((meta) => meta.id).sort().join(",") ===
       [...expected].sort().join(","),
-    "Catalog does not match the seven active games",
+    "Catalog does not match the eight active games",
   );
   for (const meta of GAME_LIST) {
     const engine = getGame(meta.id);

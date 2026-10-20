@@ -3,8 +3,25 @@
 **Written:** 2026-10-20 17:50 (NPT)
 **Verified:** 2026-10-20 18:05 (NPT) against the working tree
 **Fixed:** 2026-10-20 19:05 (NPT) — see the status table
+**Second pass:** 2026-10-20 21:50 (NPT) — the drawing game, the played
+rather than typed One of Us, the connection work and the API documentation.
+**Status:** first prototype complete and live. Eight games.
 **Scope:** Critical + High + Medium findings across `server/`, `web/`, `scripts/`.
-**Method:** every source file read in full; live UI measured in Chrome (computed styles, layout rects); all suites executed; every client contract cross-checked against all 7 game engines.
+**Method:** every source file read in full; live UI measured in Chrome (computed styles, layout rects); all suites executed; every client contract cross-checked against all 8 game engines.
+
+---
+
+## THE SECOND PASS (2026-10-20 21:50)
+
+| Change | Why |
+|---|---|
+| **Draw It** | A drawing and guessing game, the first with a clock, the first that is not made of text. It needed a canvas, a stroke channel of its own, and a server owned clock. See PLAN.md §2.8. |
+| **One of Us is played, not typed** | The clues are spoken out loud. The screen shows whose turn it is and hands the turn along, and after two rounds the room votes by itself. The host never touches the game. |
+| **A room remembers what it has used** | The questions, words, prompts and people are remembered for the whole session, so a game night never brings the same question back. |
+| **The question pool was rewritten** | Seventy eight questions that are meant to be funny rather than useful, a good half of them Nepali. |
+| **The leave button is a button** | It is a real button at the bottom of the screen, well away from the game, so nobody presses it by accident. |
+| **The connection was made harder to break** | The name is remembered, the room code is kept when a room disappears, and the banner says what is happening while the socket comes back. |
+| **The API tells you what it is doing** | `/healthz` reports the version, the uptime, the rooms, the players, the content, the allowed frontends and the memory. `/api/docs` is a dark documentation page that reads the OpenAPI description at `/api/openapi.json`. |
 
 ---
 
@@ -13,10 +30,10 @@
 Every finding below was fixed. All six suites pass:
 
 ```
-npm run smoke          server: health, foundation, engines, games
+npm run smoke          server: health, cors, config, foundation, engines, games
 npm run smoke:ui       join, lobby, admin login, branding, responsive
 npm run smoke:game-ui  full One of Us flow (now including the imposter guess)
-npm run smoke:ui-all   the other six games end-to-end
+npm run smoke:ui-all   the other seven games end-to-end
 ```
 
 ### What changed

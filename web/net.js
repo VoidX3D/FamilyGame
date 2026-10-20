@@ -9,10 +9,15 @@ export function createSocket(auth) {
   return window.io(API_URL, {
     auth,
     transports: ["websocket", "polling"],
+    // The connection is expected to drop now and then: a phone on mobile
+    // data, a laptop that slept, a server that redeployed. It always tries
+    // to come back, with a short delay so a room full of phones does not
+    // all reconnect at the same moment.
     reconnection: true,
     reconnectionAttempts: Infinity,
-    reconnectionDelay: 500,
+    reconnectionDelay: 600,
     reconnectionDelayMax: 5000,
+    randomizationFactor: 0.4,
     timeout: 10000,
   });
 }

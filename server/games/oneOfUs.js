@@ -2,7 +2,6 @@ import { getCollection } from "../contentStore.js";
 import {
   allSubmitted,
   award,
-  cleanText,
   completeRound,
   control,
   gameState,
@@ -12,9 +11,21 @@ import {
   playerInGame,
   playerName,
   publicBase,
+  roomMemory,
   setNextRound,
+  shuffle,
   submittedCount,
 } from "./common.js";
+
+/* One of Us: everyone gets the same secret word, one of them is faking
+ * it.
+ *
+ * The clues are spoken out loud, not typed. The screen only keeps the
+ * room in step: it shows whose turn it is to speak, and when they are
+ * done the next phone lights up. After two rounds of hints the room goes
+ * straight to the vote on its own, so the host never has to touch
+ * anything.
+ */
 
 export const meta = {
   id: "one-of-us",
@@ -26,16 +37,27 @@ export const meta = {
   hasScore: true,
 };
 
+const HINT_ROUNDS = 2;
+
 function beginRound(game, round) {
-  const words = getCollection("oneOfUsWords");
-  const [word] = pickUnused(words, game.usedWordIds, 1);
+  const [word] = pickUnused(getCollection("oneOfUsWords"), game.usedWordIds, 1);
+
   game.round = round;
   game.word = word?.word ?? "Momos";
   game.category = word?.category ?? "Food";
   game.imposterId = pickOne(game.players)?.id ?? null;
   game.phase = "reveal";
   game.ready = {};
-  game.clues = {};
+
+  // The speaking order. It is reshuffled for the second round so the same
+  // person does not always go first.
+  game.hintOrder = shuffle(game.players.map((player) => player.id));
+  game.hintIndex = 0;
+  game.hintRound = 1;
+  game.hintRounds = HINT_ROUNDS;
+  game.speakerId = game.hintOrder[0] ?? null;
+  game.spoken = [];
+
   game.votes = {};
   game.winner = null;
   game.caught = null;
@@ -48,7 +70,8 @@ function beginRound(game, round) {
 
 export function create(room) {
   const game = gameState(meta, room);
-  game.usedWordIds = [];
+  // The words a room has already used, for the whole session.
+  game.usedWordIds = roomMemory(room, "oneOfUsWords");
   beginRound(game, 1);
   return game;
 }
@@ -112,6 +135,31 @@ function tallyVotes(room, game) {
   }
 }
 
+/* Hands the turn to the next speaker, and moves the game on when the
+ * hints are done. After the last round the room votes by itself. */
+function nextSpeaker(game) {
+  game.hintIndex += 1;
+
+  if (game.hintIndex < game.hintOrder.length) {
+    game.speakerId = game.hintOrder[game.hintIndex];
+    return;
+  }
+
+  if (game.hintRound < game.hintRounds) {
+    game.hintRound += 1;
+    game.hintOrder = shuffle(game.players.map((player) => player.id));
+    game.hintIndex = 0;
+    game.speakerId = game.hintOrder[0] ?? null;
+    game.spoken = [];
+    return;
+  }
+
+  // Both rounds of hints are done. The vote starts on its own.
+  game.phase = "vote";
+  game.speakerId = null;
+  game.votes = {};
+}
+
 export function action(room, game, playerId, payload) {
   if (!playerInGame(game, playerId)) {
     return { ok: false, code: "not_in_game", message: "You are not in this game." };
@@ -124,40 +172,27 @@ export function action(room, game, playerId, payload) {
       return { ok: false, code: "wrong_phase", message: "The roles are already revealed." };
     }
     game.ready[playerId] = true;
-    if (allSubmitted(game.ready, game.players)) game.phase = "clues";
+    if (allSubmitted(game.ready, game.players)) {
+      game.phase = "hints";
+    }
     return { ok: true };
   }
 
-  if (type === "clue") {
-    if (game.phase !== "clues") {
-      return { ok: false, code: "wrong_phase", message: "Clues are not open right now." };
+  /* The current speaker says their clue out loud and hands the turn on. */
+  if (type === "nextHint") {
+    if (game.phase !== "hints") {
+      return { ok: false, code: "wrong_phase", message: "It is not the hint round." };
     }
-    if (Object.prototype.hasOwnProperty.call(game.clues, playerId)) {
-      return { ok: false, code: "already_submitted", message: "Your clue is already in." };
-    }
-
-    const text = cleanText(payload?.clue, 90);
-    if (!text) {
-      return { ok: false, code: "empty_clue", message: "Write a short clue first." };
-    }
-
-    const normalizedWord = normalizeAnswer(game.word);
-    const normalizedText = normalizeAnswer(text);
-    if (
-      normalizedText === normalizedWord ||
-      (normalizedWord.length >= 4 && normalizedText.includes(normalizedWord))
-    ) {
+    if (playerId !== game.speakerId) {
       return {
         ok: false,
-        code: "clue_spoils",
-        message: "That clue gives away the word. Try a subtler one.",
+        code: "not_speaker",
+        message: "It is not your turn to speak.",
       };
     }
 
-    game.clues[playerId] = text;
-    if (allSubmitted(game.clues, game.players)) {
-      game.phase = "discuss";
-    }
+    game.spoken.push(playerId);
+    nextSpeaker(game);
     return { ok: true };
   }
 
@@ -189,7 +224,7 @@ export function action(room, game, playerId, payload) {
       return { ok: false, code: "not_imposter", message: "Only the imposter can guess." };
     }
 
-    const guess = cleanText(payload?.guess, 90);
+    const guess = String(payload?.guess ?? "").trim();
     if (!guess) {
       return { ok: false, code: "empty_guess", message: "Type your guess first." };
     }
@@ -204,14 +239,13 @@ export function action(room, game, playerId, payload) {
 }
 
 export function adminAction(room, game, type) {
-  if (type === "startVote") {
-    if (game.phase !== "clues" && game.phase !== "discuss") {
-      return { ok: false, code: "wrong_phase", message: "Voting cannot start yet." };
+  /* The host does not start the vote. It starts by itself when the hints
+   * are done. The host can still step over a stuck speaker. */
+  if (type === "skipSpeaker") {
+    if (game.phase !== "hints") {
+      return { ok: false, code: "wrong_phase", message: "Nobody is speaking." };
     }
-    for (const player of game.players) {
-      if (!game.clues[player.id]) game.clues[player.id] = "(No clue given)";
-    }
-    game.phase = "vote";
+    nextSpeaker(game);
     return { ok: true };
   }
 
@@ -248,22 +282,21 @@ export function nextRound(room, game) {
 
 export function publicView(game) {
   const shown = reveal(game);
-  const cluesOpen = ["discuss", "vote", "results", "complete"].includes(game.phase);
+  const speaker = game.players.find((player) => player.id === game.speakerId);
 
   return {
     ...publicBase(game),
+    phase: game.phase,
     category: game.category,
     readyCount: submittedCount(game.ready),
-    clueCount: submittedCount(game.clues),
     voteCount: submittedCount(game.votes),
     totalPlayers: game.players.length,
-    clues: cluesOpen
-      ? game.players.map((player) => ({
-          playerId: player.id,
-          name: player.name,
-          text: game.clues[player.id] ?? "",
-        }))
-      : [],
+    speakerId: game.speakerId,
+    speakerName: speaker?.name ?? null,
+    hintRound: game.hintRound,
+    hintRounds: game.hintRounds,
+    spokenCount: game.spoken?.length ?? 0,
+    totalSpeakers: game.hintOrder?.length ?? game.players.length,
     winner: shown ? game.winner : null,
     caught: shown ? game.caught : null,
     word: shown ? game.word : null,
@@ -279,6 +312,7 @@ export function publicView(game) {
 export function playerView(game, playerId) {
   const isImposter = playerId === game.imposterId;
   const shown = reveal(game);
+  const isSpeaker = playerId === game.speakerId;
 
   return {
     role: isImposter ? "imposter" : "crew",
@@ -286,11 +320,11 @@ export function playerView(game, playerId) {
     word: isImposter && !shown ? null : game.word,
     category: game.category,
     ready: Boolean(game.ready[playerId]),
-    yourClue: game.clues[playerId] ?? "",
     yourVote: game.votes[playerId] ?? null,
     imposterGuess: shown ? game.imposterGuess : null,
     canReady: game.phase === "reveal" && !game.ready[playerId],
-    canClue: game.phase === "clues" && !game.clues[playerId],
+    isSpeaker,
+    canNextHint: isSpeaker && game.phase === "hints",
     canVote: game.phase === "vote" && !game.votes[playerId],
     canGuess: game.phase === "imposter-guess" && isImposter,
     waitingForGuess:
@@ -304,18 +338,21 @@ export function adminView(game) {
     controls: controlsFor(game),
     submissions: {
       ready: { count: submittedCount(game.ready), total: game.players.length },
-      clues: { count: submittedCount(game.clues), total: game.players.length },
+      hints: {
+        count: game.spoken?.length ?? 0,
+        total: (game.hintOrder?.length ?? 0) * (game.hintRounds ?? HINT_ROUNDS),
+      },
       votes: { count: submittedCount(game.votes), total: game.players.length },
     },
   };
 }
 
 function controlsFor(game) {
-  if (game.phase === "clues" || game.phase === "discuss") {
-    return [control("startVote", "Start voting", "gameAction", "primary")];
+  if (game.phase === "hints") {
+    return [control("skipSpeaker", "Skip this speaker", "gameAction", "tonal")];
   }
   if (game.phase === "vote" || game.phase === "imposter-guess") {
-    return [control("skipToResults", "Reveal result")];
+    return [control("skipToResults", "Reveal result", "gameAction")];
   }
   if (game.phase === "results") {
     return [control("nextRound", "Next round", "nextRound", "primary")];

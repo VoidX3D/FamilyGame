@@ -1,4 +1,5 @@
 import * as actItOut from "./actItOut.js";
+import * as drawIt from "./drawIt.js";
 import * as oneOfUs from "./oneOfUs.js";
 import * as truthOrDare from "./truthOrDare.js";
 import * as whoIsIt from "./whoIsIt.js";
@@ -7,6 +8,7 @@ import { whoAmI, whereAmI } from "./turnGuess.js";
 
 const engines = [
   actItOut,
+  drawIt,
   oneOfUs,
   whoIsIt,
   whoAmI,

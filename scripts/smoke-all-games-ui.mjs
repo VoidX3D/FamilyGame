@@ -289,6 +289,122 @@ async function playTruthOrDare() {
   await endGame();
 }
 
+async function playDrawIt() {
+  await startGame("Draw It");
+
+  // The host picks the turn length, which starts the first turn.
+  await waitFor(
+    admin,
+    `[...document.querySelectorAll("#game-controls button")]
+       .some((node) => node.textContent.trim() === "30 seconds per turn")`,
+    "draw-it time control",
+  );
+  const started = await admin.executeScript(
+    `[...document.querySelectorAll("#game-controls button")]
+       .find((node) => node.textContent.trim() === "30 seconds per turn")
+       ?.click();
+     return true;`,
+  );
+  assert(started, "Could not start the drawing game");
+
+  // Everybody sees the board, but only the drawer sees the word. The drawer
+  // is therefore the one whose screen has a word on it.
+  let drawer = null;
+  for (let attempt = 0; attempt < 40 && !drawer; attempt += 1) {
+    for (const player of players) {
+      const word = await player.executeScript(
+        `return document.querySelector("#step-game .word-display")?.textContent?.trim() ?? "";`,
+      );
+      if (word) {
+        drawer = player;
+        break;
+      }
+    }
+    if (!drawer) await sleep(200);
+  }
+  assert(drawer, "Nobody got the drawing word");
+
+  const guesser = players.find((player) => player !== drawer);
+  assert(guesser, "There is nobody left to guess");
+
+  await waitFor(
+    guesser,
+    `Boolean(document.querySelector("#step-game .game-block input"))`,
+    "draw-it guess box",
+  );
+
+  // The word must not be on anybody else's screen.
+  for (const player of players) {
+    if (player === drawer) continue;
+    const word = await player.executeScript(
+      `return document.querySelector("#step-game .word-display")?.textContent?.trim() ?? "";`,
+    );
+    assert(word === "", "The drawing word leaked to another player");
+  }
+
+  // The drawer draws, and the stroke reaches the other screens.
+  const drew = await drawer.executeScript(`
+    const canvas = document.querySelector("#step-game .draw-canvas");
+    const rect = canvas.getBoundingClientRect();
+    const send = (type, x, y) => canvas.dispatchEvent(new PointerEvent(type, {
+      bubbles: true, cancelable: true, pointerId: 1, isPrimary: true,
+      clientX: rect.left + rect.width * x,
+      clientY: rect.top + rect.height * y,
+    }));
+    canvas.setPointerCapture = () => true;
+    canvas.releasePointerCapture = () => true;
+    send("pointerdown", 0.2, 0.3);
+    send("pointermove", 0.4, 0.45);
+    send("pointermove", 0.6, 0.35);
+    send("pointerup", 0.6, 0.35);
+    return true;
+  `);
+  assert(drew, "Could not draw on the canvas");
+
+  // The other screens received the stroke, so their canvas has ink on it.
+  await sleep(700);
+  for (const player of players) {
+    if (player === drawer) continue;
+    const inked = await player.executeScript(`
+      const canvas = document.querySelector("#step-game .draw-canvas");
+      if (!canvas) return false;
+      const ctx = canvas.getContext("2d");
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      for (let i = 3; i < data.length; i += 4) {
+        if (data[i] !== 0) return true;
+      }
+      return false;
+    `);
+    assert(inked, "The stroke did not reach the other screens");
+  }
+
+  // The room guesses. The drawer knows the word, so the test reads it from
+  // the drawer's own screen.
+  const word = await drawer.executeScript(
+    `return document.querySelector("#step-game .word-display")?.textContent?.trim() ?? "";`,
+  );
+  assert(word.length > 0, "The drawer has no word to guess");
+
+  const guessed = await guesser.executeScript(`
+    const input = [...document.querySelectorAll("#step-game input")][0];
+    const setter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype, "value",
+    ).set;
+    setter.call(input, arguments[0]);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    const submit = [...document.querySelectorAll("#step-game button")]
+      .find((node) => node.textContent.includes("Submit guess"));
+    submit?.click();
+    return Boolean(submit);
+  `, word);
+  assert(guessed, "Could not submit a guess");
+
+  await sleep(600);
+  await screenshot(guesser, "ui-draw-it-guesser");
+  await screenshot(drawer, "ui-draw-it-drawer");
+  await endGame();
+}
+
 try {
   await checkServers();
 
@@ -309,7 +425,7 @@ try {
   );
   await waitFor(
     admin,
-    `document.querySelectorAll("#game-grid .game-card").length === 7`,
+    `document.querySelectorAll("#game-grid .game-card").length === 8`,
     "dynamic catalog",
   );
   await waitFor(
@@ -359,6 +475,7 @@ try {
   await playActItOut();
   await playWhoWroteThat();
   await playTruthOrDare();
+  await playDrawIt();
 
   for (const [index, driver] of drivers.entries()) {
     const errors = await driver.executeScript(

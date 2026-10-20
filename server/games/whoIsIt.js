@@ -7,6 +7,7 @@ import {
   gameState,
   pickUnused,
   playerInGame,
+  roomMemory,
   publicBase,
   setNextRound,
   submittedCount,
@@ -40,7 +41,10 @@ function beginRound(game, round) {
 
 export function create(room) {
   const game = gameState(meta, room);
-  game.usedQuestionIds = [];
+  /* The questions a room has already seen are remembered for the whole
+   * session, not just this game. Playing the game twice in a game night
+   * should not bring the same question back. */
+  game.usedQuestionIds = roomMemory(room, "whoIsItQuestions");
   beginRound(game, 1);
   return game;
 }

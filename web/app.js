@@ -1,4 +1,4 @@
-import { renderGameScreen } from "./games.js";
+import { applyDrawStroke, renderGameScreen, syncDrawBoard } from "./games.js";
 import { avatar } from "./dom.js";
 import { hydrateIcons } from "./icons.js";
 import { createSocket, emitAck } from "./net.js";
@@ -14,6 +14,25 @@ window.addEventListener("unhandledrejection", (event) => {
 });
 
 const SESSION_KEY = "fg:session:v1";
+const NAME_KEY = "fg:lastName:v1";
+
+/* The name is remembered separately from the session, so a player whose
+ * room disappeared only has to type their name once more. */
+function rememberName(name) {
+  try {
+    localStorage.setItem(NAME_KEY, String(name ?? ""));
+  } catch {
+    // Private browsing can reject storage.
+  }
+}
+
+function lastName() {
+  try {
+    return localStorage.getItem(NAME_KEY) || "";
+  } catch {
+    return "";
+  }
+}
 
 const $ = (id) => document.getElementById(id);
 
@@ -363,6 +382,12 @@ function renderGame(state) {
     send: sendGameAction,
     toast: showToast,
     onLeave: () => void leaveRoom(),
+    stroke: (stroke) => {
+      if (socket?.connected) socket.emit("draw:stroke", stroke);
+    },
+    requestSync: () => {
+      if (socket?.connected) socket.emit("draw:sync", {});
+    },
   });
 }
 
@@ -392,11 +417,18 @@ async function attemptResume() {
     });
 
     if (!result?.ok) {
+      // The room is gone: the server restarted, or the room expired. The
+      // code and the name are kept so the player can be back in the room
+      // with a tap instead of typing everything again.
+      const stale = resumeSession;
       clearSession();
+      if (stale?.code) dom.codeInput.value = stale.code;
+      if (stale?.name) rememberName(stale.name);
       showStep("code");
       showError(
         dom.codeError,
-        result?.message || "Your seat is no longer available. Enter the room code again.",
+        result?.message ||
+          "That room is no longer there. Enter your name to rejoin, or ask the host for a new code.",
       );
       setBanner("");
       return;
@@ -449,7 +481,7 @@ function connectSocket() {
     if (sessionReplaced) return;
     dom.codeSubmit.disabled = true;
     if (reason === "io client disconnect") return;
-    setBanner("Connection lost. Reconnecting…", "error");
+    setBanner("Connection lost. Coming back…", "error");
   });
 
   socket.on("connect_error", () => {
@@ -457,7 +489,33 @@ function connectSocket() {
     setBanner("Can't reach the game server. Retrying…", "error");
   });
 
+  /* A dropped connection is normal on a phone. The banner stays up until
+   * the seat is back, so nobody wonders where the game went. */
+  socket.io.on("reconnect_attempt", (attempt) => {
+    if (sessionReplaced) return;
+    setBanner(
+      attempt > 1
+        ? `Connection lost. Trying again… (${attempt})`
+        : "Connection lost. Coming back…",
+      "error",
+    );
+  });
+
+  socket.io.on("reconnect", () => {
+    if (sessionReplaced) return;
+    setBanner("Back in the room.", "info");
+  });
+
   socket.on("state", handleState);
+
+  /* The drawing board travels on its own channel, not in the game state. */
+  socket.on("draw:stroke", (stroke) => {
+    applyDrawStroke(stroke);
+  });
+
+  socket.on("draw:sync", (payload) => {
+    syncDrawBoard(payload);
+  });
 
   socket.on("room:closed", () => {
     clearSession();
@@ -549,7 +607,9 @@ async function checkRoomCode(code) {
 
     pendingCode = result.room.code;
     dom.pendingCode.textContent = pendingCode;
-    dom.nameInput.value = "";
+    // The last name is offered again, so a returning player does not have
+    // to type it.
+    dom.nameInput.value = lastName();
     clearError(dom.nameError);
     showStep("name");
     setTimeout(() => dom.nameInput.focus(), 50);
@@ -601,6 +661,7 @@ dom.nameForm.addEventListener("submit", async (event) => {
     }
 
     saveSession({ code: result.code, token: result.token, name });
+    rememberName(name);
     dom.lobbyCode.textContent = result.code;
     dom.lobbyStatus.textContent = "Joining the room…";
     showStep("lobby");

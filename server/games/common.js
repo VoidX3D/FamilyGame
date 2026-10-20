@@ -24,6 +24,19 @@ export function pickUnused(items, usedIds, count = 1) {
   return picked;
 }
 
+/* The content a room has already used, remembered for the whole session
+ * rather than for one game.
+ *
+ * Without this, every game starts at the top of the pool, so the same
+ * question turns up again in the next game of a game night. The memory is
+ * keyed by the content collection, so the words, the questions, the
+ * prompts and the people each keep their own history. */
+export function roomMemory(room, key) {
+  room.usedContentIds ??= {};
+  room.usedContentIds[key] ??= [];
+  return room.usedContentIds[key];
+}
+
 export function cleanText(value, maxLength = 180) {
   const text = String(value ?? "")
     .replace(/\s+/g, " ")

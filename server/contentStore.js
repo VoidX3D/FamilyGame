@@ -130,6 +130,16 @@ export const COLLECTIONS = [
       { key: "category", label: "Category", type: "text", max: 30 },
     ],
   },
+  {
+    key: "drawingWords",
+    label: "Draw It words",
+    game: "Draw It",
+    kind: "record",
+    fields: [
+      { key: "word", label: "Word", type: "text", max: 60, required: true },
+      { key: "category", label: "Category", type: "text", max: 30 },
+    ],
+  },
 ];
 
 function loadDefaultItems() {
@@ -304,12 +314,24 @@ export function contentSnapshot() {
         clone(getCollection(collection.key)),
       ]),
     ),
-    status: {
-      file: MEMORY_ONLY ? null : CONTENT_FILE,
-      defaultFile: DEFAULT_CONTENT_FILE,
-      persisted: MEMORY_ONLY ? true : persisted,
-      error: lastError || null,
-    },
+    status: contentStatus(),
+  };
+}
+
+/* A short summary of where the content is and whether it can be saved.
+ * The health check uses it, so a problem with the content file shows up
+ * before a host tries to edit something. */
+export function contentStatus() {
+  return {
+    file: MEMORY_ONLY ? null : CONTENT_FILE,
+    defaultFile: DEFAULT_CONTENT_FILE,
+    persisted: MEMORY_ONLY ? true : persisted,
+    collections: COLLECTIONS.length,
+    entries: COLLECTIONS.reduce(
+      (sum, collection) => sum + getCollection(collection.key).length,
+      0,
+    ),
+    error: lastError || null,
   };
 }
 

@@ -20,6 +20,7 @@ import { config } from "./config.js";
 import {
   ContentValidationError,
   contentSnapshot,
+  contentStatus,
   loadContent,
   replaceCollection,
   resetAllCollections,
@@ -28,6 +29,8 @@ import {
 import { GAME_LIST } from "./games/index.js";
 import { attachProtocol } from "./protocol.js";
 import { RoomStore } from "./rooms.js";
+import { docsPage } from "./docsPage.js";
+import { openapi } from "./openapi.js";
 
 /* The version comes from the package file, so it is never out of date. */
 const packageVersion = (() => {
@@ -119,14 +122,36 @@ app.get("/", (req, res) => {
 });
 
 app.get("/healthz", (req, res) => {
+  const memory = process.memoryUsage();
   res.json({
     ok: true,
     service: "familygame-api",
+    version: packageVersion,
+    environment: config.nodeEnv,
     uptimeSeconds: Math.round((Date.now() - startedAt) / 1000),
     rooms: store.size,
-    adminSessions: sessionCount(),
+    players: store.playerCount(),
     games: GAME_LIST.length,
+    adminSessions: sessionCount(),
+    content: contentStatus(),
+    allowedOrigins: config.allowedOrigins,
+    node: process.version,
+    memory: {
+      rssMb: Math.round((memory.rss / 1024 / 1024) * 10) / 10,
+      heapUsedMb: Math.round((memory.heapUsed / 1024 / 1024) * 10) / 10,
+    },
+    time: new Date().toISOString(),
   });
+});
+
+/* The API description, in the OpenAPI format a Swagger UI, Postman or a
+ * code generator understands. The page on /api/docs reads this same file. */
+app.get("/api/openapi.json", (req, res) => {
+  res.json(openapi);
+});
+
+app.get("/api/docs", (req, res) => {
+  res.type("html").send(docsPage);
 });
 
 app.get("/api/games", (req, res) => {

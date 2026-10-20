@@ -1,11 +1,11 @@
 # Family Game Hub — Project Specification
 
-**Status:** first prototype complete and live (seven games). Next up: the
-drawing game, the first one with a clock.
+**Status:** first prototype complete and live (seven games). The drawing
+game, the first one with a clock, is now built and in the catalog.
 **Type:** private, browser-based family party-game platform
 **Players:** 3–10 per room
 **Host:** one admin console per room
-**Brand:** Family Game Hub — “7 Fun2Play Games” (becomes eight when Draw It ships)
+**Brand:** Family Game Hub — “8 Fun2Play Games”
 **Primary language:** English (the content model leaves room for Nepali later)
 **Live:** frontend `https://funfamilygame.vercel.app`, backend
 `https://familygame.wisp.uno`
@@ -35,7 +35,7 @@ drawing game, the first one with a clock.
 
 ## 2. Games
 
-There are **seven active games**, and one more on the way.
+There are **eight active games**.
 
 ### 2.1 Act It Out
 
@@ -65,11 +65,19 @@ A digital companion for family charades.
 
 A social-deduction game with one imposter.
 
+**The clues are spoken, not typed.** The website is a scoreboard, not a
+chat room. It shows whose turn it is to speak, and the next phone lights up
+when they are done. After two rounds of hints the room votes on its own,
+so the host never has to touch anything.
+
 **Flow**
 1. Three rounds.
 2. Every player except the imposter receives the same secret word. The imposter knows only that they are the imposter.
-3. Each player privately submits one typed clue. Clues cannot contain the secret word.
-4. Once all clues are in, the room discusses out loud.
+3. The players take turns saying a clue out loud. The screen shows whose
+   turn it is and hands the turn along when they are done. Two rounds of
+   hints, and the order is reshuffled for the second one.
+4. When the hints are done the room votes by itself. The host does not have
+   to press anything.
 5. Everyone votes for the suspected imposter. Players cannot vote for themselves.
 6. If the imposter is the unique top vote, the imposter gets one typed guess at the secret word.
    - Correct guess: imposter scores 2 points.
@@ -80,7 +88,10 @@ A social-deduction game with one imposter.
 - Three rounds.
 - No timer.
 - The word and imposter stay fixed for the round.
-- Host controls: start the vote, skip to results, advance rounds.
+- The clues are spoken in the room, so there is nothing to type and nothing
+  to leak. The screen only keeps the room in step.
+- The vote starts by itself once the hints are done.
+- Host controls: skip a stuck speaker, skip to the result, advance rounds.
 
 ### 2.3 Who Is It?
 
@@ -169,7 +180,7 @@ An anonymous-answer matching game.
 - No timer.
 - Content: editable anonymous-answer prompts.
 
-### 2.8 Draw It — next
+### 2.8 Draw It
 
 A drawing-and-guessing game, in the spirit of Skribble. **This is the
 first game with a clock**, and the first one that is not made of text.
@@ -185,15 +196,16 @@ first game with a clock**, and the first one that is not made of text.
    1 point. The drawer cannot see the guesses at all.
 5. The turn ends early when every other player has guessed, or when the
    drawer presses **Done**, or when the clock runs out.
-6. On a timeout the word is revealed, the drawer scores 1 point, and
-   nobody else scores that turn.
+6. On a timeout the word is revealed, and nobody scores that turn. A
+   drawer only scores when the word was actually guessed.
 7. The next player draws. After everyone has drawn, the round is over and
    the game is complete.
 
 **Rules**
 - The drawer cannot guess, and the drawer never sees the guess list.
-- A guess is compared case-insensitively, ignoring spaces and
-  punctuation. A near miss ("draw ing") does not count.
+- A guess is compared case-insensitively, ignoring punctuation and
+  spaces, so "hot dog", "Hot-Dog!" and "hotdog" all count as the same
+  word. A different word does not count, however close it looks.
 - One point per correct guess, one point to the drawer when the word is
   guessed in time.
 - Content: editable drawing words, with categories.
@@ -361,6 +373,7 @@ state and the guess list.
 Active engines:
 
 - `actItOut.js`
+- `drawIt.js`
 - `oneOfUs.js`
 - `whoIsIt.js`
 - `turnGuess.js` (shared by Who Am I? and Where Am I?)
@@ -616,6 +629,8 @@ own kind of test:
 - Voice chat, text chat, or live translation.
 - Automatic text-to-speech.
 - Timed games, except Draw It, which is timed on purpose.
+- Text chat in any game. Draw It shows how many guesses were wrong, never
+  what they were, so the drawer cannot read them off the screen.
 - Number? until its rules are finalized.
 - Hot or Cold and The Round Table.
 - Wrong Answers Only, Chaos Mode, Family Court, and other future ideas.

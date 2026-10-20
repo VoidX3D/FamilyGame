@@ -141,7 +141,7 @@ async function playOneOfUs(admin, players) {
     for (const player of players) {
       const mine = privateGame(player);
       if (!mine) continue;
-      const key = `${game.round}:${game.phase}:${player.name}`;
+      const key = `${game.round}:${game.hintRound ?? 1}:${game.phase}:${player.name}`;
       if (done.has(key)) continue;
 
       if (game.phase === "reveal" && mine.canReady) {
@@ -151,14 +151,12 @@ async function playOneOfUs(admin, players) {
           "ready",
         );
         acted = true;
-      } else if (game.phase === "clues" && mine.canClue) {
+      } else if (game.phase === "hints" && mine.canNextHint) {
+        // The clue is spoken out loud. The screen only hands the turn on.
         done.add(key);
         expectOk(
-          await emit(player.socket, "game:action", {
-            type: "clue",
-            clue: `Clue from ${player.name}`,
-          }),
-          "clue",
+          await emit(player.socket, "game:action", { type: "nextHint" }),
+          "nextHint",
         );
         acted = true;
       } else if (game.phase === "vote" && mine.canVote) {
@@ -510,9 +508,148 @@ async function playWhoWroteThat(admin, players) {
   throw new Error("Who Wrote That did not finish in time");
 }
 
+/* Waits for a stroke to arrive on any of the given sockets. */
+function waitForStroke(sockets, timeout = 8000) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error("Timed out waiting for a stroke"));
+    }, timeout);
+
+    const onStroke = (stroke) => {
+      cleanup();
+      resolve(stroke);
+    };
+
+    function cleanup() {
+      clearTimeout(timer);
+      for (const socket of sockets) socket.off("draw:stroke", onStroke);
+    }
+
+    for (const socket of sockets) socket.on("draw:stroke", onStroke);
+  });
+}
+
+async function playDrawIt(admin, players) {
+  // The host picks the turn length, and the first turn starts.
+  expectOk(
+    await emit(admin.socket, "admin:gameAction", { type: "time30" }),
+    "draw-it setup",
+  );
+  await waitForPhase(admin, ["drawing"], "draw-it drawing");
+
+  const game = publicGame(admin.holder);
+  const drawer = players.find((player) => player.id === game.drawerId);
+  assert(drawer, "draw-it: there is no drawer");
+
+  // The word reaches the drawer alone.
+  await waitUntil(
+    () => privateGame(drawer)?.yourWord?.text,
+    "draw-it word for the drawer",
+  );
+  const word = privateGame(drawer)?.yourWord?.text;
+  assert(word, "draw-it: the drawer has no word");
+  for (const player of players) {
+    if (player.id === drawer.id) continue;
+    assert(
+      privateGame(player)?.yourWord === null,
+      "draw-it: the word reached another player",
+    );
+  }
+
+  // The drawer draws, and the room receives the stroke.
+  const strokeSeen = waitForStroke(players.map((player) => player.socket));
+  expectOk(
+    await emit(drawer.socket, "draw:stroke", {
+      id: "stroke-1",
+      points: [
+        [0.1, 0.1],
+        [0.2, 0.25],
+        [0.3, 0.2],
+      ],
+    }),
+    "draw:stroke",
+  );
+  const stroke = await strokeSeen;
+  assert(stroke?.id === "stroke-1", "draw-it: the wrong stroke arrived");
+
+  // The stroke count travels in the state, on a throttle.
+  await waitUntil(
+    () => publicGame(admin.holder)?.strokeCount === 1,
+    "draw-it stroke count",
+  );
+
+  // A guesser cannot draw.
+  const guesser = otherPlayer(players, drawer.id);
+  const refused = await emit(guesser.socket, "draw:stroke", {
+    id: "stroke-2",
+    points: [
+      [0.4, 0.4],
+      [0.5, 0.5],
+    ],
+  });
+  assert(!refused?.ok, "draw-it: a guesser was allowed to draw");
+
+  // The room guesses. A wrong guess first, then the right one.
+  const wrong = await emit(guesser.socket, "game:action", {
+    type: "guess",
+    text: "definitely not the word",
+  });
+  expectOk(wrong, "draw-it wrong guess");
+  assert(wrong.correct === false, "draw-it: the wrong guess was accepted");
+
+  const right = await emit(guesser.socket, "game:action", {
+    type: "guess",
+    text: word,
+  });
+  expectOk(right, "draw-it right guess");
+  assert(right.correct === true, "draw-it: the right guess was refused");
+
+  // Everybody else guesses, and the turn ends on its own.
+  for (const player of players) {
+    if (player.id === drawer.id) continue;
+    if (player.id === guesser.id) continue;
+    expectOk(
+      await emit(player.socket, "game:action", { type: "guess", text: word }),
+      "draw-it guess",
+    );
+  }
+  await waitForPhase(admin, ["reveal"], "draw-it reveal");
+
+  // The word is public once the turn is over.
+  assert(
+    publicGame(admin.holder)?.word?.text === word,
+    "draw-it: the word was not revealed",
+  );
+
+  // The host moves on, and the game runs to the end.
+  let guard = 0;
+  while (publicGame(admin.holder)?.phase !== "complete" && guard < 40) {
+    guard += 1;
+    const phase = publicGame(admin.holder)?.phase;
+    if (phase === "drawing") {
+      expectOk(
+        await emit(admin.socket, "admin:gameAction", { type: "skipTurn" }),
+        "draw-it skip",
+      );
+    } else if (phase === "reveal") {
+      expectOk(
+        await emit(admin.socket, "admin:gameAction", { type: "nextTurn" }),
+        "draw-it next",
+      );
+    } else {
+      break;
+    }
+    await sleep(60);
+  }
+  assert(
+    publicGame(admin.holder)?.phase === "complete",
+    "draw-it did not finish in time",
+  );
+}
+
 /* Starts a game, plays it, and returns the room to the lobby. */
-async function playGame(admin, players, gameId, play) {
-  expectOk(await emit(admin.socket, "admin:startGame", { gameId }), `start ${gameId}`);
+async function playGame(admin, players, gameId, play) {  expectOk(await emit(admin.socket, "admin:startGame", { gameId }), `start ${gameId}`);
   await waitUntil(
     () => publicGame(admin.holder)?.id === gameId,
     `${gameId} state`,
@@ -594,89 +731,7 @@ try {
     () => publicGame(admin.holder)?.id === "one-of-us",
     "one-of-us state",
   );
-
-  let guard = 0;
-  const done = new Set();
-  while (guard < 240) {
-    guard += 1;
-    const game = publicGame(admin.holder);
-    assert(game, "One of Us state missing");
-
-    if (
-      game.phase !== "results" &&
-      game.phase !== "complete" &&
-      (game.word != null || game.imposterId != null)
-    ) {
-      throw new Error("Word or imposter leaked before reveal");
-    }
-
-    await assertImposterIsBlind(admin, players);
-
-    if (game.phase === "complete") break;
-
-    if (game.phase === "results") {
-      expectOk(await emit(adminSocket, "admin:nextRound", {}), "nextRound");
-      await waitForPhase(admin, ["reveal"], "next one-of-us round");
-      continue;
-    }
-
-    if (game.phase === "discuss") {
-      expectOk(
-        await emit(adminSocket, "admin:gameAction", { type: "startVote" }),
-        "startVote",
-      );
-      await waitForPhase(admin, ["vote"], "one-of-us vote");
-      continue;
-    }
-
-    let acted = false;
-    for (const player of players) {
-      const mine = privateGame(player);
-      if (!mine) continue;
-      const key = `${game.round}:${game.phase}:${player.name}`;
-      if (done.has(key)) continue;
-
-      if (game.phase === "reveal" && mine.canReady) {
-        done.add(key);
-        expectOk(await emit(player.socket, "game:action", { type: "ready" }), "ready");
-        acted = true;
-      } else if (game.phase === "clues" && mine.canClue) {
-        done.add(key);
-        expectOk(
-          await emit(player.socket, "game:action", {
-            type: "clue",
-            clue: `Clue from ${player.name}`,
-          }),
-          "clue",
-        );
-        acted = true;
-      } else if (game.phase === "vote" && mine.canVote) {
-        done.add(key);
-        const target = otherPlayer(players, player.id);
-        expectOk(
-          await emit(player.socket, "game:action", {
-            type: "vote",
-            targetId: target.id,
-          }),
-          "vote",
-        );
-        acted = true;
-      } else if (game.phase === "imposter-guess" && mine.canGuess) {
-        done.add(key);
-        expectOk(
-          await emit(player.socket, "game:action", {
-            type: "guess",
-            guess: "a definitely wrong answer",
-          }),
-          "imposter guess",
-        );
-        acted = true;
-      }
-    }
-
-    await sleep(acted ? 60 : 120);
-  }
-  assert(guard < 240, "One of Us did not finish in time");
+  await playOneOfUs(admin, players);
 
   expectOk(await emit(adminSocket, "admin:endGame", {}), "end one-of-us");
   await waitUntil(
@@ -686,6 +741,7 @@ try {
 
   // The remaining games, each played over the real socket.
   await playGame(admin, players, "who-is-it", playWhoIsIt);
+  await playGame(admin, players, "draw-it", playDrawIt);
   await playGame(admin, players, "who-am-i", (a, p) => playTurnGuess(a, p, "who-am-i"));
   await playGame(admin, players, "where-am-i", (a, p) => playTurnGuess(a, p, "where-am-i"));
   await playGame(admin, players, "act-it-out", playActItOut);
