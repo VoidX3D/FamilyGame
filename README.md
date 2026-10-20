@@ -202,7 +202,7 @@ records and the `/api/games` locale field without changing the protocol.
 
 See [DEPLOY.md](DEPLOY.md). The production backend is expected at
 `https://familygame.wisp.uno` and the frontend at
-`https://familygame.vercel.app`. Set the frontend origin in the backend's
+`https://funfamilygame.vercel.app`. Set the frontend origin in the backend's
 `FRONTEND_ORIGINS` before testing.
 
 ## Notes and limits

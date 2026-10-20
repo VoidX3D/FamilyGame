@@ -28,7 +28,7 @@ Required environment variables:
 NODE_ENV=production
 PORT=<port assigned by Wispbyte, if required>
 ADMIN_PASSCODE=<strong private passcode, at least 12 characters>
-FRONTEND_ORIGINS=https://familygame.vercel.app
+FRONTEND_ORIGINS=https://funfamilygame.vercel.app
 ```
 
 Production startup fails if `ADMIN_PASSCODE` is missing or shorter than 12
@@ -76,7 +76,7 @@ production branch currently uses `https://familygame.wisp.uno`).
 After Vercel assigns the domain:
 
 1. Set the backend's `FRONTEND_ORIGINS` to the exact origin
-   `https://familygame.vercel.app`. Add a custom domain too if used.
+   `https://funfamilygame.vercel.app`. Add a custom domain too if used.
 2. Redeploy/restart the backend so CORS and Socket.IO accept that origin.
 3. Open the frontend, sign in at `/admin`, create a room, and join from at least
    three separate browser profiles.
@@ -103,7 +103,7 @@ After Vercel assigns the domain:
 
 - The backend hostname `familygame.wisp.uno` was returning "Web server offline"
   during the final local build, so production deployment is not yet verified.
-- The Vercel frontend is expected at `https://familygame.vercel.app`. Set that
+- The Vercel frontend is expected at `https://funfamilygame.vercel.app`. Set that
   exact origin in the backend's `FRONTEND_ORIGINS` before testing.
 - No secrets belong in git. `server/.env` and `server/data/` are ignored;
   configure production secrets in the Wispbyte panel.
