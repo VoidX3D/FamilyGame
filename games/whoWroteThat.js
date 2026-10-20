@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import crypto from "node:crypto";
 import { getCollection } from "../contentStore.js";
 import {

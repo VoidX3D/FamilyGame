@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import { verifySession } from "./auth.js";
 import { config } from "./config.js";
 import { getGame } from "./games/index.js";
@@ -1003,6 +1004,92 @@ export function attachProtocol(io, store) {
           strokePublish.set(room.code, now());
           publish(io, store, room);
         }
+        reply(ack, { ok: true });
+      });
+
+      /* The drawer takes a stroke back. */
+      socket.on("draw:undo", (payload, ack) => {
+        const gate = strokeLimiter(clientIpFromSocket(socket));
+        if (!gate.ok) return rateLimited(ack, gate);
+
+        const room = store.getRoom(socket.data.roomCode);
+        if (!room || !room.game) {
+          return fail(ack, "no_game", "There is no active game.");
+        }
+
+        const engine = roomEngine(room);
+        if (!engine?.undoStroke) {
+          return fail(ack, "not_supported", "This game has no drawing board.");
+        }
+
+        const player = store.findPlayerBySocket(room, socket.id);
+        if (!player) {
+          return fail(ack, "not_in_room", "Rejoin the room to continue.");
+        }
+
+        let result;
+        try {
+          result = engine.undoStroke(room, room.game, player.id);
+        } catch (error) {
+          console.error("[draw] undo failed", error);
+          return fail(ack, "game_error", "That could not be undone.");
+        }
+
+        if (!result?.ok) {
+          return fail(
+            ack,
+            result?.code ?? "cannot_undo",
+            result?.message ?? "That could not be undone.",
+          );
+        }
+
+        store.touch(room);
+        io.to(playerChannel(room.code)).emit("draw:remove", {
+          id: result.strokeId,
+        });
+        publish(io, store, room);
+        reply(ack, { ok: true });
+      });
+
+      /* The drawer wipes the board. */
+      socket.on("draw:clear", (payload, ack) => {
+        const gate = strokeLimiter(clientIpFromSocket(socket));
+        if (!gate.ok) return rateLimited(ack, gate);
+
+        const room = store.getRoom(socket.data.roomCode);
+        if (!room || !room.game) {
+          return fail(ack, "no_game", "There is no active game.");
+        }
+
+        const engine = roomEngine(room);
+        if (!engine?.clearBoard) {
+          return fail(ack, "not_supported", "This game has no drawing board.");
+        }
+
+        const player = store.findPlayerBySocket(room, socket.id);
+        if (!player) {
+          return fail(ack, "not_in_room", "Rejoin the room to continue.");
+        }
+
+        let result;
+        try {
+          result = engine.clearBoard(room, room.game, player.id);
+        } catch (error) {
+          console.error("[draw] clear failed", error);
+          return fail(ack, "game_error", "The board could not be cleared.");
+        }
+
+        if (!result?.ok) {
+          return fail(
+            ack,
+            result?.code ?? "cannot_clear",
+            result?.message ?? "The board could not be cleared.",
+          );
+        }
+
+        store.touch(room);
+        io.to(playerChannel(room.code)).emit("draw:clear", {});
+        publish(io, store, room);
         reply(ack, { ok: true });
       });
 

@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 /* Editable game content with optional file persistence.
  *
  * Defaults are loaded from server/data/default-content.json. The host console

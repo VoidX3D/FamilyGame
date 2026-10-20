@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 /* Superseded by turnGuess.js.
  *
  * The old simultaneous Who Am I? / Where Am I? design and the removed

@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import { getCollection } from "../contentStore.js";
 import {
   award,
@@ -244,11 +245,15 @@ export function acceptStroke(room, game, playerId, payload) {
     return { ok: false, code: "invalid_stroke", message: "That stroke was refused." };
   }
 
+  const tool = TOOLS.has(payload?.tool) ? payload.tool : "pen";
+
   const stroke = {
     id: String(payload?.id ?? `${game.strokeSeq + 1}`).slice(0, 40),
+    by: playerId,
+    tool,
     points,
-    color: safeColor(payload?.color),
-    width: clamp(Number(payload?.width) || 0.012, 0.002, 0.08),
+    color: tool === "erase" ? null : safeColor(payload?.color),
+    width: clamp(Number(payload?.width) || 0.012, 0.002, 0.12),
   };
 
   game.strokes.push(stroke);
@@ -290,6 +295,51 @@ function safeColor(value) {
  * mid-turn. */
 export function strokeHistory(game) {
   return game.strokes ?? [];
+}
+
+/* The tools the drawer can use. The server only checks that the tool is
+ * one it knows; the drawing itself is done by the clients. */
+const TOOLS = new Set(["pen", "erase", "fill"]);
+
+/* Removes the drawer's last stroke, so a mistake can be taken back. */
+export function undoStroke(room, game, playerId) {
+  if (game.phase !== "drawing") {
+    return { ok: false, code: "wrong_phase", message: "The board is closed." };
+  }
+  if (playerId !== game.drawerId) {
+    return {
+      ok: false,
+      code: "not_drawer",
+      message: "Only the drawer can take a stroke back.",
+    };
+  }
+
+  for (let index = game.strokes.length - 1; index >= 0; index -= 1) {
+    if (game.strokes[index]?.by === playerId) {
+      const [removed] = game.strokes.splice(index, 1);
+      return { ok: true, strokeId: removed.id };
+    }
+  }
+
+  return { ok: false, code: "nothing_to_undo", message: "There is nothing to undo." };
+}
+
+/* Wipes the board. The drawer may do this at any point in the turn. */
+export function clearBoard(room, game, playerId) {
+  if (game.phase !== "drawing") {
+    return { ok: false, code: "wrong_phase", message: "The board is closed." };
+  }
+  if (playerId !== game.drawerId) {
+    return {
+      ok: false,
+      code: "not_drawer",
+      message: "Only the drawer can clear the board.",
+    };
+  }
+
+  game.strokes = [];
+  game.strokeSeq = 0;
+  return { ok: true };
 }
 
 export function action(room, game, playerId, payload) {
@@ -350,22 +400,6 @@ export function action(room, game, playerId, payload) {
     }
     endTurn(room, game, "drawer-done");
     return { ok: true };
-  }
-
-  if (type === "clear") {
-    if (playerId !== game.drawerId) {
-      return {
-        ok: false,
-        code: "not_drawer",
-        message: "Only the drawer can clear the board.",
-      };
-    }
-    if (game.phase !== "drawing") {
-      return { ok: false, code: "wrong_phase", message: "The board is closed." };
-    }
-    game.strokes = [];
-    game.strokeSeq = 0;
-    return { ok: true, cleared: true };
   }
 
   return { ok: false, code: "unknown_action", message: "Unknown action." };

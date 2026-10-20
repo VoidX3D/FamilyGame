@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 /* A small, self contained API documentation page.
  *
  * It reads the OpenAPI document from /api/openapi.json and renders it.

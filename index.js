@@ -1,3 +1,4 @@
+/* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import http from "node:http";
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -129,8 +130,10 @@ app.get("/healthz", (req, res) => {
     version: packageVersion,
     environment: config.nodeEnv,
     uptimeSeconds: Math.round((Date.now() - startedAt) / 1000),
+    startedAt: new Date(startedAt).toISOString(),
     rooms: store.size,
     players: store.playerCount(),
+    activePlayers: store.connectedPlayerCount(),
     games: GAME_LIST.length,
     adminSessions: sessionCount(),
     content: contentStatus(),
@@ -141,6 +144,24 @@ app.get("/healthz", (req, res) => {
       heapUsedMb: Math.round((memory.heapUsed / 1024 / 1024) * 10) / 10,
     },
     time: new Date().toISOString(),
+  });
+});
+
+/* What every open room is doing. It has no secrets in it: only the room
+ * code, the phase, how many people are in it and who is connected. */
+app.get("/api/rooms", (req, res) => {
+  res.json({
+    ok: true,
+    rooms: store.summary().map((room) => ({
+      code: room.code,
+      phase: room.phase,
+      game: room.game,
+      players: room.players,
+      connected: room.connected,
+      createdAt: room.createdAt,
+      lastActivity: room.lastActivity,
+      idleSeconds: room.idleSeconds,
+    })),
   });
 });
 
