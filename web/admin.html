@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0c0a13" />
+    <meta name="robots" content="noindex, nofollow" />
+    <base href="/" />
+    <title>Host · Family Game Hub</title>
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="admin.css" />
+    <script defer src="vendor/gsap.min.js"></script>
+    <script defer src="vendor/socket.io.min.js"></script>
+    <script defer src="config.js"></script>
+    <script type="module" src="admin.js"></script>
+  </head>
+  <body class="admin-body" data-view="login">
+    <div class="blob blob-a" aria-hidden="true"></div>
+    <div class="blob blob-b" aria-hidden="true"></div>
+    <div class="banner" id="connection-banner" role="status" hidden></div>
+
+    <div class="page">
+      <header class="topbar admin-topbar">
+        <div class="topbar-inner">
+          <div class="brand">
+            <div class="brand-lockup">
+              <img class="brand-mark" src="assets/logo.svg" alt="" width="56" height="56" />
+              <div class="brand-copy">
+                <p class="brand-name">Family Game Hub</p>
+                <p class="brand-sub">Host console</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="shell admin-shell">
+        <section class="card admin-login-card" id="admin-login" aria-labelledby="login-title">
+          <h1 id="login-title">Host access</h1>
+          <form id="login-form" class="stack" novalidate>
+            <input
+              type="text"
+              name="host"
+              autocomplete="username"
+              value="host"
+              hidden
+            />
+            <label class="field" for="passcode">
+              <span>Passcode</span>
+              <input
+                id="passcode"
+                name="passcode"
+                type="password"
+                autocomplete="current-password"
+                placeholder="Enter host passcode"
+                required
+                aria-describedby="login-error"
+              />
+            </label>
+            <p class="form-error" id="login-error" role="alert" hidden></p>
+            <button class="btn btn-primary" type="submit" id="login-submit">
+              <span class="btn-icon" data-icon="arrow-right" aria-hidden="true"></span>
+              <span class="btn-label">Continue</span>
+            </button>
+          </form>
+        </section>
+
+        <section id="admin-dashboard" class="admin-dashboard" hidden>
+          <nav class="admin-nav" aria-label="Admin sections">
+            <a class="admin-nav-item is-active" href="/admin/room" data-admin-tab="room" aria-current="page">
+              <span class="nav-icon" data-icon="users" aria-hidden="true"></span>
+              <span class="nav-title">Room</span>
+            </a>
+            <a class="admin-nav-item" href="/admin/playlist" data-admin-tab="playlist">
+              <span class="nav-icon" data-icon="list" aria-hidden="true"></span>
+              <span class="nav-title">Playlist</span>
+            </a>
+            <a class="admin-nav-item" href="/admin/session" data-admin-tab="live">
+              <span class="nav-icon" data-icon="gamepad" aria-hidden="true"></span>
+              <span class="nav-title">Live game</span>
+            </a>
+            <a class="admin-nav-item" href="/admin/content" data-admin-tab="content">
+              <span class="nav-icon" data-icon="layers" aria-hidden="true"></span>
+              <span class="nav-title">Content</span>
+            </a>
+            <a class="admin-nav-item" href="/admin/config" data-admin-tab="settings">
+              <span class="nav-icon" data-icon="settings" aria-hidden="true"></span>
+              <span class="nav-title">Settings</span>
+            </a>
+          </nav>
+
+          <div class="admin-panels">
+              <section class="admin-panel" id="admin-panel-room" data-admin-panel="room">
+                <section class="card room-hero" aria-labelledby="room-code-label">
+                  <div class="room-hero-main">
+                    <p class="label" id="room-code-label">Room code</p>
+                    <div class="code-row">
+                      <button class="code-display" id="admin-code" type="button" title="Copy room code">
+                        -----
+                      </button>
+                      <button class="icon-button icon-button-lg code-copy" type="button" id="copy-code" aria-label="Copy room code" title="Copy room code">
+                        <span data-icon="copy"></span>
+                      </button>
+                    </div>
+                    <p class="invite-url" id="admin-join-url">-----</p>
+                    <div class="invite-line">
+                      <button class="btn btn-primary btn-inline" type="button" id="copy-invite">
+                        <span class="btn-icon" data-icon="copy" aria-hidden="true"></span>
+                        <span class="btn-label">Copy invite</span>
+                      </button>
+                      <span class="pill" id="room-state">Lobby</span>
+                      <span class="pill" id="room-lock">Open</span>
+                    </div>
+                  </div>
+
+                  <div class="room-hero-side">
+                    <div class="hero-metrics">
+                      <div class="metric">
+                        <span class="metric-icon" data-icon="users" aria-hidden="true"></span>
+                        <div class="metric-copy">
+                          <strong id="hero-player-count">0 / 10</strong>
+                          <span>Players</span>
+                        </div>
+                      </div>
+                      <div class="metric">
+                        <span class="metric-icon" data-icon="wifi" aria-hidden="true"></span>
+                        <div class="metric-copy">
+                          <strong id="hero-connected-count">0 online</strong>
+                          <span>Connected</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="admin-actions hero-actions">
+                      <button class="btn btn-tonal btn-inline" type="button" id="toggle-lock">
+                        <span class="btn-icon" data-icon="lock" aria-hidden="true"></span>
+                        <span class="btn-label">Lock room</span>
+                      </button>
+                      <button class="btn btn-tonal btn-inline" type="button" id="reset-room">
+                        <span class="btn-icon" data-icon="refresh" aria-hidden="true"></span>
+                        <span class="btn-label">New room</span>
+                      </button>
+                      <button class="btn btn-text btn-inline" type="button" id="logout">
+                        <span class="btn-icon" data-icon="log-out" aria-hidden="true"></span>
+                        <span class="btn-label">Sign out</span>
+                      </button>
+                    </div>
+                  </div>
+                </section>
+
+                <div class="room-overview-grid">
+                  <div class="card players-card">
+                    <div class="card-head">
+                      <div class="heading-with-icon">
+                        <span class="icon-badge" aria-hidden="true"><span data-icon="users"></span></span>
+                        <div>
+                          <h2>Players</h2>
+                        </div>
+                      </div>
+                    </div>
+                    <ul class="player-list admin-player-list" id="admin-players"></ul>
+                    <p class="hint" id="start-hint">At least 3 connected players are needed.</p>
+                  </div>
+
+                  <div class="card" id="game-catalog-card">
+                    <div class="card-head">
+                      <div class="heading-with-icon">
+                        <span class="icon-badge" aria-hidden="true"><span data-icon="gamepad"></span></span>
+                        <div>
+                          <h2>Games</h2>
+                          <p class="card-sub">Start now or add to Playlist</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="game-grid" id="game-grid"></div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="admin-panel" id="admin-panel-live" data-admin-panel="live" hidden>
+                <div class="card empty-live" id="live-empty">
+                  <span class="icon-badge icon-badge-lg" aria-hidden="true"><span data-icon="gamepad"></span></span>
+                  <h2>No game is running</h2>
+                  <p class="hint">Start a game from Room or Playlist.</p>
+                  <div class="admin-actions">
+                    <button class="btn btn-tonal btn-inline" type="button" data-goto-tab="room">
+                      <span class="btn-icon" data-icon="users" aria-hidden="true"></span>
+                      <span class="btn-label">Go to room</span>
+                    </button>
+                    <button class="btn btn-text btn-inline" type="button" data-goto-tab="playlist">
+                      <span class="btn-icon" data-icon="list" aria-hidden="true"></span>
+                      <span class="btn-label">Build playlist</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="card active-game" id="active-game" hidden>
+                  <div class="card-head">
+                    <div class="heading-with-icon">
+                      <span class="icon-badge" id="active-game-icon" aria-hidden="true"><span data-icon="dice"></span></span>
+                      <div>
+                        <h2 id="active-game-name">Game</h2>
+                        <p class="card-sub" id="active-game-status">In progress</p>
+                      </div>
+                    </div>
+                    <span class="pill pill-accent" id="active-game-round">Round</span>
+                  </div>
+                  <div class="admin-game-stats" id="game-stats"></div>
+                  <div class="admin-game-controls" id="game-controls"></div>
+                  <div class="host-notes" id="host-notes" hidden>
+                    <p class="label">Host notes</p>
+                    <ul class="hints" id="host-notes-list"></ul>
+                  </div>
+                  <div class="admin-game-scores" id="game-scores"></div>
+                  <div class="admin-game-scores" id="session-scores" hidden></div>
+                  <div class="admin-game-controls" id="playlist-game-controls"></div>
+                  <p class="fine">Private prompts stay on player screens.</p>
+                  <div class="admin-danger-row">
+                    <button class="btn btn-text btn-inline" type="button" id="end-game">
+                      <span class="btn-icon" data-icon="stop" aria-hidden="true"></span>
+                      <span class="btn-label">End game</span>
+                    </button>
+                    <button class="btn btn-text btn-inline" type="button" id="replay-game">
+                      <span class="btn-icon" data-icon="rotate-ccw" aria-hidden="true"></span>
+                      <span class="btn-label">Restart game</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="card" id="history-card" hidden>
+                  <div class="card-head">
+                    <div class="heading-with-icon">
+                      <span class="icon-badge" aria-hidden="true"><span data-icon="clock"></span></span>
+                      <div>
+                        <h2>Recent games</h2>
+                        <p class="card-sub">Finished and skipped games in this room</p>
+                      </div>
+                    </div>
+                    <span class="pill" id="history-count">0</span>
+                  </div>
+                  <ul class="history-list" id="game-history"></ul>
+                </div>
+              </section>
+
+              <section class="admin-panel" id="admin-panel-playlist" data-admin-panel="playlist" hidden>
+                <div class="card" id="playlist-card">
+                  <div class="card-head">
+                    <div class="heading-with-icon">
+                      <span class="icon-badge" aria-hidden="true"><span data-icon="list"></span></span>
+                      <div>
+                        <h2>Playlist</h2>
+                        <p class="card-sub">You choose when each game starts</p>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="hint" id="playlist-hint">Add games to build the queue.</p>
+
+                  <div class="playlist-builder" id="playlist-builder">
+                    <div class="subsection-head">
+                      <p class="label">Add a game</p>
+                      <div class="playlist-quick-actions">
+                        <button class="btn btn-text btn-inline btn-small" type="button" id="playlist-add-all">
+                          <span class="btn-icon" data-icon="plus" aria-hidden="true"></span>
+                          <span class="btn-label">Add all</span>
+                        </button>
+                        <button class="btn btn-text btn-inline btn-small" type="button" id="playlist-shuffle">
+                          <span class="btn-icon" data-icon="shuffle" aria-hidden="true"></span>
+                          <span class="btn-label">Shuffle</span>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="playlist-picker" id="playlist-picker"></div>
+
+                    <div class="subsection-head queue-head">
+                      <p class="label">Queue</p>
+                    </div>
+                    <ul class="playlist-queue" id="playlist-queue"></ul>
+
+                    <div class="admin-actions playground-actions">
+                      <button class="btn btn-primary btn-inline" type="button" id="start-playlist">
+                        <span class="btn-icon" data-icon="play" aria-hidden="true"></span>
+                        <span class="btn-label">Start playlist</span>
+                      </button>
+                      <button class="btn btn-text btn-inline" type="button" id="clear-playlist">
+                        <span class="btn-icon" data-icon="trash" aria-hidden="true"></span>
+                        <span class="btn-label">Clear queue</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="playlist-live" id="playlist-live" hidden>
+                    <div class="subsection-head">
+                      <p class="label">Current session</p>
+                      <span class="pill pill-session" id="playlist-live-badge">Host paced</span>
+                    </div>
+                    <p class="hint" id="playlist-progress"></p>
+                    <div class="subsection-head">
+                      <p class="label">Upcoming games</p>
+                    </div>
+                    <ul class="playlist-upcoming" id="playlist-upcoming"></ul>
+                    <div class="playlist-picker" id="upcoming-picker" hidden></div>
+                    <div class="admin-actions" id="playlist-edit-actions">
+                      <button class="btn btn-tonal btn-inline" type="button" id="add-upcoming">
+                        <span class="btn-icon" data-icon="plus" aria-hidden="true"></span>
+                        <span class="btn-label">Add upcoming</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="admin-panel" id="admin-panel-content" data-admin-panel="content" hidden>
+                <div class="card" id="content-card">
+                  <div class="card-head">
+                    <div class="heading-with-icon">
+                      <span class="icon-badge" aria-hidden="true"><span data-icon="layers"></span></span>
+                      <div>
+                        <h2>Game content</h2>
+                        <p class="card-sub">Words, prompts, people, and places</p>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="hint" id="content-status">Loading game content…</p>
+
+                  <div class="content-toolbar">
+                    <label class="field" for="content-collection">
+                      <span>Collection</span>
+                      <select id="content-collection" class="field-input"></select>
+                    </label>
+                    <label class="field content-search-field" for="content-search">
+                      <span>Search entries</span>
+                      <span class="search-input">
+                        <span class="search-icon" data-icon="search" aria-hidden="true"></span>
+                        <input class="field-input" id="content-search" type="search" placeholder="Search this collection…" autocomplete="off" />
+                      </span>
+                    </label>
+                    <div class="content-toolbar-actions">
+                      <button class="btn btn-tonal btn-inline btn-small" type="button" id="content-refresh">
+                        <span class="btn-icon" data-icon="refresh" aria-hidden="true"></span>
+                        <span class="btn-label">Refresh</span>
+                      </button>
+                      <button class="btn btn-text btn-inline btn-small" type="button" id="content-reset">
+                        <span class="btn-icon" data-icon="rotate-ccw" aria-hidden="true"></span>
+                        <span class="btn-label">Reset collection</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <p class="form-error" id="content-error" role="alert" hidden></p>
+                  <div class="content-editor" id="content-editor"></div>
+                  <div class="editor-footer">
+                    <div class="admin-actions">
+                      <button class="btn btn-text btn-inline" type="button" id="content-discard">
+                        <span class="btn-icon" data-icon="rotate-ccw" aria-hidden="true"></span>
+                        <span class="btn-label">Discard changes</span>
+                      </button>
+                      <button class="btn btn-tonal btn-inline" type="button" id="content-add">
+                        <span class="btn-icon" data-icon="plus" aria-hidden="true"></span>
+                        <span class="btn-label">Add entry</span>
+                      </button>
+                      <button class="btn btn-primary btn-inline" type="button" id="content-save">
+                        <span class="btn-icon" data-icon="check" aria-hidden="true"></span>
+                        <span class="btn-label">Save changes</span>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="fine">
+                    Changes apply to future rounds and turns. Existing games keep their current prompts.
+                  </p>
+                </div>
+              </section>
+
+              <section class="admin-panel" id="admin-panel-settings" data-admin-panel="settings" hidden>
+                <div class="card" id="host-tools-card">
+                  <div class="card-head">
+                    <div class="heading-with-icon">
+                      <span class="icon-badge" aria-hidden="true"><span data-icon="settings"></span></span>
+                      <div>
+                        <h2>Settings</h2>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="tool-section">
+                    <p class="label">Safety</p>
+                    <label class="switch-row" for="pref-confirm">
+                      <span class="switch-copy">
+                        <strong>Confirm destructive actions</strong>
+                      </span>
+                      <span class="switch">
+                        <input type="checkbox" id="pref-confirm" checked />
+                        <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+                      </span>
+                    </label>
+                  </div>
+
+                </div>
+              </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

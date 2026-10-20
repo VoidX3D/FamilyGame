@@ -1,0 +1,57 @@
+.not-found-body {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+}
+
+.not-found-card {
+  width: min(100%, 480px);
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: clamp(28px, 6vw, 48px);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(180deg, var(--card-sheen), transparent 45%),
+    var(--surface);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+
+.not-found-card .brand-mark {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 4px;
+}
+
+.not-found-card .eyebrow {
+  margin: 0;
+}
+
+.not-found-card h1 {
+  margin: 0;
+  font-size: clamp(28px, 6vw, 38px);
+  letter-spacing: -0.03em;
+}
+
+.not-found-card .hint {
+  max-width: 34ch;
+  margin: 0 0 8px;
+}
+
+.not-found-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.not-found-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  text-decoration: none;
+}

@@ -1,0 +1,423 @@
+import { GAME_LIST, getGame } from "../server/games/index.js";
+
+function assert(condition, message) {
+  if (!condition) throw new Error(message);
+}
+
+function makeRoom(count) {
+  const players = Array.from({ length: count }, (_, index) => ({
+    id: `p${index + 1}`,
+    name: `Player ${index + 1}`,
+    connected: true,
+  }));
+  return {
+    players,
+    scores: Object.fromEntries(players.map((player) => [player.id, 0])),
+    sessionScores: Object.fromEntries(players.map((player) => [player.id, 0])),
+  };
+}
+
+function firstOther(players, id) {
+  return players.find((player) => player.id !== id).id;
+}
+
+function drive(engine, room, players, steps) {
+  const game = engine.create(room);
+  const context = { room, players, game, engine };
+
+  for (const step of steps) {
+    step(context);
+  }
+
+  return game;
+}
+
+function expectOk(result, label) {
+  assert(result?.ok, `${label} failed: ${JSON.stringify(result)}`);
+}
+
+const checks = [];
+
+function check(name, fn) {
+  checks.push({ name, fn });
+}
+
+check("one-of-us full run", () => {
+  const room = makeRoom(4);
+  const engine = getGame("one-of-us");
+  const game = engine.create(room);
+  const players = room.players;
+
+  for (let round = 1; round <= 3; round += 1) {
+    assert(game.round === round, `Expected round ${round}`);
+    for (const player of players) {
+      expectOk(
+        engine.action(room, game, player.id, { type: "ready" }),
+        "ready",
+      );
+    }
+    assert(game.phase === "clues", "Expected clues phase");
+
+    for (const player of players) {
+      expectOk(
+        engine.action(room, game, player.id, {
+          type: "clue",
+          clue: `Clue from ${player.name}`,
+        }),
+        "clue",
+      );
+    }
+    assert(game.phase === "discuss", "Expected discuss phase");
+
+    const publicView = engine.publicView(game, room);
+    assert(publicView.word === null, "Word leaked before reveal");
+    assert(publicView.imposterId === null, "Imposter leaked before reveal");
+
+    expectOk(engine.adminAction(room, game, "startVote"), "startVote");
+    for (const player of players) {
+      expectOk(
+        engine.action(room, game, player.id, {
+          type: "vote",
+          targetId: players[0].id === player.id ? players[1].id : players[0].id,
+        }),
+        "vote",
+      );
+    }
+
+    if (game.phase === "imposter-guess") {
+      expectOk(
+        engine.action(room, game, game.imposterId, {
+          type: "guess",
+          guess: game.word,
+        }),
+        "imposter guess",
+      );
+    }
+
+    assert(
+      game.phase === "results" || game.phase === "complete",
+      `Expected results, got ${game.phase}`,
+    );
+
+    if (game.phase === "results") {
+      expectOk(engine.nextRound(room, game), "nextRound");
+    }
+  }
+
+  assert(game.phase === "complete", "One of Us should be complete");
+  const total = Object.values(room.scores).reduce((sum, value) => sum + value, 0);
+  assert(total > 0, "One of Us should award points");
+});
+
+check("who-is-it full run", () => {
+  const room = makeRoom(4);
+  const engine = getGame("who-is-it");
+  const game = engine.create(room);
+
+  for (let round = 1; round <= 3; round += 1) {
+    for (const player of room.players) {
+      expectOk(
+        engine.action(room, game, player.id, {
+          type: "vote",
+          targetId: firstOther(room.players, player.id),
+        }),
+        "vote",
+      );
+    }
+    assert(
+      game.phase === "results" || game.phase === "complete",
+      `Expected results, got ${game.phase}`,
+    );
+    if (game.phase === "results") {
+      expectOk(engine.nextRound(room, game), "nextRound");
+    }
+  }
+
+  assert(game.phase === "complete", "Who Is It should be complete");
+  const total = Object.values(room.scores).reduce((sum, value) => sum + value, 0);
+  assert(total > 0, "Who Is It should award points");
+});
+
+for (const gameId of ["who-am-i", "where-am-i"]) {
+  check(`${gameId} turn-based run`, () => {
+    const room = makeRoom(4);
+    const engine = getGame(gameId);
+    const game = engine.create(room);
+
+    for (let turn = 0; turn < room.players.length; turn += 1) {
+      const activeId = game.activePlayerId;
+      const activeView = engine.playerView(game, activeId);
+      assert(activeView.isActive, "Active guesser not marked");
+      assert(activeView.assignment === null, "Guesser saw their own answer");
+
+      for (const player of room.players) {
+        if (player.id === activeId) continue;
+        const view = engine.playerView(game, player.id);
+        assert(
+          view.assignment?.name,
+          "Clue-givers should see the hidden answer",
+        );
+        assert(
+          !JSON.stringify(view).includes("hints"),
+          "Host notes leaked to a player",
+        );
+      }
+
+      const publicText = JSON.stringify(engine.publicView(game, room));
+      assert(
+        !publicText.includes(game.assignment.name),
+        "Hidden answer leaked to public state",
+      );
+
+      expectOk(
+        engine.action(room, game, activeId, {
+          type: "guess",
+          guess: "definitely not the answer",
+        }),
+        "wrong guess",
+      );
+      assert(game.phase === "guess", "Wrong guess should not end the turn");
+
+      expectOk(
+        engine.action(room, game, activeId, {
+          type: "guess",
+          guess: game.assignment.name,
+        }),
+        "correct guess",
+      );
+      assert(game.phase === "reveal", "Correct guess should reveal");
+      assert(room.scores[activeId] === 1, `${gameId} scoring mismatch`);
+      assert(
+        room.sessionScores[activeId] === 1,
+        `${gameId} session scoring mismatch`,
+      );
+
+      const adminView = engine.adminView(game, room);
+      assert(
+        Array.isArray(adminView.assignment?.hints) &&
+          adminView.assignment.hints.length > 0,
+        `${gameId} host notes missing for the host`,
+      );
+
+      if (turn < room.players.length - 1) {
+        expectOk(
+          engine.action(room, game, activeId, { type: "next" }),
+          "next turn",
+        );
+        assert(game.phase === "guess", "Next turn should start guessing");
+      }
+    }
+
+    expectOk(engine.adminAction(room, game, "finish"), "finish");
+    assert(game.phase === "complete", `${gameId} should be complete`);
+  });
+}
+
+check("act-it-out full run", () => {
+  const room = makeRoom(4);
+  const engine = getGame("act-it-out");
+  const game = engine.create(room);
+
+  for (let turn = 0; turn < room.players.length; turn += 1) {
+    const actorId = game.actorId;
+    const actorView = engine.playerView(game, actorId);
+    assert(actorView.isActor, "Actor not marked");
+    assert(actorView.yourPrompt?.text, "Actor did not get a private prompt");
+
+    for (const player of room.players) {
+      if (player.id === actorId) continue;
+      const view = engine.playerView(game, player.id);
+      assert(!view.yourPrompt, "Prompt leaked to a non-actor");
+      assert(view.category, "Category should be visible to everyone");
+    }
+
+    const publicText = JSON.stringify(engine.publicView(game, room));
+    assert(
+      !publicText.includes(game.prompt.text),
+      "Prompt leaked to public state",
+    );
+
+    const oldPromptId = game.prompt.id;
+    expectOk(
+      engine.action(room, game, actorId, { type: "skipPrompt" }),
+      "skip prompt",
+    );
+    assert(game.prompt.id !== oldPromptId, "Skipped prompt was not replaced");
+
+    const guesser = room.players.find((player) => player.id !== actorId);
+    const actorBefore = room.scores[actorId] ?? 0;
+    const guesserBefore = room.scores[guesser.id] ?? 0;
+    expectOk(
+      engine.action(room, game, actorId, {
+        type: "correct",
+        playerId: guesser.id,
+      }),
+      "select guesser",
+    );
+    assert(game.phase === "results", "Act It Out should show results");
+    assert(room.scores[actorId] === actorBefore + 1, "Actor should score");
+    assert(
+      room.scores[guesser.id] === guesserBefore + 1,
+      "Guesser should score",
+    );
+
+    if (turn < room.players.length - 1) {
+      expectOk(
+        engine.action(room, game, actorId, { type: "next" }),
+        "next actor",
+      );
+    }
+  }
+
+  expectOk(engine.action(room, game, game.actorId, { type: "next" }), "finish");
+  assert(game.phase === "complete", "Act It Out should be complete");
+  assert(game.history.length === room.players.length, "Acting history mismatch");
+});
+
+check("who-wrote-that full run", () => {
+  const room = makeRoom(4);
+  const engine = getGame("who-wrote-that");
+  const game = engine.create(room);
+
+  for (let round = 1; round <= 3; round += 1) {
+    for (const player of room.players) {
+      expectOk(
+        engine.action(room, game, player.id, {
+          type: "answer",
+          answer: `Answer by ${player.name}`,
+        }),
+        "answer",
+      );
+    }
+    assert(game.phase === "guessing", "Expected guessing phase");
+
+    const publicText = JSON.stringify(engine.publicView(game, room));
+    assert(
+      !publicText.includes("authorId"),
+      "Answer authors leaked before reveal",
+    );
+
+    for (const player of room.players) {
+      const guesses = {};
+      for (const answer of game.answers) {
+        if (answer.authorId === player.id) continue;
+        guesses[answer.id] = answer.authorId;
+      }
+      expectOk(
+        engine.action(room, game, player.id, { type: "guesses", guesses }),
+        "guesses",
+      );
+    }
+
+    assert(
+      game.phase === "results" || game.phase === "complete",
+      `Expected results, got ${game.phase}`,
+    );
+    if (game.phase === "results") {
+      expectOk(engine.nextRound(room, game), "nextRound");
+    }
+  }
+
+  assert(game.phase === "complete", "Who Wrote That should be complete");
+  for (const player of room.players) {
+    assert(room.scores[player.id] === 9, "Who Wrote That scoring mismatch");
+  }
+});
+
+check("truth-or-dare full run", () => {
+  const room = makeRoom(3);
+  const engine = getGame("truth-or-dare");
+  const game = engine.create(room);
+
+  for (const player of room.players) {
+    expectOk(
+      engine.action(room, game, player.id, {
+        type: "submit",
+        truth: `Truth from ${player.name}`,
+        dare: `Dare from ${player.name}`,
+      }),
+      "submit",
+    );
+  }
+  assert(game.phase === "play", "Truth or Dare should start playing");
+
+  let guard = 0;
+  while (game.phase === "play" && guard < 20) {
+    guard += 1;
+    const publicText = JSON.stringify(engine.publicView(game, room));
+    assert(
+      !publicText.includes(game.currentTurn.text),
+      "Truth or Dare prompt leaked to public state",
+    );
+
+    if (guard % 3 === 0) {
+      expectOk(engine.adminAction(room, game, "skipTurn"), "skipTurn");
+    } else {
+      expectOk(
+        engine.action(room, game, game.currentTurn.playerId, { type: "done" }),
+        "done",
+      );
+    }
+  }
+
+  assert(game.phase === "complete", "Truth or Dare should be complete");
+  assert(game.history.length === 6, "Truth or Dare should log every turn");
+  assert(game.completedTurns === 6, "Truth or Dare turn count mismatch");
+});
+
+check("catalog shape", () => {
+  const expected = [
+    "act-it-out",
+    "one-of-us",
+    "who-is-it",
+    "who-am-i",
+    "where-am-i",
+    "truth-or-dare",
+    "who-wrote-that",
+  ];
+  assert(GAME_LIST.length === 7, "Expected seven games in the catalog");
+  assert(
+    GAME_LIST.map((meta) => meta.id).sort().join(",") ===
+      [...expected].sort().join(","),
+    "Catalog does not match the seven active games",
+  );
+  for (const meta of GAME_LIST) {
+    const engine = getGame(meta.id);
+    assert(engine, `Missing engine for ${meta.id}`);
+    assert(meta.name, `Missing name for ${meta.id}`);
+    assert(meta.minPlayers >= 3, `Bad minPlayers for ${meta.id}`);
+    assert(meta.maxPlayers <= 10, `Bad maxPlayers for ${meta.id}`);
+    assert(meta.maxRounds >= 0, `Bad maxRounds for ${meta.id}`);
+    for (const fn of [
+      "create",
+      "action",
+      "adminAction",
+      "nextRound",
+      "publicView",
+      "playerView",
+      "adminView",
+    ]) {
+      assert(
+        typeof engine[fn] === "function",
+        `${meta.id} is missing ${fn}()`,
+      );
+    }
+  }
+});
+
+for (const { name, fn } of checks) {
+  try {
+    fn();
+    console.log(`ok - ${name}`);
+  } catch (error) {
+    console.error(`not ok - ${name}`);
+    console.error(error);
+    process.exitCode = 1;
+  }
+}
+
+if (process.exitCode) {
+  console.error("engine smoke failed");
+} else {
+  console.log("engine smoke ok");
+}

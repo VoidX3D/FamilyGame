@@ -1,0 +1,36 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/game", "destination": "/index.html" },
+    { "source": "/g/:code", "destination": "/index.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/admin/room", "destination": "/admin.html" },
+    { "source": "/admin/playlist", "destination": "/admin.html" },
+    { "source": "/admin/session", "destination": "/admin.html" },
+    { "source": "/admin/live", "destination": "/admin.html" },
+    { "source": "/admin/content", "destination": "/admin.html" },
+    { "source": "/admin/config", "destination": "/admin.html" },
+    { "source": "/admin/settings", "destination": "/admin.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://familygame.wisp.uno wss://familygame.wisp.uno; font-src 'self'; object-src 'none'"
+        }
+      ]
+    }
+  ]
+}

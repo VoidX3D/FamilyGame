@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0c0a13" />
+    <meta name="description" content="A private family party-game hub. Join with a room code and play from your phone." />
+    <base href="/" />
+    <title>Family Game Hub</title>
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="vendor/gsap.min.js"></script>
+    <script defer src="vendor/socket.io.min.js"></script>
+    <script defer src="config.js"></script>
+    <script type="module" src="app.js"></script>
+  </head>
+  <body data-view="code">
+    <div class="blob blob-a" aria-hidden="true"></div>
+    <div class="blob blob-b" aria-hidden="true"></div>
+    <div class="banner" id="connection-banner" role="status" hidden></div>
+
+    <div class="page">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-lockup">
+            <img class="brand-mark" src="assets/logo.svg" alt="" width="56" height="56" />
+            <div class="brand-copy">
+              <p class="brand-name">Family Game Hub</p>
+              <p class="brand-sub">7 Fun2Play Games</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="shell">
+      <section class="card join-card" aria-labelledby="join-title">
+        <form id="code-form" class="stack" novalidate>
+          <div class="card-head">
+            <span class="step-dot">1</span>
+            <h2 id="join-title">Enter room code</h2>
+          </div>
+          <p class="hint">Ask the host for the five-character code.</p>
+          <label class="field" for="room-code">
+            <span>Room code</span>
+            <input
+              id="room-code"
+              class="code-input"
+              name="code"
+              inputmode="text"
+              autocomplete="off"
+              autocapitalize="characters"
+              spellcheck="false"
+              maxlength="5"
+              placeholder="K7M2Q"
+              required
+              aria-describedby="code-error"
+            />
+          </label>
+          <p class="form-error" id="code-error" role="alert" hidden></p>
+          <button class="btn btn-primary" type="submit" id="code-submit" disabled>
+            Continue
+          </button>
+        </form>
+
+        <form id="name-form" class="stack" novalidate hidden>
+          <div class="card-head">
+            <span class="step-dot">2</span>
+            <h2>What's your name?</h2>
+          </div>
+          <p class="hint">
+            Joining room <strong class="inline-code" id="pending-code">----</strong>
+          </p>
+          <label class="field" for="player-name">
+            <span>Your name</span>
+            <input
+              id="player-name"
+              name="name"
+              type="text"
+              autocomplete="nickname"
+              maxlength="16"
+              placeholder="e.g. Aama"
+              required
+              aria-describedby="name-error"
+            />
+          </label>
+          <p class="form-error" id="name-error" role="alert" hidden></p>
+          <button class="btn btn-primary" type="submit" id="name-submit">
+            Join room
+          </button>
+          <button class="btn btn-text" type="button" id="back-to-code">
+            Use a different code
+          </button>
+        </form>
+
+        <section id="step-lobby" class="stack" aria-live="polite" hidden>
+          <div class="room-line">
+            <div>
+              <p class="label">Room</p>
+              <button class="code-chip" id="lobby-code" type="button" title="Copy room code">
+                ----
+              </button>
+            </div>
+            <span class="pill" id="lobby-count">0 players</span>
+          </div>
+          <button class="btn btn-tonal btn-inline lobby-invite" id="copy-invite" type="button">
+            <span class="btn-icon" data-icon="copy" aria-hidden="true"></span>
+            <span class="btn-label">Copy invite</span>
+          </button>
+          <div class="lobby-head">
+            <h2>Waiting for the host</h2>
+            <p class="hint" id="lobby-status">Connecting…</p>
+          </div>
+          <ul class="player-list" id="lobby-players"></ul>
+          <div class="lobby-playlist" id="lobby-playlist" hidden></div>
+          <p class="fine" id="lobby-hint">
+            The admin will start the game from the console.
+          </p>
+          <button class="btn btn-text" type="button" id="leave-room">
+            Leave room
+          </button>
+        </section>
+
+        <section id="step-game" class="stack game-stage" hidden></section>
+      </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "familygame",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Family Game Hub - private multiplayer party games",
+  "scripts": {
+    "vendor": "node scripts/vendor.mjs",
+    "dev:server": "npm --prefix server run dev",
+    "dev:web": "node scripts/dev-web.mjs",
+    "smoke:server": "node scripts/smoke-server.mjs",
+    "smoke:foundation": "node scripts/smoke-foundation.mjs",
+    "smoke:engines": "node scripts/smoke-engines.mjs",
+    "smoke:games": "node scripts/smoke-games.mjs",
+    "smoke": "npm run smoke:foundation && npm run smoke:engines && npm run smoke:games",
+    "smoke:ui": "node scripts/smoke-ui.mjs",
+    "smoke:game-ui": "node scripts/smoke-game-ui.mjs",
+    "smoke:ui-all": "node scripts/smoke-all-games-ui.mjs"
+  },
+  "devDependencies": {
+    "gsap": "^3.15.0",
+    "lenis": "^1.3.27",
+    "selenium-webdriver": "^4.51.0",
+    "socket.io-client": "^4.8.4"
+  }
+}
