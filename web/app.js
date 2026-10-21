@@ -9,6 +9,7 @@ import {
 import { avatar } from "./dom.js";
 import { hydrateIcons } from "./icons.js";
 import { createSocket, emitAck } from "./net.js";
+import { deleteStored, readStored, writeStored } from "./storage.js";
 
 window.__FG_ERRORS = [];
 window.addEventListener("error", (event) => {
@@ -25,6 +26,12 @@ const NAME_KEY = "fg:lastName:v1";
 const RECENT_ROOM_KEY = "fg:recentRoom:v1";
 let installPrompt = null;
 
+function mirrorStored(key, value) {
+  void writeStored(key, value).catch(() => {
+    // localStorage remains the fallback for private browsing and older browsers.
+  });
+}
+
 /* The name is remembered separately from the session, so a player whose
  * room disappeared only has to type their name once more. */
 function rememberName(name) {
@@ -33,6 +40,7 @@ function rememberName(name) {
   } catch {
     // Private browsing can reject storage.
   }
+  mirrorStored(NAME_KEY, String(name ?? ""));
 }
 
 function lastName() {
@@ -60,11 +68,13 @@ function renderSavedRoom() {
 }
 
 function rememberRoom(code, name = lastName()) {
+  const value = { code, name, savedAt: Date.now() };
   try {
-    localStorage.setItem(RECENT_ROOM_KEY, JSON.stringify({ code, name, savedAt: Date.now() }));
+    localStorage.setItem(RECENT_ROOM_KEY, JSON.stringify(value));
   } catch {
     // Private browsing can reject storage.
   }
+  mirrorStored(RECENT_ROOM_KEY, value);
   renderSavedRoom();
 }
 
@@ -73,6 +83,40 @@ function forgetRoom() {
     localStorage.removeItem(RECENT_ROOM_KEY);
   } catch {
     // Ignore storage failures.
+  }
+  void deleteStored(RECENT_ROOM_KEY).catch(() => {});
+  renderSavedRoom();
+}
+
+async function hydratePersistentState() {
+  const [storedSession, storedName, storedRoom] = await Promise.all([
+    readStored(SESSION_KEY).catch(() => null),
+    readStored(NAME_KEY).catch(() => null),
+    readStored(RECENT_ROOM_KEY).catch(() => null),
+  ]);
+
+  if (!session && storedSession?.code && storedSession?.token) {
+    session = storedSession;
+    try {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(storedSession));
+    } catch {
+      // Keep the IndexedDB value as the durable copy.
+    }
+    dom.lobbyCode.textContent = storedSession.code;
+    dom.lobbyStatus.textContent = "Rejoining your room…";
+    showStep("lobby");
+  }
+
+  if (!lastName() && typeof storedName === "string" && storedName) {
+    rememberName(storedName);
+  }
+
+  if (!loadRecentRoom() && storedRoom?.code) {
+    try {
+      localStorage.setItem(RECENT_ROOM_KEY, JSON.stringify(storedRoom));
+    } catch {
+      // Keep the IndexedDB value as the durable copy.
+    }
   }
   renderSavedRoom();
 }
@@ -163,6 +207,7 @@ function saveSession(next) {
   } catch {
     // Private browsing can reject storage; the in-memory session still works.
   }
+  mirrorStored(SESSION_KEY, next);
 }
 
 function clearSession() {
@@ -172,6 +217,7 @@ function clearSession() {
   } catch {
     // Ignore storage failures.
   }
+  void deleteStored(SESSION_KEY).catch(() => {});
 }
 
 function prefersReducedMotion() {
@@ -837,6 +883,7 @@ if (session) {
 
 hydrateIcons();
 renderSavedRoom();
+void hydratePersistentState();
 connectSocket();
 intro();
 window.__FG_READY__ = "player";

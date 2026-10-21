@@ -50,10 +50,13 @@ npm run dev:web
 | `/about` | What the hub is, how it works, and how to host it. |
 
 The player remembers the last display name, active seat, and most recent room
-code in the browser's local storage. It can be installed as a progressive web
-app where the browser supports installation. The service worker caches only
-the static shell; room state and Socket.IO traffic remain live and are never
-stored by the offline cache.
+code in the browser. Values are written immediately to local storage and
+mirrored into IndexedDB for more durable browser-session persistence, with
+graceful fallback when either store is unavailable. It can be installed as a
+progressive web app where the browser supports installation. The service
+worker caches only the static shell; room state and Socket.IO traffic remain
+live and are never stored by the offline cache. Storage is per browser/device,
+not a cloud account shared across devices.
 
 ## How the screens are built
 

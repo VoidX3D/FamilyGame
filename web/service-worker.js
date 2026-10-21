@@ -10,6 +10,7 @@ const SHELL = [
   "/icons.js",
   "/net.js",
   "/config.js",
+  "/storage.js",
   "/manifest.webmanifest",
   "/assets/logo.svg",
   "/assets/icons/icon-192.png",
