@@ -11,6 +11,7 @@ const SHELL = [
   "/net.js",
   "/config.js",
   "/storage.js",
+  "/audio.js",
   "/manifest.webmanifest",
   "/assets/logo.svg",
   "/assets/icons/icon-192.png",

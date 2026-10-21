@@ -10,6 +10,7 @@ import { avatar } from "./dom.js";
 import { hydrateIcons } from "./icons.js";
 import { createSocket, emitAck } from "./net.js";
 import { deleteStored, readStored, writeStored } from "./storage.js";
+import { audioIsEnabled, playSound, primeAudio, toggleAudio } from "./audio.js";
 
 window.__FG_ERRORS = [];
 window.addEventListener("error", (event) => {
@@ -127,6 +128,8 @@ const dom = {
   banner: $("connection-banner"),
   toast: $("toast"),
   installApp: $("install-app"),
+  soundToggle: $("sound-toggle"),
+  soundLabel: $("sound-label"),
   savedRoom: $("saved-room"),
   useSavedRoom: $("use-saved-room"),
   clearSavedRoom: $("clear-saved-room"),
@@ -242,6 +245,12 @@ function showToast(message) {
   toastTimer = setTimeout(() => {
     dom.toast.classList.remove("is-visible");
   }, 2200);
+}
+
+function updateSoundButton() {
+  const on = audioIsEnabled();
+  dom.soundToggle.setAttribute("aria-pressed", String(on));
+  dom.soundLabel.textContent = on ? "Sound on" : "Sound off";
 }
 
 async function copyText(text) {
@@ -669,6 +678,7 @@ function resetLobby() {
 dom.codeInput.addEventListener("input", () => {
   dom.codeInput.value = normalizeCode(dom.codeInput.value);
   clearError(dom.codeError);
+  void primeAudio();
 });
 
 dom.nameInput.addEventListener("input", () => {
@@ -697,6 +707,7 @@ async function checkRoomCode(code) {
     const result = await emitAck(socket, "room:check", { code });
 
     if (!result?.ok) {
+      void playSound("error");
       showError(dom.codeError, result?.message || "That room code was not found.");
       dom.codeInput.focus();
       return;
@@ -719,6 +730,7 @@ async function checkRoomCode(code) {
     dom.nameInput.value = lastName();
     clearError(dom.nameError);
     showStep("name");
+    void playSound("success");
     setTimeout(() => dom.nameInput.focus(), 50);
   } catch (error) {
     showError(dom.codeError, error.message);
@@ -762,6 +774,7 @@ dom.nameForm.addEventListener("submit", async (event) => {
     });
 
     if (!result?.ok) {
+      void playSound("error");
       showError(dom.nameError, result?.message || "Could not join the room.");
       dom.nameInput.focus();
       return;
@@ -770,6 +783,7 @@ dom.nameForm.addEventListener("submit", async (event) => {
     saveSession({ code: result.code, token: result.token, name });
     rememberName(name);
     rememberRoom(result.code, name);
+    void playSound("join");
     dom.lobbyCode.textContent = result.code;
     dom.lobbyStatus.textContent = "Joining the room…";
     showStep("lobby");
@@ -824,6 +838,11 @@ dom.useSavedRoom.addEventListener("click", () => {
 dom.clearSavedRoom.addEventListener("click", () => {
   forgetRoom();
   showToast("Saved room forgotten");
+});
+
+dom.soundToggle.addEventListener("click", async () => {
+  await toggleAudio();
+  updateSoundButton();
 });
 
 window.addEventListener("beforeinstallprompt", (event) => {
@@ -883,6 +902,7 @@ if (session) {
 
 hydrateIcons();
 renderSavedRoom();
+updateSoundButton();
 void hydratePersistentState();
 connectSocket();
 intro();

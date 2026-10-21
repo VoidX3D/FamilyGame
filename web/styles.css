@@ -181,6 +181,28 @@ button {
 
 .install-button:hover { background: rgba(85, 214, 190, 0.18); }
 
+.sound-button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 11px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--on-surface-muted);
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.sound-button[aria-pressed="true"] {
+  border-color: rgba(85, 214, 190, 0.35);
+  color: var(--secondary);
+}
+
+.sound-button:hover { background: var(--surface-3); color: var(--on-surface); }
+
 .shell {
   width: min(100% - 32px, 560px);
   flex: 1 1 auto;
