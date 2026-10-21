@@ -3,6 +3,7 @@
  * no secret ever lives in this file, and no timer is started here. */
 
 import { avatar, initials, toneClass } from "./dom.js";
+import { icon } from "./icons.js";
 
 const drafts = new Map();
 
@@ -509,25 +510,32 @@ function oneOfUs(state, game, mine, actions) {
   if (game.phase === "results" || game.phase === "complete") {
     const crewWon = game.winner === "crew";
     const wasCaught = game.caught === true;
+
+    /* The room needs to be told what actually happened, because "the
+     * imposter escaped" covers two very different endings. */
+    const topVote = game.voteCounts?.[0] ?? null;
+    let outcome;
+    if (crewWon) {
+      outcome = `${game.imposterName} was caught.`;
+    } else if (game.outcomeReason === "no_guess") {
+      outcome = `${game.imposterName} was caught, but no guess was made.`;
+    } else if (game.outcomeReason === "vote_tie" || game.decisiveVote === false) {
+      outcome = "The vote was tied, so the imposter escaped.";
+    } else if (game.outcomeReason === "wrong_vote") {
+      outcome = topVote?.name
+        ? `The room voted for ${topVote.name}, who was not the imposter.`
+        : "The room voted for somebody who was not the imposter.";
+    } else if (wasCaught) {
+      outcome = `${game.imposterName} was caught, but guessed the word anyway.`;
+    } else {
+      outcome = `${game.imposterName} fooled the room.`;
+    }
+
     const banner = el("section", `result-banner ${crewWon ? "is-win" : "is-loss"}`);
     banner.append(
       el("h3", "result-title", crewWon ? "Crew wins!" : "Imposter wins!"),
     );
-    banner.append(
-      note(
-        crewWon
-          ? `${game.imposterName} was caught.`
-          : game.outcomeReason === "no_guess"
-            ? `${game.imposterName} was caught, but no guess was made.`
-            : game.outcomeReason === "vote_tie"
-              ? "The vote was tied, so the imposter escaped."
-              : game.outcomeReason === "no_consensus"
-                ? "There was no decisive vote, so the imposter escaped."
-                : wasCaught
-                  ? `${game.imposterName} was caught, but guessed the word anyway.`
-                  : `${game.imposterName} fooled the room.`,
-      ),
-    );
+    banner.append(note(outcome));
     nodes.push(banner);
 
     const reveal = block(blockTitle("The reveal"));
@@ -1409,22 +1417,26 @@ function historyList(game) {
 /* The palette the drawer can pick from. */
 const DRAW_COLORS = [
   "#f8f7f2",
+  "#ff8a6b",
   "#ffd166",
   "#55d6be",
   "#6c8cff",
-  "#ffd166",
   "#7dd3fc",
   "#86efac",
   "#f9a8d4",
+  "#c4b5fd",
+  "#ff7b9c",
 ];
 
 /* The brush sizes, as a fraction of the canvas width. */
-const DRAW_SIZES = [0.005, 0.011, 0.02, 0.034];
+const DRAW_SIZES = [0.004, 0.008, 0.014, 0.024, 0.04];
 
 const DRAW_TOOLS = [
-  { id: "pen", label: "Pen", icon: "✎" },
-  { id: "erase", label: "Eraser", icon: "▱" },
-  { id: "fill", label: "Fill", icon: "◧" },
+  { id: "pen", label: "Pen", icon: "pencil" },
+  { id: "erase", label: "Eraser", icon: "eraser" },
+  { id: "fill", label: "Fill", icon: "bucket" },
+  { id: "line", label: "Line", icon: "line" },
+  { id: "square", label: "Box", icon: "square" },
 ];
 
 const BOARD_BACKGROUND = "#0d1526";
@@ -1438,9 +1450,14 @@ const FLUSH_MS = 120;
  * state push, and a fresh canvas element would come up blank in the
  * middle of somebody's drawing.
  */
+/* A prefix that is unique to this page load, so two phones never send the
+ * same stroke id, and a reload does not repeat one. */
+const drawSessionId = Math.random().toString(36).slice(2, 8);
+
 const drawState = {
   canvas: null,
   ctx: null,
+  sessionId: drawSessionId,
   strokes: [],
   turnKey: "",
   ownIds: new Set(),
@@ -1452,6 +1469,9 @@ const drawState = {
   lastFlush: 0,
   counter: 0,
   painting: false,
+  shape: null,
+  redoStack: [],
+  expanded: false,
   clock: null,
   observer: null,
   tool: "pen",
@@ -1510,6 +1530,15 @@ function ensureDrawCanvas(game) {
     event.preventDefault();
     const point = pointFrom(event);
     if (!point) return;
+
+    if (drawState.tool === "line" || drawState.tool === "square") {
+      // A shape is drawn when the finger is lifted, so the preview follows
+      // the finger and the shape only appears once.
+      drawState.shape = point;
+      drawShapePreview();
+      return;
+    }
+
     drawState.buffer.push(point);
     drawSegment(point);
     flushStroke(false);
@@ -1519,6 +1548,19 @@ function ensureDrawCanvas(game) {
     if (!drawState.painting) return;
     drawState.painting = false;
     canvas.releasePointerCapture?.(event.pointerId);
+
+    if (drawState.tool === "line" || drawState.tool === "square") {
+      const from = drawState.buffer[0];
+      const to = drawState.shape;
+      drawState.shape = null;
+      if (from && to) {
+        drawState.buffer = [from, to];
+        drawShape();
+        flushStroke(true);
+      }
+      return;
+    }
+
     flushStroke(true);
   };
   canvas.addEventListener("pointerup", stop);
@@ -1535,6 +1577,63 @@ function ensureDrawCanvas(game) {
   }
 
   return canvas;
+}
+
+/* The shape being dragged out, before the finger is lifted. */
+function drawShapePreview() {
+  const ctx = drawState.ctx;
+  const canvas = drawState.canvas;
+  if (!ctx || !canvas) return;
+
+  redrawBoard();
+  const from = drawState.buffer[0];
+  const to = drawState.shape;
+  if (!from || !to) return;
+
+  ctx.strokeStyle = drawState.color;
+  ctx.lineWidth = drawState.size * canvas.width;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  const a = strokePoint(ctx, from, canvas.width, canvas.height);
+  const b = strokePoint(ctx, to, canvas.width, canvas.height);
+  if (drawState.tool === "square") {
+    ctx.rect(
+      Math.min(a[0], b[0]),
+      Math.min(a[1], b[1]),
+      Math.abs(b[0] - a[0]),
+      Math.abs(b[1] - a[1]),
+    );
+  } else {
+    ctx.moveTo(a[0], a[1]);
+    ctx.lineTo(b[0], b[1]);
+  }
+  ctx.stroke();
+}
+
+/* Draws the shape for good, as a stroke the other phones will also see. */
+function drawShape() {
+  const ctx = drawState.ctx;
+  const canvas = drawState.canvas;
+  if (!ctx || !canvas) return;
+
+  ctx.strokeStyle = drawState.color;
+  ctx.lineWidth = drawState.size * canvas.width;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  const a = strokePoint(ctx, drawState.buffer[0], canvas.width, canvas.height);
+  const b = strokePoint(ctx, drawState.buffer[1], canvas.width, canvas.height);
+  if (drawState.tool === "square") {
+    ctx.rect(
+      Math.min(a[0], b[0]),
+      Math.min(a[1], b[1]),
+      Math.abs(b[0] - a[0]),
+      Math.abs(b[1] - a[1]),
+    );
+  } else {
+    ctx.moveTo(a[0], a[1]);
+    ctx.lineTo(b[0], b[1]);
+  }
+  ctx.stroke();
 }
 
 function resizeDrawCanvas(canvas) {
@@ -1606,11 +1705,22 @@ function drawStroke(stroke) {
   ctx.lineJoin = "round";
   ctx.beginPath();
 
-  stroke.points.forEach((point, index) => {
-    const [x, y] = strokePoint(ctx, point, canvas.width, canvas.height);
-    if (index === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  });
+  if (stroke.tool === "square" && stroke.points.length >= 2) {
+    const a = strokePoint(ctx, stroke.points[0], canvas.width, canvas.height);
+    const b = strokePoint(ctx, stroke.points[1], canvas.width, canvas.height);
+    ctx.rect(
+      Math.min(a[0], b[0]),
+      Math.min(a[1], b[1]),
+      Math.abs(b[0] - a[0]),
+      Math.abs(b[1] - a[1]),
+    );
+  } else {
+    stroke.points.forEach((point, index) => {
+      const [x, y] = strokePoint(ctx, point, canvas.width, canvas.height);
+      if (index === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+  }
   ctx.stroke();
 }
 
@@ -1724,9 +1834,19 @@ function hexToRgba(value) {
 }
 
 /* The drawer fills an area with the current colour. */
+/* The next stroke id.
+ *
+ * The id has to be unique for the whole session, not just for this page
+ * load. Otherwise a phone that reloads mid-turn sends the same id again
+ * and the server refuses it, and with it every stroke after that. */
+function nextStrokeId() {
+  drawState.counter += 1;
+  return `${drawState.sessionId}-${drawState.counter}`;
+}
+
 function applyFill(point) {
   const stroke = {
-    id: `c${++drawState.counter}`,
+    id: nextStrokeId(),
     tool: "fill",
     points: [point],
     color: drawState.color,
@@ -1750,8 +1870,7 @@ function flushStroke(force) {
   const points = drawState.buffer;
   drawState.buffer = [];
 
-  drawState.counter += 1;
-  const id = `c${drawState.counter}`;
+  const id = nextStrokeId();
   drawState.ownIds.add(id);
 
   drawState.actions?.stroke?.({
@@ -1778,8 +1897,28 @@ export function removeDrawStroke(payload) {
   if (!id) return;
   const index = drawState.strokes.findIndex((entry) => entry.id === id);
   if (index === -1) return;
-  drawState.strokes.splice(index, 1);
+  const [removed] = drawState.strokes.splice(index, 1);
+  // The drawer's own strokes can be put back.
+  if (removed && drawState.ownIds.has(removed.id)) {
+    drawState.redoStack.push(removed);
+  }
   redrawBoard();
+}
+
+/* Puts a stroke that was taken back. It goes out as a new stroke, so the
+ * whole room sees it again. */
+function redoDrawStroke() {
+  const stroke = drawState.redoStack.pop();
+  if (!stroke) return;
+
+  const next = {
+    ...stroke,
+    id: nextStrokeId(),
+  };
+  drawState.ownIds.add(next.id);
+  drawState.strokes.push(next);
+  drawStroke(next);
+  drawState.actions?.stroke?.(next);
 }
 
 /* Called by the app when the drawer wipes the board. */
@@ -1831,17 +1970,19 @@ function startDrawClock() {
   }, 250);
 }
 
-/* The tools the drawer uses: pen, eraser and fill, the colour palette and
- * the brush size. Only the drawer sees it. */
+/* The tools the drawer uses: the pen, the eraser, the fill, a straight
+ * line and a box, the colour palette and the brush size. Only the drawer
+ * sees it. */
 function drawToolBar(actions) {
   const bar = el("div", "draw-tools");
 
   const tools = el("div", "draw-tool-row");
   for (const tool of DRAW_TOOLS) {
-    const button = el("button", "draw-tool", tool.icon);
+    const button = el("button", "draw-tool");
     button.type = "button";
     button.title = tool.label;
     button.setAttribute("aria-label", tool.label);
+    button.append(icon(tool.icon, { size: 20 }));
     if (drawState.tool === tool.id) {
       button.classList.add("is-active");
       button.setAttribute("aria-pressed", "true");
@@ -1857,6 +1998,45 @@ function drawToolBar(actions) {
     });
     tools.append(button);
   }
+
+  // Undo, redo and a bigger board.
+  const extras = el("div", "draw-tool-row draw-extras");
+
+  const undo = el("button", "draw-tool draw-tool-small");
+  undo.type = "button";
+  undo.title = "Undo the last stroke";
+  undo.setAttribute("aria-label", "Undo the last stroke");
+  undo.append(icon("undo", { size: 18 }));
+  undo.addEventListener("click", () => drawState.actions?.undo?.());
+  extras.append(undo);
+
+  const redo = el("button", "draw-tool draw-tool-small");
+  redo.type = "button";
+  redo.title = "Redo the last stroke";
+  redo.setAttribute("aria-label", "Redo the last stroke");
+  redo.append(icon("redo", { size: 18 }));
+  redo.addEventListener("click", () => redoDrawStroke());
+  extras.append(redo);
+
+  const expand = el("button", "draw-tool draw-tool-small");
+  expand.type = "button";
+  expand.title = "Make the board bigger";
+  expand.setAttribute("aria-label", "Make the board bigger");
+  expand.append(icon("maximize", { size: 18 }));
+  expand.addEventListener("click", () => {
+    drawState.expanded = !drawState.expanded;
+    drawState.canvas?.classList.toggle("is-expanded", drawState.expanded);
+    expand.classList.toggle("is-active", drawState.expanded);
+    if (drawState.expanded) {
+      drawState.canvas?.scrollIntoView({
+        block: "center",
+        behavior: "smooth",
+      });
+    }
+  });
+  extras.append(expand);
+
+  tools.append(extras);
 
   const palette = el("div", "draw-tool-row draw-palette");
   for (const color of DRAW_COLORS) {
@@ -1887,6 +2067,21 @@ function drawToolBar(actions) {
     });
     palette.append(swatch);
   }
+
+  // Any colour at all, for the fussy.
+  const custom = el("input", "draw-color-custom");
+  custom.type = "color";
+  custom.value = drawState.color;
+  custom.title = "Pick any colour";
+  custom.setAttribute("aria-label", "Pick any colour");
+  custom.addEventListener("input", () => {
+    drawState.color = custom.value;
+    if (drawState.tool === "erase") drawState.tool = "pen";
+    for (const other of palette.querySelectorAll(".draw-color")) {
+      other.classList.remove("is-active");
+    }
+  });
+  palette.append(custom);
 
   const sizes = el("div", "draw-tool-row draw-sizes");
   DRAW_SIZES.forEach((size, index) => {
@@ -1921,6 +2116,8 @@ function drawIt(state, game, mine, actions) {
     drawState.strokes = [];
     drawState.ownIds.clear();
     drawState.buffer = [];
+    drawState.redoStack = [];
+    drawState.shape = null;
     redrawBoard();
   }
 
@@ -1990,11 +2187,6 @@ function drawIt(state, game, mine, actions) {
     nodes.push(drawToolBar(actions));
 
     const tools = el("div", "button-row");
-    const done = button("Done, reveal the word");
-    done.addEventListener(
-      "click",
-      actOn(done, actions, { type: "done" }, "Could not end the turn."),
-    );
     const undo = button("Undo", "btn btn-tonal");
     undo.addEventListener("click", () => {
       drawState.actions?.undo?.();
@@ -2003,16 +2195,28 @@ function drawIt(state, game, mine, actions) {
     clear.addEventListener("click", () => {
       drawState.actions?.clearBoard?.();
     });
-    tools.append(done, undo, clear);
+    tools.append(undo, clear);
     nodes.push(tools);
+  } else if (mine.youGuessed) {
+    nodes.push(
+      block(
+        blockTitle("You got it"),
+        el("p", "game-note", "You found the word. Watch the board until the turn ends."),
+      ),
+    );
   } else {
     const form = block(blockTitle("Your guess"));
     const input = textInput("Type what you think it is", keyOf(game, "guess"), {
       maxLength: 60,
+      autocomplete: "off",
+      spellcheck: false,
     });
     form.append(input);
     const error = errorSlot();
     form.append(error);
+    const hint = note("", "muted");
+    hint.hidden = true;
+    form.append(hint);
     const submit = button("Submit guess");
     formSubmit({
       button: submit,
@@ -2024,12 +2228,34 @@ function drawIt(state, game, mine, actions) {
         return value ? { type: "guess", text: value } : null;
       },
       onSuccess: (result) => {
-        if (result?.correct) clearDraft(keyOf(game, "guess"));
+        if (result?.correct) {
+          clearDraft(keyOf(game, "guess"));
+          input.disabled = true;
+          submit.disabled = true;
+          hint.hidden = true;
+          return;
+        }
+        /* A wrong guess is not the end of it. The input is emptied and
+         * stays open, so the next guess is one tap away. */
+        clearDraft(keyOf(game, "guess"));
+        input.value = "";
+        input.focus();
+        if (result?.mask && result.matched > 0) {
+          hint.textContent = `Close. ${result.mask.replace(/_/g, "·")}`;
+          hint.hidden = false;
+        } else {
+          hint.hidden = true;
+        }
       },
     });
     form.append(submit);
     nodes.push(form);
   }
+
+  /* The running list of guesses, shared by the whole room. It is the
+   * heart of the game: everybody sees what everybody is thinking. */
+  const guesses = drawGuessList(game);
+  if (guesses) nodes.push(guesses);
 
   // The revealed tiles, and how close the room is.
   const tiles = el("div", "draw-tiles");
@@ -2051,23 +2277,65 @@ function drawIt(state, game, mine, actions) {
   }
 
   if (game.phase === "reveal") {
-    nodes.push(
-      block(
-        blockTitle("The word was"),
-        el("p", "word-display", game.word?.text ?? "-"),
-        note(
-          game.result?.guessed
-            ? `${game.drawerName} drew "${game.word?.text}".`
-            : `Nobody got "${game.word?.text}" in time.`,
-        ),
+    const reveal = block(
+      blockTitle("The word was"),
+      el("p", "word-display", game.word?.text ?? "-"),
+      note(
+        game.result?.guessed
+          ? `${game.drawerName} drew "${game.word?.text}".`
+          : `Nobody got "${game.word?.text}" in time.`,
       ),
     );
+
+    /* Who got it, and what it was worth. */
+    const winners = game.result?.guessers ?? [];
+    if (winners.length > 0) {
+      const list = el("ul", "history-list");
+      for (const winner of winners) {
+        const row = el("li", "history-row");
+        row.append(el("span", "player-name", winner.name));
+        row.append(pill("+1", "badge badge-correct"));
+        list.append(row);
+      }
+      reveal.append(list);
+    }
+    nodes.push(reveal);
   }
 
   nodes.push(scoreboard(state, game));
   if (state.public.playlist) nodes.push(sessionScoreboard(state));
 
   return nodes;
+}
+
+/* The running list of guesses.
+ *
+ * A wrong guess is shown as it was typed. A correct one is not: that text
+ * is the word, and the word stays secret until the turn is over. */
+function drawGuessList(game) {
+  const entries = game.guessLog ?? [];
+  if (entries.length === 0) return null;
+
+  const list = el("ul", "draw-guesses");
+  for (const entry of entries) {
+    const item = el("li", "draw-guess");
+    if (entry.correct) {
+      item.classList.add("is-correct");
+      item.append(el("span", "draw-guess-name", entry.playerName));
+      item.append(el("span", "draw-guess-text", "got it!"));
+    } else {
+      item.append(el("span", "draw-guess-name", entry.playerName));
+      item.append(el("span", "draw-guess-text", entry.text));
+      if (entry.mask && entry.matched > 0) {
+        item.append(el("span", "draw-guess-mask", entry.mask));
+      }
+    }
+    list.append(item);
+  }
+
+  const wrapper = block(blockTitle("Guesses"), list);
+  wrapper.classList.add("draw-guesses-block");
+  return wrapper;
 }
 
 function drawHistory(game) {

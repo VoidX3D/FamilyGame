@@ -388,15 +388,28 @@ async function playDrawIt() {
     assert(inked, "The stroke did not reach the other screens");
   }
 
-  // The drawer has the tools: pen, eraser and fill, a palette and sizes.
+  // The drawer has the tools: at least a pen and an eraser, a palette and
+  // sizes. The list may grow, so this checks what has to be there rather
+  // than how many there are.
   const tools = await drawer.executeScript(`
     return {
       tools: document.querySelectorAll("#step-game .draw-tool").length,
+      labels: [...document.querySelectorAll("#step-game .draw-tool")]
+        .map((node) => node.title)
+        .filter(Boolean),
       colors: document.querySelectorAll("#step-game .draw-color").length,
       sizes: document.querySelectorAll("#step-game .draw-size").length,
     };
   `);
-  assert(tools.tools === 3, `Expected 3 drawing tools, found ${tools.tools}`);
+  assert(tools.tools >= 2, `Expected the drawing tools, found ${tools.tools}`);
+  assert(
+    tools.labels.includes("Pen"),
+    `The pen is missing from the tools: ${tools.labels.join(", ")}`,
+  );
+  assert(
+    tools.labels.includes("Eraser"),
+    `The eraser is missing from the tools: ${tools.labels.join(", ")}`,
+  );
   assert(tools.colors >= 6, `Expected a colour palette, found ${tools.colors}`);
   assert(tools.sizes >= 3, `Expected brush sizes, found ${tools.sizes}`);
 
@@ -441,16 +454,77 @@ async function playDrawIt() {
   const before = await drawer.executeScript(
     `return document.querySelectorAll("#step-game .draw-tool").length;`,
   );
-  assert(before === 3, "The tool bar changed while drawing");
+  assert(before >= 2, "The tool bar changed while drawing");
 
-  // The room guesses. The drawer knows the word, so the test reads it from
-  // the drawer's own screen.
+  // The guessing rules.
+  await playDrawItGuessing(drawer, guesser);
+
+  await screenshot(guesser, "ui-draw-it-guesser");
+  await screenshot(drawer, "ui-draw-it-drawer");
+  await endGame();
+}
+
+/* Draw It lets a player guess as often as they like, shows everybody the
+ * guesses as they arrive, and never lets the drawer end the turn. */
+async function playDrawItGuessing(drawer, guesser) {
   const word = await drawer.executeScript(
     `return document.querySelector("#step-game .word-display")?.textContent?.trim() ?? "";`,
   );
   assert(word.length > 0, "The drawer has no word to guess");
 
-  const guessed = await guesser.executeScript(`
+  // A wrong guess. It must not lock the player out of the next one.
+  const wrong = await guesser.executeScript(`
+    const input = [...document.querySelectorAll("#step-game input")][0];
+    const setter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype, "value",
+    ).set;
+    const submit = [...document.querySelectorAll("#step-game button")]
+      .find((node) => node.textContent.includes("Submit guess"));
+    setter.call(input, "not the word at all");
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    submit?.click();
+    return Boolean(submit);
+  `);
+  assert(wrong, "Could not submit the wrong guess");
+  await sleep(500);
+
+  const stillOpen = await guesser.executeScript(`
+    const input = [...document.querySelectorAll("#step-game input")][0];
+    const submit = [...document.querySelectorAll("#step-game button")]
+      .find((node) => node.textContent.includes("Submit guess"));
+    return Boolean(input && submit && !input.disabled && !submit.disabled);
+  `);
+  assert(stillOpen, "A wrong guess locked the player out of guessing again");
+
+  // The list of guesses is on the other screens too.
+  const seen = await drawer.executeScript(`
+    const items = [...document.querySelectorAll("#step-game .draw-guess")];
+    return {
+      count: items.length,
+      text: items.map((node) => node.textContent).join(" | "),
+    };
+  `);
+  assert(seen.count >= 1, "The drawer cannot see the list of guesses");
+  assert(
+    seen.text.includes("not the word at all"),
+    `The guess list is wrong: ${seen.text}`,
+  );
+
+  // The word is not on the list, and the drawer has no way to end the turn.
+  const leak = await drawer.executeScript(`
+    const list = document.querySelector("#step-game .draw-guesses")?.textContent ?? "";
+    const buttons = [...document.querySelectorAll("#step-game button")]
+      .map((node) => node.textContent.trim().toLowerCase());
+    return {
+      list,
+      hasDone: buttons.some((text) => text.includes("reveal the word")),
+    };
+  `);
+  assert(!leak.list.includes(word), "The word leaked into the list of guesses");
+  assert(!leak.hasDone, "The drawer has a button that reveals the word");
+
+  // Now the right guess.
+  const right = await guesser.executeScript(`
     const input = [...document.querySelectorAll("#step-game input")][0];
     const setter = Object.getOwnPropertyDescriptor(
       window.HTMLInputElement.prototype, "value",
@@ -462,12 +536,25 @@ async function playDrawIt() {
     submit?.click();
     return Boolean(submit);
   `, word);
-  assert(guessed, "Could not submit a guess");
+  assert(right, "Could not submit the right guess");
+  await sleep(700);
 
-  await sleep(600);
-  await screenshot(guesser, "ui-draw-it-guesser");
-  await screenshot(drawer, "ui-draw-it-drawer");
-  await endGame();
+  const after = await drawer.executeScript(`
+    const items = [...document.querySelectorAll("#step-game .draw-guess")];
+    return {
+      text: items.map((node) => node.textContent).join(" | "),
+      found: items.some((node) => node.classList.contains("is-correct")),
+    };
+  `);
+  assert(after.found, "The correct guess was not marked on the list");
+  assert(
+    !after.text.includes(word),
+    "The correct guess showed the word before the reveal",
+  );
+  assert(
+    after.text.includes("got it"),
+    `The list does not say who got it: ${after.text}`,
+  );
 }
 
 try {

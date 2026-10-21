@@ -508,6 +508,94 @@ check("draw-it full run", () => {
   assert(!early.ok, "The clock must not end a turn early");
 });
 
+check("draw-it guessing is open and the list is shared", () => {
+  const room = makeRoom(3);
+  const engine = getGame("draw-it");
+  const game = engine.create(room);
+  const players = room.players;
+
+  expectOk(engine.adminAction(room, game, "time30"), "time30");
+  const drawer = players.find((player) => player.id === game.drawerId);
+  const guesser = players.find((player) => player.id !== game.drawerId);
+  const word = game.word.text;
+
+  // A player may keep guessing. The first wrong guess must not lock
+  // them out of the next one.
+  const first = engine.action(room, game, guesser.id, {
+    type: "guess",
+    text: "not the word",
+  });
+  expectOk(first, "first wrong guess");
+  assert(first.correct === false, "A wrong guess must not be correct");
+
+  const second = engine.action(room, game, guesser.id, {
+    type: "guess",
+    text: "still not the word",
+  });
+  expectOk(second, "second wrong guess");
+  assert(second.correct === false, "The second wrong guess must be accepted");
+
+  // The list of guesses is shared, and everybody can see it.
+  const log = engine.publicView(game, room).guessLog;
+  assert(Array.isArray(log), "The public view should carry the guess list");
+  assert(log.length === 2, "Both guesses should be on the list");
+  assert(
+    log.every((entry) => entry.playerName),
+    "Every guess should say who made it",
+  );
+
+  // A wrong guess is shown as it was typed.
+  assert(log[0].text === "not the word", "A wrong guess should be visible");
+
+  // The right guess is on the list, but its text is the word, so it is
+  // not shown until the turn is over.
+  const right = engine.action(room, game, guesser.id, {
+    type: "guess",
+    text: word,
+  });
+  expectOk(right, "right guess");
+  const after = engine.publicView(game, room);
+  assert(after.guessLog.length === 3, "The right guess should be on the list");
+  assert(
+    after.guessLog[2].correct === true,
+    "The right guess should be marked as correct",
+  );
+  assert(
+    after.guessLog[2].text === null,
+    "A correct guess must not show the word before the reveal",
+  );
+
+  // Nothing in the public state may spell the word.
+  const publicText = JSON.stringify(after);
+  assert(!publicText.includes(word), "The word leaked into the public state");
+  for (const player of players) {
+    if (player.id === drawer.id) continue;
+    assert(
+      !JSON.stringify(engine.playerView(game, player.id)).includes(word),
+      "The word leaked into a player's view",
+    );
+  }
+
+  // A close guess shows the letters that landed in the right place, and
+  // the hint can never spell the whole word.
+  const close = engine.action(room, game, guesser.id, {
+    type: "guess",
+    text: word.toUpperCase().split("").reverse().join(""),
+  });
+  expectOk(close, "close guess");
+  if (close.mask) {
+    assert(!close.mask.includes(word), "The mask must not spell the word");
+  }
+
+  // The drawer cannot end the turn. There is no done action at all.
+  const done = engine.action(room, game, drawer.id, { type: "done" });
+  assert(!done.ok, "The drawer must not be able to end the turn");
+  assert(
+    game.phase === "drawing",
+    "The turn must still be running after a refused done",
+  );
+});
+
 check("catalog shape", () => {
   // The games that were always here. Newer games are welcome, but these
   // must never disappear.

@@ -32,10 +32,20 @@ function getContext() {
   return context;
 }
 
+/* Waking the audio context is the one call the browser can refuse, and a
+ * refusal must never reach the page as an unhandled rejection. The sound
+ * is a nicety; a game that throws because of it is a broken game. */
 async function resume() {
   const audio = getContext();
   if (!audio) return null;
-  if (audio.state === "suspended") await audio.resume();
+  if (audio.state === "suspended") {
+    try {
+      await audio.resume();
+    } catch {
+      return null;
+    }
+  }
+  if (audio.state === "closed") return null;
   return audio;
 }
 
@@ -79,6 +89,35 @@ function stopAmbient() {
   ambient = null;
 }
 
+/* The background drone.
+ *
+ * It waits for a real gesture, because a browser will not let audio start
+ * without one, and it stops when the page is hidden, because a phone in
+ * a pocket should not be humming all evening. */
+let gestureWatched = false;
+
+export function watchForGesture() {
+  if (gestureWatched) return;
+  gestureWatched = true;
+
+  const start = () => {
+    if (!enabled) return;
+    void primeAudio();
+  };
+
+  for (const name of ["pointerdown", "keydown", "touchstart"]) {
+    window.addEventListener(name, start, { once: false, passive: true });
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      stopAmbient();
+      return;
+    }
+    if (enabled) void primeAudio();
+  });
+}
+
 export async function setAudioEnabled(next) {
   enabled = Boolean(next);
   savePreference();
@@ -87,7 +126,7 @@ export async function setAudioEnabled(next) {
     return enabled;
   }
   await primeAudio();
-  playSound("confirm");
+  await playSound("confirm");
   return enabled;
 }
 
@@ -109,17 +148,21 @@ export async function playSound(kind = "tap") {
   };
   const [frequency, duration, type] = notes[kind] || notes.tap;
   const now = audio.currentTime;
-  const oscillator = audio.createOscillator();
-  const gain = audio.createGain();
-  oscillator.type = type;
-  oscillator.frequency.setValueAtTime(frequency, now);
-  if (kind === "success") oscillator.frequency.exponentialRampToValueAtTime(1320, now + duration);
-  if (kind === "error") oscillator.frequency.exponentialRampToValueAtTime(120, now + duration);
-  gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(kind === "tap" ? 0.12 : 0.2, now + 0.008);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-  oscillator.connect(gain);
-  gain.connect(master);
-  oscillator.start(now);
-  oscillator.stop(now + duration + 0.03);
+  try {
+    const oscillator = audio.createOscillator();
+    const gain = audio.createGain();
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, now);
+    if (kind === "success") oscillator.frequency.exponentialRampToValueAtTime(1320, now + duration);
+    if (kind === "error") oscillator.frequency.exponentialRampToValueAtTime(120, now + duration);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(kind === "tap" ? 0.12 : 0.2, now + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    oscillator.connect(gain);
+    gain.connect(master);
+    oscillator.start(now);
+    oscillator.stop(now + duration + 0.03);
+  } catch {
+    // The context went away between the check and the call. Nothing to do.
+  }
 }

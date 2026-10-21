@@ -176,6 +176,7 @@ button {
   color: var(--secondary);
   font-size: 12px;
   font-weight: 800;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -193,6 +194,7 @@ button {
   color: var(--on-surface-muted);
   font-size: 12px;
   font-weight: 750;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -202,6 +204,12 @@ button {
 }
 
 .sound-button:hover { background: var(--surface-3); color: var(--on-surface); }
+
+.sound-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .shell {
   width: min(100% - 32px, 560px);
@@ -749,6 +757,26 @@ body[data-view="game"] .game-stage {
   cursor: crosshair;
 }
 
+/* A bigger board, for when the drawing needs more room. */
+.draw-canvas.is-expanded {
+  aspect-ratio: 1 / 1;
+}
+
+.draw-tool-small {
+  width: 38px;
+  height: 38px;
+}
+
+.draw-color-custom {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 2px solid var(--border-soft);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
 .draw-head {
   display: flex;
   align-items: center;
@@ -910,6 +938,74 @@ body[data-view="game"] .game-stage {
 
 .game-note[data-tone="error"] {
   color: var(--error);
+}
+
+/* The hint under the guess box: how close the last guess was. */
+.game-note[data-tone="muted"] {
+  color: var(--secondary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.12em;
+}
+
+/* The running list of guesses, shared by the room. It is capped so it
+ * never pushes the board off the screen. */
+.draw-guesses-block {
+  min-height: 0;
+}
+
+.draw-guesses {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 190px;
+  overflow-y: auto;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+}
+
+.draw-guess {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 11px;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.draw-guess:last-child {
+  border-bottom: none;
+}
+
+.draw-guess-name {
+  flex: 0 0 auto;
+  max-width: 42%;
+  overflow: hidden;
+  color: var(--on-surface-muted);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.draw-guess-text {
+  flex: 1 1 auto;
+  color: var(--on-surface);
+  word-break: break-word;
+}
+
+.draw-guess.is-correct .draw-guess-name,
+.draw-guess.is-correct .draw-guess-text {
+  color: var(--secondary);
+  font-weight: 800;
+}
+
+.draw-guess-mask {
+  flex: 0 0 auto;
+  color: var(--on-surface-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
 }
 
 .game-wait {
@@ -1532,6 +1628,16 @@ body[data-view="game"] .game-stage {
 
   .brand-name {
     font-size: 18px;
+  }
+
+  /* On a narrow phone the button keeps the icon and drops the words.
+   * The button still carries the label for a screen reader. */
+  .sound-button #sound-label {
+    display: none;
+  }
+
+  .sound-button {
+    padding: 0 9px;
   }
 
   .topbar-link {

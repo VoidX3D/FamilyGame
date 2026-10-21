@@ -16,6 +16,8 @@ import { config } from "./config.js";
 import crypto from "node:crypto";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+/* The shape of the collections: one JSON entry per collection. */
+export const SCHEMA_FILE = path.join(here, "data", "content-schema.json");
 export const DEFAULT_CONTENT_FILE = path.join(
   here,
   "data",
@@ -35,7 +37,13 @@ export class ContentValidationError extends Error {
   }
 }
 
-export const COLLECTIONS = [
+/* The shape of every collection.
+ *
+ * It lives in server/data/content-schema.json, so a new collection is a
+ * JSON entry and not a change to this file. The built-in copy below is only
+ * used if that file is missing or broken, so the server always starts.
+ */
+const BUILTIN_COLLECTIONS = [
   {
     key: "oneOfUsWords",
     label: "One of Us words",
@@ -145,6 +153,30 @@ export const COLLECTIONS = [
     ],
   },
 ];
+
+function loadSchema() {
+  try {
+    const raw = readFileSync(SCHEMA_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    const list = parsed?.collections;
+    if (!Array.isArray(list) || list.length === 0) {
+      throw new Error("the schema file has no collections");
+    }
+    for (const collection of list) {
+      if (!collection?.key || !collection?.kind) {
+        throw new Error("a collection is missing its key or kind");
+      }
+    }
+    return list;
+  } catch (error) {
+    console.warn(
+      `[content] could not read ${SCHEMA_FILE} (${error.message}). Using the built-in collection list.`,
+    );
+    return BUILTIN_COLLECTIONS;
+  }
+}
+
+export const COLLECTIONS = loadSchema();
 
 function loadDefaultItems() {
   let parsed;

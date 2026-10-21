@@ -1,0 +1,168 @@
+{
+  "version": 1,
+  "collections": [
+    {
+      "key": "oneOfUsWords",
+      "label": "One of Us words",
+      "game": "One of Us",
+      "kind": "record",
+      "fields": [
+        {
+          "key": "word",
+          "label": "Word",
+          "type": "text",
+          "max": 60,
+          "required": true
+        },
+        {
+          "key": "category",
+          "label": "Category",
+          "type": "text",
+          "max": 30
+        }
+      ]
+    },
+    {
+      "key": "whoIsItQuestions",
+      "label": "Who Is It questions",
+      "game": "Who Is It?",
+      "kind": "text",
+      "max": 160
+    },
+    {
+      "key": "people",
+      "label": "Who Am I people",
+      "game": "Who Am I?",
+      "kind": "record",
+      "fields": [
+        {
+          "key": "name",
+          "label": "Name",
+          "type": "text",
+          "max": 80,
+          "required": true
+        },
+        {
+          "key": "hints",
+          "label": "Host notes (one per line)",
+          "type": "lines",
+          "max": 120,
+          "maxItems": 4,
+          "minItems": 1
+        },
+        {
+          "key": "group",
+          "label": "Group",
+          "type": "text",
+          "max": 40
+        },
+        {
+          "key": "aliases",
+          "label": "Also accepted (one per line)",
+          "type": "lines",
+          "max": 80,
+          "maxItems": 8
+        }
+      ]
+    },
+    {
+      "key": "places",
+      "label": "Where Am I places",
+      "game": "Where Am I?",
+      "kind": "record",
+      "fields": [
+        {
+          "key": "name",
+          "label": "Place",
+          "type": "text",
+          "max": 80,
+          "required": true
+        },
+        {
+          "key": "hints",
+          "label": "Host notes (one per line)",
+          "type": "lines",
+          "max": 120,
+          "maxItems": 4,
+          "minItems": 1
+        },
+        {
+          "key": "group",
+          "label": "Group",
+          "type": "text",
+          "max": 40
+        },
+        {
+          "key": "aliases",
+          "label": "Also accepted (one per line)",
+          "type": "lines",
+          "max": 80,
+          "maxItems": 8
+        }
+      ]
+    },
+    {
+      "key": "whoWrotePrompts",
+      "label": "Who Wrote That prompts",
+      "game": "Who Wrote That?!",
+      "kind": "text",
+      "max": 180
+    },
+    {
+      "key": "truths",
+      "label": "Truth or Dare truths",
+      "game": "Truth or Dare",
+      "kind": "text",
+      "max": 180
+    },
+    {
+      "key": "dares",
+      "label": "Truth or Dare dares",
+      "game": "Truth or Dare",
+      "kind": "text",
+      "max": 180
+    },
+    {
+      "key": "charades",
+      "label": "Act It Out prompts",
+      "game": "Act It Out",
+      "kind": "record",
+      "fields": [
+        {
+          "key": "text",
+          "label": "Prompt",
+          "type": "text",
+          "max": 120,
+          "required": true
+        },
+        {
+          "key": "category",
+          "label": "Category",
+          "type": "text",
+          "max": 30
+        }
+      ]
+    },
+    {
+      "key": "drawingWords",
+      "label": "Draw It words",
+      "game": "Draw It",
+      "kind": "record",
+      "fields": [
+        {
+          "key": "word",
+          "label": "Word",
+          "type": "text",
+          "max": 60,
+          "required": true
+        },
+        {
+          "key": "category",
+          "label": "Category",
+          "type": "text",
+          "max": 30
+        }
+      ]
+    }
+  ]
+}

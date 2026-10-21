@@ -1,6 +1,18 @@
 {
   "cleanUrls": true,
   "rewrites": [
+    {
+      "source": "/api",
+      "destination": "https://familygame.wisp.uno/api"
+    },
+    {
+      "source": "/api/",
+      "destination": "https://familygame.wisp.uno/api"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://familygame.wisp.uno/api/:path*"
+    },
     { "source": "/game", "destination": "/index.html" },
     { "source": "/g/:code", "destination": "/index.html" },
     { "source": "/privacy", "destination": "/privacy.html" },

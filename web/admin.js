@@ -139,7 +139,6 @@ const dom = {
 
 let token = readToken();
 let socket = null;
-let roomCreatedForSession = false;
 let currentState = null;
 let catalog = [];
 let catalogLoaded = false;
@@ -155,6 +154,8 @@ let contentDraft = [];
 let contentDirty = false;
 let contentLoading = false;
 let contentSearch = "";
+/* How many pages of a big collection are on screen. */
+let contentPage = 1;
 let confirmDestructive = readPreference("fg:confirmDestructive", true);
 let activeTab = "room";
 
@@ -1618,8 +1619,37 @@ function renderContent() {
     return;
   }
 
-  for (const { entry, index } of visible) {
+  /* A big collection is normal, so only part of it is drawn at a time.
+   * Drawing five hundred rows makes the page unusable. */
+  const pageSize = 60;
+  const shown = visible.slice(0, contentPage * pageSize);
+
+  for (const { entry, index } of shown) {
     dom.contentEditor.append(renderContentRow(entry, index, collection));
+  }
+
+  if (visible.length > shown.length) {
+    const more = make(
+      "button",
+      "btn btn-tonal btn-inline",
+      `Show ${Math.min(pageSize, visible.length - shown.length)} more of ${
+        visible.length - shown.length
+      }`,
+    );
+    more.type = "button";
+    more.addEventListener("click", () => {
+      contentPage += 1;
+      renderContent();
+    });
+    dom.contentEditor.append(more);
+  } else if (contentPage > 1) {
+    const less = make("button", "btn btn-text btn-inline", "Show fewer");
+    less.type = "button";
+    less.addEventListener("click", () => {
+      contentPage = 1;
+      renderContent();
+    });
+    dom.contentEditor.append(less);
   }
 }
 
@@ -1668,6 +1698,7 @@ async function loadContent({ force = false } = {}) {
 
 function selectContentCollection(key) {
   if (key === contentKey) return;
+  contentPage = 1;
   if (contentDirty && !confirmAction("Discard unsaved content changes?")) {
     dom.contentCollection.value = contentKey;
     return;
@@ -1862,8 +1893,14 @@ function render(state) {
   renderHistory(admin);
 }
 
+/* The room is looked after by the server: creating it again returns the same
+ * room. So this is safe to call on every reconnect, which it has to be,
+ * because `admin:createRoom` is the only thing that puts this socket in the
+ * room's channel. Without it, a host whose connection dropped would sit
+ * there receiving no state at all: no player list, no game events and no
+ * way to advance the game. */
 async function createRoom() {
-  if (!socket?.connected || roomCreatedForSession) return;
+  if (!socket?.connected) return;
 
   const result = await emitAdmin(
     "admin:createRoom",
@@ -1871,7 +1908,6 @@ async function createRoom() {
     "Could not create the room.",
   );
   if (!result) return;
-  roomCreatedForSession = true;
   dom.code.textContent = result.code;
 }
 
@@ -1896,7 +1932,6 @@ function connectAdmin() {
     socket.disconnect();
   }
 
-  roomCreatedForSession = false;
   try {
     socket = createSocket({ role: "admin", token });
   } catch {
@@ -2295,6 +2330,7 @@ dom.contentCollection.addEventListener("change", () => {
   selectContentCollection(dom.contentCollection.value);
 });
 dom.contentSearch.addEventListener("input", () => {
+  contentPage = 1;
   contentSearch = dom.contentSearch.value;
   renderContent();
 });

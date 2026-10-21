@@ -7,10 +7,15 @@ import {
   syncDrawBoard,
 } from "./games.js";
 import { avatar } from "./dom.js";
-import { hydrateIcons } from "./icons.js";
+import { hydrateIcons, icon } from "./icons.js";
 import { createSocket, emitAck } from "./net.js";
 import { deleteStored, readStored, writeStored } from "./storage.js";
-import { audioIsEnabled, playSound, primeAudio, toggleAudio } from "./audio.js";
+import {
+  audioIsEnabled,
+  playSound,
+  toggleAudio,
+  watchForGesture,
+} from "./audio.js";
 
 window.__FG_ERRORS = [];
 window.addEventListener("error", (event) => {
@@ -52,10 +57,20 @@ function lastName() {
   }
 }
 
+/* A shared tablet should not show yesterday's room code for ever, so the
+ * record is only offered for a week. */
+const RECENT_ROOM_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
 function loadRecentRoom() {
   try {
     const parsed = JSON.parse(localStorage.getItem(RECENT_ROOM_KEY) || "null");
-    return /^[A-Z2-9]{5}$/.test(parsed?.code) ? parsed : null;
+    if (!/^[A-Z2-9]{5}$/.test(parsed?.code)) return null;
+    const savedAt = Number(parsed?.savedAt ?? 0);
+    if (!savedAt || Date.now() - savedAt > RECENT_ROOM_MAX_AGE_MS) {
+      forgetRoom();
+      return null;
+    }
+    return parsed;
   } catch {
     return null;
   }
@@ -89,24 +104,19 @@ function forgetRoom() {
   renderSavedRoom();
 }
 
+/* Reads back the things that are worth remembering.
+ *
+ * The seat token is not one of them. It is the credential that lets
+ * anyone holding it rejoin as that player, so it stays in localStorage
+ * and is never copied into the IndexedDB store, which is durable and
+ * survives "clear cookies" in some browsers. The name and the last room
+ * are not secrets, so those are mirrored. */
+
 async function hydratePersistentState() {
-  const [storedSession, storedName, storedRoom] = await Promise.all([
-    readStored(SESSION_KEY).catch(() => null),
+  const [storedName, storedRoom] = await Promise.all([
     readStored(NAME_KEY).catch(() => null),
     readStored(RECENT_ROOM_KEY).catch(() => null),
   ]);
-
-  if (!session && storedSession?.code && storedSession?.token) {
-    session = storedSession;
-    try {
-      localStorage.setItem(SESSION_KEY, JSON.stringify(storedSession));
-    } catch {
-      // Keep the IndexedDB value as the durable copy.
-    }
-    dom.lobbyCode.textContent = storedSession.code;
-    dom.lobbyStatus.textContent = "Rejoining your room…";
-    showStep("lobby");
-  }
 
   if (!lastName() && typeof storedName === "string" && storedName) {
     rememberName(storedName);
@@ -130,6 +140,7 @@ const dom = {
   installApp: $("install-app"),
   soundToggle: $("sound-toggle"),
   soundLabel: $("sound-label"),
+  soundIcon: $("sound-icon"),
   savedRoom: $("saved-room"),
   useSavedRoom: $("use-saved-room"),
   clearSavedRoom: $("clear-saved-room"),
@@ -210,7 +221,10 @@ function saveSession(next) {
   } catch {
     // Private browsing can reject storage; the in-memory session still works.
   }
-  mirrorStored(SESSION_KEY, next);
+  // The seat token is deliberately not mirrored into IndexedDB. It is the
+  // credential that lets anyone holding it rejoin as that player, so it
+  // stays in localStorage, which the player can clear from the browser.
+  void deleteStored(SESSION_KEY).catch(() => {});
 }
 
 function clearSession() {
@@ -251,6 +265,12 @@ function updateSoundButton() {
   const on = audioIsEnabled();
   dom.soundToggle.setAttribute("aria-pressed", String(on));
   dom.soundLabel.textContent = on ? "Sound on" : "Sound off";
+  // The words are dropped on a narrow phone, so the button needs a label
+  // of its own for a screen reader.
+  dom.soundToggle.setAttribute("aria-label", on ? "Sound on" : "Sound off");
+  // The glyph said "music playing" whatever the state was. The icon says
+  // whether sound is on or off, which is what the button does.
+  dom.soundIcon?.replaceChildren(icon(on ? "volume-on" : "volume-off", { size: 16 }));
 }
 
 async function copyText(text) {
@@ -678,7 +698,6 @@ function resetLobby() {
 dom.codeInput.addEventListener("input", () => {
   dom.codeInput.value = normalizeCode(dom.codeInput.value);
   clearError(dom.codeError);
-  void primeAudio();
 });
 
 dom.nameInput.addEventListener("input", () => {
@@ -917,6 +936,7 @@ renderSavedRoom();
 updateSoundButton();
 updateInstallButton();
 void hydratePersistentState();
+watchForGesture();
 connectSocket();
 intro();
 window.__FG_READY__ = "player";
