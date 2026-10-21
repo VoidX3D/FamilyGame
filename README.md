@@ -23,6 +23,14 @@ saved to `server/data/content.json`.
 | --- | --- |
 | ![The host console](preview/host-console.png) | ![The API documentation](preview/api-docs.png) |
 
+| Who Am I? | Act It Out |
+| --- | --- |
+| ![Who Am I? on a phone](preview/player-who-am-i.png) | ![Act It Out on a phone](preview/player-act-it-out.png) |
+
+| Who Wrote That?! | Truth or Dare |
+| --- | --- |
+| ![Who Wrote That?! on a phone](preview/player-who-wrote-that.png) | ![Truth or Dare on a phone](preview/player-truth-or-dare.png) |
+
 More in [`preview/`](preview/).
 
 ## Games in v1

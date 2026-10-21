@@ -7,10 +7,14 @@ the readme can show what it actually looks like, rather than a mock up.
 | --- | --- |
 | `player-one-of-us.png` | One of Us, on a player's phone. The crew's secret word, and the leave button safely at the bottom. |
 | `player-results.png` | The result of a round. |
-| `player-draw-it.png` | Draw It, on the drawer's phone: the board, the countdown, and the word only they can see. |
-| `player-draw-it-guess.png` | Draw It, on a guessing phone: the same drawing, and a box to type the answer. |
+| `player-draw-it.png` | Draw It, on the drawer's phone: the board, the tool kit, and the word pinned under the tools where only they can see it. |
+| `player-draw-it-guess.png` | Draw It, on a guessing phone: the same drawing, the box to type in, and the list of guesses the room has made. |
 | `player-who-is-it.png` | Who Is It? |
+| `player-who-am-i.png` | Who Am I? |
+| `player-where-am-i.png` | Where Am I? |
+| `player-act-it-out.png` | Act It Out. |
 | `player-truth-or-dare.png` | Truth or Dare. |
+| `player-who-wrote-that.png` | Who Wrote That?! |
 | `host-console.png` | The host console, in the middle of a game. |
 | `api-docs.png` | The API documentation page. |
 
@@ -23,4 +27,4 @@ npm run smoke:ui-all
 ```
 
 The images land in `.shots/`, which is not committed. Copy the ones worth
-showing into this folder.
+showing into this folder. They are all 390 by 844, the size of a phone.
