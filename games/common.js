@@ -46,10 +46,30 @@ export function cleanText(value, maxLength = 180) {
   return Array.from(text).slice(0, maxLength).join("");
 }
 
+/* Turns an answer into the form that is compared.
+ *
+ * Everything that should not make two answers different is taken out here,
+ * once, so every game compares the same way:
+ *
+ * - case: "Cactus", "cactus", "CACTUS" and "CaCtUs" are the same word,
+ * - punctuation and spacing: "hot dog", "Hot-Dog!" and "hotdog" are the
+ *   same,
+ * - an ampersand is an "and": "rock & roll" is "rock and roll",
+/* - an accent is optional: "cafe" is "café".
+ *
+ * The accent folding is only applied to Latin letters. The content has
+ * Nepali in it, and Devanagari writes its vowels as marks on the letter,
+ * so folding those away would turn a name into a different name. The
+ * marks are kept in the last step too, for the same reason.
+ */
 export function normalizeAnswer(value) {
   return String(value ?? "")
     .toLocaleLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, "");
+    .replace(/&/g, " and ")
+    .replace(/\p{Script=Latin}+/gu, (chunk) =>
+      chunk.normalize("NFD").replace(/\p{M}/gu, ""),
+    )
+    .replace(/[^\p{L}\p{N}\p{M}]+/gu, "");
 }
 
 export function answerMatches(guess, item) {

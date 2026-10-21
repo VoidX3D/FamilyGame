@@ -5,6 +5,7 @@ import {
   cleanText,
   control,
   gameState,
+  normalizeAnswer,
   pickUnused,
   playerInGame,
   playerName,
@@ -48,16 +49,15 @@ const MAX_GUESS_LOG = 120;
 
 /* A guess is compared without case, punctuation or spaces, so "hot dog",
  * "Hot-Dog!" and "hotdog" all count as the same word. A different word
- * never counts, however close it looks. */
+ * never counts, however close it looks. The comparison itself lives in
+ * common.js, so every game sanitises a word the same way. */
 export function normalizeGuess(value) {
-  return String(value ?? "")
-    .toLocaleLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, "");
+  return normalizeAnswer(value);
 }
 
 function guessMatches(guess, word) {
-  const target = normalizeGuess(word);
-  return target.length > 0 && normalizeGuess(guess) === target;
+  const target = normalizeAnswer(word);
+  return target.length > 0 && normalizeAnswer(guess) === target;
 }
 
 /* How close a wrong guess was.
