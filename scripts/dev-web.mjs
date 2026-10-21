@@ -3,6 +3,7 @@ import http from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { CONNECT_ORIGINS, LOCAL_WEB } from "../web/endpoints.js";
 
 const webRoot = path.resolve(fileURLToPath(new URL("../web", import.meta.url)));
 const port = Number(process.env.WEB_PORT || 5173);
@@ -27,6 +28,15 @@ const MIME = {
   ".map": "application/json; charset=utf-8",
 };
 
+/* The hosts the page may talk to come from web/endpoints.js, so the
+ * policy cannot fall out of step with the addresses the app actually
+ * uses. */
+const connectSources = ["'self'"];
+for (const origin of CONNECT_ORIGINS) {
+  connectSources.push(origin);
+  connectSources.push(origin.replace(/^http/, "ws"));
+}
+
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -35,7 +45,7 @@ const CONTENT_SECURITY_POLICY = [
   "img-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
   "script-src 'self'",
-  "connect-src 'self' http://localhost:12800 ws://localhost:12800 http://127.0.0.1:12800 ws://127.0.0.1:12800 https://familygame.wisp.uno wss://familygame.wisp.uno",
+  `connect-src ${connectSources.join(" ")}`,
   "font-src 'self'",
   "object-src 'none'",
 ].join("; ");
@@ -137,7 +147,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(port, host, () => {
-  console.log(`Family Game web preview: http://localhost:${port}`);
+  console.log(`Family Game web preview: ${LOCAL_WEB}`);
   console.log(`Serving ${webRoot}`);
 });
 

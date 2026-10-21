@@ -16,6 +16,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { DEPLOYED_WEB } from "../web/endpoints.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(here, "..");
@@ -25,7 +26,7 @@ const MANIFEST = path.join(web, "manus-routes.json");
 const SITEMAP = path.join(web, "sitemap.xml");
 const ROBOTS = path.join(web, "robots.txt");
 
-const SITE = "https://funfamilygame.vercel.app";
+const SITE = DEPLOYED_WEB;
 
 /* The pages that are not for the public. They are kept out of the
  * sitemap and pushed away in the robots file. */

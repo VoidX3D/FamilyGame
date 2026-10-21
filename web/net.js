@@ -1,6 +1,13 @@
 /* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
-export const API_URL =
-  window.APP_CONFIG?.API_URL ?? "http://localhost:12800";
+/* The connection to the backend.
+ *
+ * The address comes from ./config.js, which is the one place that decides
+ * where the API is. Nothing in this file decides anything about hosts or
+ * ports, so there is no second copy to fall out of step. */
+
+import { API_URL } from "./config.js";
+
+export { API_URL };
 
 export function createSocket(auth) {
   if (!window.io) {

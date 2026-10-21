@@ -11,6 +11,85 @@ Read [`STATUS.md`](STATUS.md) for what is true right now, and
 
 ## 2026-10-21
 
+### One place for the addresses, and no more stale ports
+
+`web/net.js` had its own copy of the API address, with `localhost:12800`
+as a fallback, and `web/config.js` had another. Two copies of the same
+thing, one of them a magic fallback, and the front end could quietly talk
+to the wrong host.
+
+- `web/endpoints.js` is now the one file that says where things are. It
+  has no DOM in it, so the browser, the dev server, the test driver and
+  the sitemap script all read the same numbers.
+- `web/config.js` decides which one to use and exports it. It takes the
+  address from `window.APP_CONFIG`, then from a `<meta name="api-url">`
+  tag, and only then from the defaults.
+- `web/net.js` imports the answer. It has no host or port in it at all.
+- `server/config.js` defaulted to port **3000**, the port from before the
+  hosting service moved. A fresh install from the example settings file
+  would have started on the wrong port. The default and the example are
+  12800 now, and the OpenAPI description builds its local address from
+  the port the server is actually using.
+- The dev server's content security policy, the browser driver's
+  defaults and the sitemap script all follow the shared file.
+- The backend keeps its own list of allowed frontends, because the
+  `backend` branch is a split of `server/` alone and cannot reach
+  `web/endpoints.js`. The CORS suite now checks the two lists agree, so
+  they cannot drift apart silently.
+
+### One way to spell a word, for every game
+
+`Cactus`, `cactus`, `CACTUS` and `CaCtUs` all had to work, and they had
+to work the same way in every game. The comparison lived in two places
+and did not fold accents or read `&` as "and".
+
+`normalizeAnswer()` in `server/games/common.js` is now the only
+sanitiser. It takes out case, punctuation, spacing, the difference
+between `&` and "and", and an accent on a Latin letter. It leaves
+Devanagari alone on purpose: Devanagari writes its vowels as marks on the
+letter, and folding those away turns one name into a different name. The
+content has Nepali in it, so this matters.
+
+Draw It uses the same function. The suite has a test that says so.
+
+### The buttons say what they do
+
+- The sound button is the speaker on its own. A plain speaker means sound
+  is on, a crossed one means it is off. The words "Sound on" and "Sound
+  off" are gone, and the button carries the label for a screen reader.
+- The install button says **Install**, with a download icon.
+
+### An emoji in a name is the player's own picture of themselves
+
+If a name has an emoji in it, the round badge shows the emoji instead of
+two initials. A flag, a family joined together and a thumb with a skin
+tone are each one picture, not two characters.
+
+### The agents' folder
+
+`AGENTS.md` in the root is the open standard, and it stays exactly where
+it is. The working memory moved from `agents/` to `.agents/`, because it
+is for agents rather than for the product, and a hidden folder says so.
+
+### The documentation page
+
+The Swagger UI is dark, and now it is legible. Swagger draws its schema
+section with the light theme's colours, so the model names were dark grey
+on a grey card, which is unreadable on a dark page. Every part of that
+section now has a colour from the app's own palette.
+
+Two of the bugs were ours, not Swagger's:
+
+- A decorative glow behind the header was a fixed overlay at z-index 0,
+  which paints over any content that is not itself positioned. It turned
+  every operation card a shade of light. It sits at z-index -1 now.
+- The same filter that made the little chevrons visible was applied to
+  the whole summary row, which inverted the dark card into a light one.
+
+---
+
+## 2026-10-21
+
 ### Draw It now works the way skribble.io works
 
 The old Draw It gave every player one guess. A wrong guess was gone, the

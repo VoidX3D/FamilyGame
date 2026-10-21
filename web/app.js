@@ -6,7 +6,7 @@ import {
   renderGameScreen,
   syncDrawBoard,
 } from "./games.js";
-import { avatar } from "./dom.js";
+import { avatar, avatarText } from "./dom.js";
 import { hydrateIcons, icon } from "./icons.js";
 import { createSocket, emitAck } from "./net.js";
 import { deleteStored, readStored, writeStored } from "./storage.js";
@@ -139,7 +139,6 @@ const dom = {
   toast: $("toast"),
   installApp: $("install-app"),
   soundToggle: $("sound-toggle"),
-  soundLabel: $("sound-label"),
   soundIcon: $("sound-icon"),
   savedRoom: $("saved-room"),
   useSavedRoom: $("use-saved-room"),
@@ -261,16 +260,16 @@ function showToast(message) {
   }, 2200);
 }
 
+/* The button shows the speaker on its own: a plain speaker means sound is
+ * on, a crossed one means it is off. The words are not needed, and the
+ * icon says the same thing in half the space. */
 function updateSoundButton() {
   const on = audioIsEnabled();
+  const label = on ? "Sound on" : "Sound off";
   dom.soundToggle.setAttribute("aria-pressed", String(on));
-  dom.soundLabel.textContent = on ? "Sound on" : "Sound off";
-  // The words are dropped on a narrow phone, so the button needs a label
-  // of its own for a screen reader.
-  dom.soundToggle.setAttribute("aria-label", on ? "Sound on" : "Sound off");
-  // The glyph said "music playing" whatever the state was. The icon says
-  // whether sound is on or off, which is what the button does.
-  dom.soundIcon?.replaceChildren(icon(on ? "volume-on" : "volume-off", { size: 16 }));
+  dom.soundToggle.setAttribute("aria-label", label);
+  dom.soundToggle.setAttribute("title", label);
+  dom.soundIcon?.replaceChildren(icon(on ? "volume-on" : "volume-off", { size: 18 }));
 }
 
 async function copyText(text) {
@@ -449,7 +448,7 @@ function renderLobbyPlaylist(room) {
     item.className = "score-row";
     const avatar = document.createElement("span");
     avatar.className = `avatar ${toneClass(row.id)}`;
-    avatar.textContent = initials(row.name);
+    avatar.textContent = avatarText(row.name);
     avatar.setAttribute("aria-hidden", "true");
     const name = document.createElement("span");
     name.className = "player-name";

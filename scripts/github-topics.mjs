@@ -12,6 +12,8 @@
  *   $env:GITHUB_TOKEN="ghp_yourtoken"; node scripts/github-topics.mjs
  */
 
+import { DEPLOYED_WEB } from "../web/endpoints.js";
+
 const REPO = process.env.GITHUB_REPO ?? "VoidX3D/FamilyGame";
 const TOKEN = process.env.GITHUB_TOKEN ?? "";
 
@@ -75,7 +77,7 @@ console.log(
 
 const description = await send(`https://api.github.com/repos/${REPO}`, "PATCH", {
   description: DESCRIPTION,
-  homepage: "https://funfamilygame.vercel.app",
+  homepage: DEPLOYED_WEB,
   topics: TOPICS,
 });
 console.log(

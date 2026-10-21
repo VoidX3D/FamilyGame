@@ -2174,17 +2174,24 @@ function drawIt(state, game, mine, actions) {
   nodes.push(head, board);
 
   if (mine.isDrawer) {
-    nodes.push(
-      block(
-        blockTitle("Your word"),
-        el("p", "word-display", mine.yourWord?.text ?? "-"),
-        note(
-          `Category: ${mine.yourWord?.category ?? "Fun"}. Draw it, and never say it out loud.`,
-        ),
+    /* The order here matters. The board comes first, because it is what
+     * the drawer is looking at. The tools come next, because they are
+     * what the drawer is reaching for. The word is pinned to the bottom
+     * of the screen, so it stays in sight while the board is being drawn
+     * on and the tools are being used. */
+    nodes.push(drawToolBar(actions));
+
+    const word = el("section", "draw-word");
+    word.append(blockTitle("Your word"));
+    word.append(el("p", "word-display", mine.yourWord?.text ?? "-"));
+    word.append(
+      el(
+        "p",
+        "draw-word-category",
+        `Category: ${mine.yourWord?.category ?? "Fun"}. Never say it out loud.`,
       ),
     );
-
-    nodes.push(drawToolBar(actions));
+    nodes.push(word);
 
     const tools = el("div", "button-row");
     const undo = button("Undo", "btn btn-tonal");

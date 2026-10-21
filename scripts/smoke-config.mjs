@@ -1,5 +1,6 @@
 /* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import { spawn } from "node:child_process";
+import { FRONTEND_ORIGINS } from "../web/endpoints.js";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
@@ -10,7 +11,7 @@ import path from "node:path";
 
 const port = 3100 + Math.floor(Math.random() * 300);
 const base = `http://127.0.0.1:${port}`;
-const deployedFrontend = "https://funfamilygame.vercel.app";
+const deployedFrontend = FRONTEND_ORIGINS[FRONTEND_ORIGINS.length - 1];
 const passcodeFile = path.join("server", "data", "admin-passcode");
 
 function assert(condition, message) {

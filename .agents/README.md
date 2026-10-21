@@ -1,4 +1,4 @@
-# `agents/`
+# `.agents/`
 
 The shared memory of this repository.
 
@@ -41,7 +41,7 @@ instructions for running, testing and extending the project.
 
 Not the commit after. Not "I'll write it at the end of the week". The same
 one. A commit that changes how the project behaves and does not touch
-`agents/` is an incomplete commit.
+`.agents/` is an incomplete commit.
 
 Concretely:
 

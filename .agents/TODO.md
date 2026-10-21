@@ -29,6 +29,7 @@ The fix is written but is not finished, not verified, or not deployed.
 | **The turn history must stay visible in Who Am I? and Where Am I?** | The redaction that hid it is gone. It still needs a play-through that checks the history mid-round. |
 | **The seat token must stay out of IndexedDB** | The token lives in `localStorage` now and the remembered room record expires after a week. It needs the old IndexedDB entries cleared on the upgrade path, and a check that the token really is gone from IndexedDB. |
 | **The whole session needs a deploy** | Everything above is written and the suites pass. None of it is live until the backend branch is published and the front end is rebuilt. |
+| **The preview images are out of date** | `preview/` holds hand-made screenshots of the player screens and the host console. There is no script for them, so they have to be taken by hand. The documentation page was refreshed; the player screens still show the older Draw It. |
 
 ---
 

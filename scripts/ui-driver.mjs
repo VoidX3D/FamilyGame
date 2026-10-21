@@ -3,9 +3,10 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Builder } from "selenium-webdriver";
 import chrome from "selenium-webdriver/chrome.js";
+import { LOCAL_API, LOCAL_WEB } from "../web/endpoints.js";
 
-export const WEB = process.env.WEB_URL || "http://localhost:5173";
-export const API = process.env.API_URL || "http://localhost:12800";
+export const WEB = process.env.WEB_URL || LOCAL_WEB;
+export const API = process.env.API_URL || LOCAL_API;
 export const SHOTS = process.env.SCREENSHOT_DIR || path.resolve(".shots");
 export const PASSCODE = await loadPasscode();
 

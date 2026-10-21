@@ -45,7 +45,12 @@ const fileValues = readEnvFile();
 
 /* The frontend that may talk to this server. The deployed site is listed
  * here so the server works with no configuration at all; a settings file or
- * an environment variable can add more. */
+ * an environment variable can add more.
+ *
+ * This list is written out rather than imported because the `backend`
+ * branch is a split of `server/` alone and cannot reach `web/endpoints.js`,
+ * where the same list lives for the front end. The smoke suite checks that
+ * the two agree, so they cannot drift apart. */
 const DEFAULT_ORIGINS = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
@@ -180,7 +185,7 @@ function isOriginAllowed(origin) {
 }
 
 export const config = {
-  port: Number(setting("PORT") || setting("SERVER_PORT") || 3000),
+  port: Number(setting("PORT") || setting("SERVER_PORT") || 12800),
   host: setting("HOST", "0.0.0.0"),
   nodeEnv,
   trustProxy,
@@ -189,6 +194,12 @@ export const config = {
   passcodeFile,
   allowedOrigins,
   isOriginAllowed,
+  /* The address the service is reached on in the wild. The documentation
+   * says it, so it belongs in the settings rather than in the code. */
+  publicUrl: String(setting("PUBLIC_URL", "https://familygame.wisp.uno")).replace(
+    /\/+$/,
+    "",
+  ),
   contentFile: setting("CONTENT_FILE", path.join(here, "data", "content.json")),
   maxPlayers: 10,
   minPlayers: 3,

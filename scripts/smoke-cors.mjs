@@ -1,5 +1,6 @@
 /* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import { spawn } from "node:child_process";
+import { FRONTEND_ORIGINS } from "../web/endpoints.js";
 
 /* Checks that the server only answers the frontend it was configured for.
  * A wrong FRONTEND_ORIGINS value makes the browser block every request from
@@ -7,7 +8,7 @@ import { spawn } from "node:child_process";
 
 const port = 3100 + Math.floor(Math.random() * 300);
 const base = `http://127.0.0.1:${port}`;
-const allowed = "https://funfamilygame.vercel.app";
+const allowed = FRONTEND_ORIGINS[FRONTEND_ORIGINS.length - 1];
 const pattern = "https://*.vercel.app";
 
 const child = spawn(process.execPath, ["server/index.js"], {
@@ -30,6 +31,24 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+/* The server carries its own list of allowed frontends, because the
+ * `backend` branch is a split of `server/` alone and cannot reach
+ * web/endpoints.js. This checks that the two lists still agree, because
+ * a front end the server does not allow is a site that silently fails to
+ * talk to its own API. */
+async function checkOriginListsAgree() {
+  const { config } = await import("../server/config.js");
+  const serverOrigins = config.allowedOrigins.map((origin) =>
+    String(origin).replace(/\/+$/, ""),
+  );
+  for (const origin of FRONTEND_ORIGINS) {
+    assert(
+      serverOrigins.includes(origin),
+      `The server does not allow ${origin}. web/endpoints.js and server/config.js have drifted apart.`,
+    );
+  }
+}
+
 async function waitForHealth() {
   for (let attempt = 0; attempt < 40; attempt += 1) {
     try {
@@ -50,6 +69,7 @@ function grantFor(origin) {
 }
 
 try {
+  await checkOriginListsAgree();
   await waitForHealth();
   // The port is random, but a server left over from an earlier run could
   // still be listening on it. Make sure this is our own server.

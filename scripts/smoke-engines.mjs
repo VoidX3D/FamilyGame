@@ -1,6 +1,7 @@
 /* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import { readFileSync } from "node:fs";
 import { GAME_LIST, getGame } from "../server/games/index.js";
+import { normalizeAnswer } from "../server/games/common.js";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -32,6 +33,50 @@ const checks = [];
 function check(name, fn) {
   checks.push({ name, fn });
 }
+
+check("answers are compared the same way everywhere", () => {
+  /* Every game sanitises an answer the same way, so a person who types
+   * "Cactus" gets the same answer as a person who types "cactus". */
+  const same = [
+    ["Cactus", "cactus"],
+    ["CACTUS", "CaCtUs"],
+    ["cactus", "Cactus"],
+    ["hot dog", "Hot-Dog!"],
+    ["hotdog", "HOT DOG"],
+    ["Café", "cafe"],
+    ["rock & roll", "Rock and Roll"],
+    ["  cactus  ", "cactus."],
+  ];
+  for (const [a, b] of same) {
+    assert(
+      normalizeAnswer(a) === normalizeAnswer(b),
+      `"${a}" and "${b}" should be the same answer`,
+    );
+  }
+
+  /* Different words must stay different. */
+  const different = [
+    ["cactus", "cactus plant"],
+    ["cat", "cactus"],
+    ["momos", "samosa"],
+  ];
+  for (const [a, b] of different) {
+    assert(
+      normalizeAnswer(a) !== normalizeAnswer(b),
+      `"${a}" and "${b}" should not be the same answer`,
+    );
+  }
+
+  /* The content has Nepali in it, and Devanagari writes its vowels as
+   * marks on the letter. Folding those away would turn one name into a
+   * different name. */
+  for (const word of ["नेपाल", "काठमाडौ"]) {
+    assert(
+      normalizeAnswer(word) === word,
+      `The Nepali word ${word} was changed by the sanitiser`,
+    );
+  }
+});
 
 check("one-of-us full run", () => {
   const room = makeRoom(4);

@@ -6,9 +6,19 @@
  * /api/openapi.json can never drift apart.
  */
 
+import { config } from "./config.js";
+
+/* The addresses the service answers on.
+ *
+ * The local one is built from the port the server is actually using, so
+ * it cannot drift away from it. The deployed one is the address the
+ * hosting panel gives the service. */
 const servers = [
-  { url: "https://familygame.wisp.uno", description: "Production" },
-  { url: "http://localhost:3000", description: "Local development" },
+  { url: config.publicUrl, description: "Production" },
+  {
+    url: `http://localhost:${config.port}`,
+    description: "Local development",
+  },
 ];
 
 function errorResponse(description) {
