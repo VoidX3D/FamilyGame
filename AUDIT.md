@@ -5,9 +5,169 @@
 **Fixed:** 2026-10-20 19:05 (NPT) — see the status table
 **Second pass:** 2026-10-20 21:50 (NPT) — the drawing game, the played
 rather than typed One of Us, the connection work and the API documentation.
+**Third pass:** 2026-10-21 — review of the PWA, audio, IndexedDB and
+palette work, plus the open issues below.
 **Status:** first prototype complete and live. Eight games.
 **Scope:** Critical + High + Medium findings across `server/`, `web/`, `scripts/`.
 **Method:** every source file read in full; live UI measured in Chrome (computed styles, layout rects); all suites executed; every client contract cross-checked against all 8 game engines.
+
+---
+
+## OPEN ISSUES (2026-10-21)
+
+Found while reviewing the PWA, audio, IndexedDB and palette work. They may
+be fixed by the next update; if not, this is the list to work through.
+Nothing here was changed.
+
+### Do not "fix" the port
+
+`server/.env` sets `PORT=12800` **on purpose**: the hosting service needs
+it, and the backend will not answer without it. Do not change it back to
+3000.
+
+The side effect is that a **local** `npm run dev:server` also listens on
+12800, while `web/config.js`, `scripts/ui-driver.mjs` and
+`scripts/dev-web.mjs` all expect `http://localhost:3000`. So the three
+browser suites cannot reach a locally started server.
+
+The tidy fix, when wanted: let the local dev override the file without
+touching the hosted value — for example `server/.env.local` (gitignored)
+read after `server/.env` by the loader in `server/config.js`, with
+`PORT=3000` in it. A real environment variable must still win over both.
+
+### 1. The host console goes blind after a reconnect — `web/admin.js:1866`
+
+```js
+if (!socket?.connected || roomCreatedForSession) return;   // :1866
+roomCreatedForSession = true;                                // :1874
+roomCreatedForSession = false;                               // :1899 (login only)
+```
+
+`admin:createRoom` is the only thing that puts the admin socket into the
+room's channel, and `broadcast()` sends the state to that channel. The
+flag is cleared only when the host logs in, never when the socket
+reconnects. So a dropped connection means the host receives **no state at
+all**: no player list, no game events, no way to advance the game, while
+the players carry on.
+
+Fix: always emit `admin:createRoom` on connect (the server's
+`getOrCreateRoom()` is idempotent), or clear the flag in the `disconnect`
+handler.
+
+### 2. Drawing dies after a mid-turn reload — `server/games/drawIt.js:251`
+
+The client ids are `c${counter}` (`web/games.js:1754`) and the counter
+restarts at 0 on every page load. The server rejects a repeated id:
+
+```js
+if (game.strokes.some((stroke) => stroke.id === strokeId)) {
+  return { ok: false, code: "duplicate_stroke", ... };
+}
+```
+
+So a drawer whose phone reloads mid-turn (tab eviction, a PWA relaunch)
+sends `c1` again and **every** later stroke is rejected too. The client
+sends without waiting for an answer, so there is no error: the drawer
+sees their own strokes, the room sees a frozen board.
+
+Fix: make the id unique per page session, or namespace the check by
+`by` + turn.
+
+### 3. The turn history goes blank — `server/games/turnGuess.js:180`
+
+```js
+function visibleHistory(game) {
+  if (reveal(game)) return game.history ?? [];
+  return (game.history ?? []).map((entry) => ({ ...entry, answerId: null, answerName: null }));
+}
+```
+
+`recordHistory()` only runs from `finishTurn()`, which sets
+`phase = "reveal"` first (`:151` then `:162`). Every history entry is
+therefore already public, and the client renders `row.answerName`
+(`web/games.js:949`). The effect is that the history list empties as soon
+as the next turn starts.
+
+Fix: drop `visibleHistory()` and use `history: game.history ?? []`.
+
+### 4. The service worker serves the old app — `web/service-worker.js`
+
+- `CACHE = "family-game-shell-v2"` is a hard-coded constant, so the shell
+  is never re-cached on an ordinary deploy. `staleWhileRevalidate` returns
+  the old copy first, and the HTML is `networkFirst`, which gives fresh
+  HTML with stale JavaScript.
+- `/admin` and `/api` are not excluded from the cache, and the Cache API
+  ignores the `no-store` the server sets.
+- `skipWaiting()` and `clients.claim()` are called outside `waitUntil`.
+
+Fix: version the cache name with the build, skip `/admin` and `/api`, and
+honour `no-store`.
+
+### 5. The IndexedDB restore never re-joins the room — `web/app.js:92`
+
+`hydratePersistentState()` shows the lobby, but `attemptResume()` is only
+called from the socket `connect` handler. If IndexedDB resolves after the
+socket connects, the session is restored too late, the join never happens,
+and the player sits on "Rejoining your room…" for ever. The invite-link
+path has the same race in the other direction (`app.js:903`): the delete
+and the read are separate asynchronous connections, so a stale session can
+win.
+
+### 6. The seat token is now in IndexedDB — `web/app.js:213`
+
+`saveSession()` mirrors `{code, token, name}` into IndexedDB as well as
+`localStorage`. The token is the credential that lets anyone holding it
+rejoin as that player. The room code and name are also kept with no
+expiry, and `privacy.html` does not mention IndexedDB.
+
+### 7. The ambient drone never stops — `web/audio.js:52`
+
+`primeAudio()` starts two continuous oscillators (110 Hz and 165 Hz) on the
+first keystroke in the room-code box, and they run until the tab closes.
+A rejected `audio.resume()` also becomes an unhandled rejection, which
+lands in `window.__FG_ERRORS` and **fails the browser suites**.
+
+### 8. Smaller ones
+
+- `server/contentStore.js:342` — the non-atomic write fallback was removed,
+  so a `rename` that fails on Windows loses the edit.
+- `web/games.js:1410` — `#ffd166` is in the draw palette twice.
+- `web/pages.css` — rewritten into one-rule-per-line form, which is not
+  the house style.
+- `web/index.html` and `web/admin.html` — `theme-color` is still
+  `#0c0a13` while the new palette is `#0b1020`.
+- `scripts/dev-web.mjs` — `.webmanifest` is missing from the MIME map, so
+  the install prompt never appears locally.
+- `web/manus-routes.json` — read by nothing, and it lists the admin routes
+  that `robots.txt` asks not to be indexed.
+- `server/games/oneOfUs.js:138` — the `no_consensus` message is wrong
+  (the vote was decisive, just not for the imposter), and `decisiveVote`
+  is published but never read.
+
+### Midnight pre-flight, for the five new games
+
+1. **The CI gate blocks the deploy.** `sync-backend.yml` runs
+   `npm run smoke` *before* it publishes `backend`, and
+   `scripts/smoke-engines.mjs:521`, `scripts/smoke-game-ui.mjs:57` and
+   `scripts/smoke-all-games-ui.mjs:484` all assert **8** games. With 13
+   the suite fails, `backend` is never published, and the front end
+   deploys against an old API.
+2. **A missing content entry takes the whole site down.** A collection
+   registered in `server/contentStore.js` but missing from
+   `server/data/default-content.json` makes the module throw at import:
+
+   ```text
+   SERVER BOOT FAILURE: Invalid default content for charades: Items must be a list.
+   ```
+
+   Every new collection must be in both files. A one-line assertion in the
+   suite would turn this into a red test instead of an outage.
+3. **The service worker will hand people the old app** (issue 4 above),
+   which is the worst way to start a launch.
+4. `web/index.html:34` says "8 Fun2Play Games", and the README says
+   "all eight games" twice.
+5. Each new game needs a `RENDERERS` entry in `web/games.js`, or players
+   see "This game screen is not available yet."
 
 ---
 
