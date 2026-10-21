@@ -111,8 +111,18 @@ function setting(key, fallback = "") {
 }
 
 const nodeEnv = setting("NODE_ENV", "production");
+const rawTrustProxy = setting("TRUST_PROXY", "1").trim().toLowerCase();
+const trustProxy = rawTrustProxy === "true"
+  ? true
+  : rawTrustProxy === "false"
+    ? false
+    : Number(rawTrustProxy) || 0;
 const configuredPasscode = setting("ADMIN_PASSCODE");
 const hasConfiguredPasscode = configuredPasscode.trim().length > 0;
+
+if (nodeEnv === "production" && allowedOrigins.includes("*")) {
+  throw new Error("FRONTEND_ORIGINS=* is not allowed in production.");
+}
 
 if (
   nodeEnv === "production" &&
@@ -173,6 +183,7 @@ export const config = {
   port: Number(setting("PORT") || setting("SERVER_PORT") || 3000),
   host: setting("HOST", "0.0.0.0"),
   nodeEnv,
+  trustProxy,
   adminPasscode: hasConfiguredPasscode ? configuredPasscode : generatedPasscode,
   generatedPasscode,
   passcodeFile,

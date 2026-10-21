@@ -13,6 +13,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { config } from "./config.js";
+import crypto from "node:crypto";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const DEFAULT_CONTENT_FILE = path.join(
@@ -23,6 +24,7 @@ export const DEFAULT_CONTENT_FILE = path.join(
 export const CONTENT_FILE =
   config.contentFile;
 const MEMORY_ONLY = CONTENT_FILE === ":memory:";
+let writeQueue = Promise.resolve();
 
 export class ContentValidationError extends Error {
   constructor(details) {
@@ -339,33 +341,31 @@ export function contentStatus() {
 
 async function writeContentFile() {
   if (MEMORY_ONLY) return;
-  const payload = {
-    updatedAt: new Date().toISOString(),
-    collections: Object.fromEntries(
-      COLLECTIONS.map((collection) => [
-        collection.key,
-        getCollection(collection.key),
-      ]),
-    ),
-  };
-
-  try {
-    await fs.mkdir(path.dirname(CONTENT_FILE), { recursive: true });
-    const temporary = `${CONTENT_FILE}.tmp`;
-    await fs.writeFile(temporary, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  writeQueue = writeQueue.then(async () => {
+    const payload = {
+      updatedAt: new Date().toISOString(),
+      collections: Object.fromEntries(
+        COLLECTIONS.map((collection) => [
+          collection.key,
+          getCollection(collection.key),
+        ]),
+      ),
+    };
+    const temporary = `${CONTENT_FILE}.${process.pid}.${crypto.randomUUID()}.tmp`;
     try {
+      await fs.mkdir(path.dirname(CONTENT_FILE), { recursive: true });
+      await fs.writeFile(temporary, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
       await fs.rename(temporary, CONTENT_FILE);
-    } catch {
-      await fs.writeFile(CONTENT_FILE, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
-      await fs.rm(temporary, { force: true });
+      persisted = true;
+      lastError = "";
+    } catch (error) {
+      persisted = false;
+      lastError = error.message;
+      await fs.rm(temporary, { force: true }).catch(() => {});
+      console.warn(`[content] could not save ${CONTENT_FILE}: ${error.message}`);
     }
-    persisted = true;
-    lastError = "";
-  } catch (error) {
-    persisted = false;
-    lastError = error.message;
-    console.warn(`[content] could not save ${CONTENT_FILE}: ${error.message}`);
-  }
+  });
+  await writeQueue;
 }
 
 export async function replaceCollection(key, items) {

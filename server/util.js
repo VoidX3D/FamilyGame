@@ -1,5 +1,6 @@
 /* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import crypto from "node:crypto";
+import { config } from "./config.js";
 
 const ROOM_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
@@ -43,6 +44,8 @@ export function now() {
 }
 
 export function clientIpFromSocket(socket) {
+  const address = socket.handshake.address || "unknown";
+  if (!config.trustProxy) return address;
   return (
     socket.handshake.headers["cf-connecting-ip"] ||
     socket.handshake.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||

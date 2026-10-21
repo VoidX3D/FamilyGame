@@ -53,14 +53,9 @@ app.disable("x-powered-by");
 // reverse proxy (Wispbyte / Vercel). Set TRUST_PROXY=false when the API is
 // exposed directly, so a client cannot spoof its address with
 // X-Forwarded-For and slip the IP rate limits.
-const trustProxy = String(process.env.TRUST_PROXY ?? "1").trim();
 app.set(
   "trust proxy",
-  trustProxy === "true"
-    ? true
-    : trustProxy === "false"
-      ? false
-      : Number(trustProxy) || 0,
+  config.trustProxy,
 );
 
 /* The same rule decides for the REST API and for the Socket.IO handshake,
@@ -84,6 +79,9 @@ const rejectedOrigins = new Map();
 function noteRejectedOrigin(origin) {
   if (!origin) return;
   const key = String(origin).slice(0, 120);
+  if (!rejectedOrigins.has(key) && rejectedOrigins.size >= 1000) {
+    rejectedOrigins.delete(rejectedOrigins.keys().next().value);
+  }
   const seen = rejectedOrigins.get(key) ?? 0;
   rejectedOrigins.set(key, seen + 1);
   if (seen === 0) {
@@ -321,9 +319,8 @@ server.listen(config.port, config.host, () => {
     }`,
   );
   console.log(
-    `Content file: ${
-      process.env.CONTENT_FILE || "server/data/content.json"
-    }${process.env.CONTENT_FILE === ":memory:" ? " (memory only)" : ""}`,
+    `Content file: ${config.contentFile}${
+      config.contentFile === ":memory:" ? " (memory only)" : ""}`,
   );
 
   if (config.generatedPasscode) {
