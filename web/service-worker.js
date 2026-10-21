@@ -12,6 +12,8 @@ const SHELL = [
   "/config.js",
   "/storage.js",
   "/audio.js",
+  "/vendor/socket.io.min.js",
+  "/vendor/gsap.min.js",
   "/manifest.webmanifest",
   "/assets/logo.svg",
   "/assets/icons/icon-192.png",
@@ -42,16 +44,31 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
 
-  event.respondWith(
-    caches.match(request).then((cached) => {
-      const network = fetch(request).then((response) => {
-        if (response.ok && request.destination !== "document") {
-          const copy = response.clone();
-          caches.open(CACHE).then((cache) => cache.put(request, copy));
-        }
-        return response;
-      }).catch(() => cached);
-      return cached || network;
-    }),
-  );
+  const isDocument = request.destination === "document";
+  event.respondWith(isDocument ? networkFirst(request) : staleWhileRevalidate(request));
 });
+
+async function networkFirst(request) {
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(CACHE);
+      await cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    return (await caches.match(request)) || caches.match("/");
+  }
+}
+
+async function staleWhileRevalidate(request) {
+  const cached = await caches.match(request);
+  const refresh = fetch(request).then(async (response) => {
+    if (response.ok) {
+      const cache = await caches.open(CACHE);
+      await cache.put(request, response.clone());
+    }
+    return response;
+  }).catch(() => null);
+  return cached || (await refresh) || new Response("Offline", { status: 503 });
+}

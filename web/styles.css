@@ -713,7 +713,7 @@ body[data-view="game"] .game-stage {
 
 .connection-dot.is-offline {
   background: var(--on-surface-muted);
-  box-shadow: 0 0 0 4px rgba(174, 184, 208, 0.12);
+  box-shadow: 0 0 0 4px rgba(170, 181, 208, 0.2), 0 0 0 1px var(--outline);
 }
 
 .empty-state {

@@ -25,6 +25,20 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: |
+          npm ci
+          npm --prefix server ci
+
+      - name: Run backend smoke suite
+        run: npm run smoke
+
       - name: Publish server folder to backend
         shell: bash
         run: |

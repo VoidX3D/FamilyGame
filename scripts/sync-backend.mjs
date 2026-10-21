@@ -52,9 +52,13 @@ let stashed = false;
 if (current === BRANCH) {
   const dirty = run(["status", "--porcelain"], { allowFailure: true }).output;
   if (dirty.trim()) {
-    run(["stash", "push", "-u", "-m", "sync-backend: local changes"], {
+    const stash = run(["stash", "push", "-u", "-m", "sync-backend: local changes"], {
       allowFailure: true,
     });
+    if (!stash.ok) {
+      console.error("Could not save local changes safely; refusing to reset the backend branch.");
+      process.exit(1);
+    }
     stashed = true;
     console.log("Your local changes were set aside (git stash).");
   }

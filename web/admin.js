@@ -139,6 +139,7 @@ const dom = {
 
 let token = readToken();
 let socket = null;
+let roomCreatedForSession = false;
 let currentState = null;
 let catalog = [];
 let catalogLoaded = false;
@@ -1862,7 +1863,7 @@ function render(state) {
 }
 
 async function createRoom() {
-  if (!socket?.connected) return;
+  if (!socket?.connected || roomCreatedForSession) return;
 
   const result = await emitAdmin(
     "admin:createRoom",
@@ -1870,6 +1871,7 @@ async function createRoom() {
     "Could not create the room.",
   );
   if (!result) return;
+  roomCreatedForSession = true;
   dom.code.textContent = result.code;
 }
 
@@ -1894,6 +1896,7 @@ function connectAdmin() {
     socket.disconnect();
   }
 
+  roomCreatedForSession = false;
   try {
     socket = createSocket({ role: "admin", token });
   } catch {

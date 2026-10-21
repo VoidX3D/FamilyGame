@@ -737,6 +737,7 @@ async function checkRoomCode(code) {
   } finally {
     codeCheckInFlight = false;
     setBusy(dom.codeSubmit, false, "Checking…", "Continue");
+    dom.codeSubmit.disabled = !socket?.connected;
   }
 }
 
