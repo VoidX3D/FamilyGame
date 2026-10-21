@@ -10,6 +10,7 @@ import {
   pickUnused,
   playerInGame,
   publicBase,
+  roomMemory,
   setNextRound,
   shuffle,
   submittedCount,
@@ -44,7 +45,7 @@ function beginRound(game, round) {
 
 export function create(room) {
   const game = gameState(meta, room);
-  game.usedPromptIds = [];
+  game.usedPromptIds = roomMemory(room, "whoWrotePrompts");
   beginRound(game, 1);
   return game;
 }

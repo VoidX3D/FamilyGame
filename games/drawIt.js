@@ -246,9 +246,14 @@ export function acceptStroke(room, game, playerId, payload) {
   }
 
   const tool = TOOLS.has(payload?.tool) ? payload.tool : "pen";
+  const requestedId = String(payload?.id ?? "").trim();
+  const strokeId = requestedId.slice(0, 40) || `stroke-${game.strokeSeq + 1}`;
+  if (game.strokes.some((stroke) => stroke.id === strokeId)) {
+    return { ok: false, code: "duplicate_stroke", message: "That stroke was already received." };
+  }
 
   const stroke = {
-    id: String(payload?.id ?? `${game.strokeSeq + 1}`).slice(0, 40),
+    id: strokeId,
     by: playerId,
     tool,
     points,
@@ -466,6 +471,9 @@ export function adminAction(room, game, type) {
         code: "already_complete",
         message: "The game is already complete.",
       };
+    }
+    if (game.phase === "drawing") {
+      endTurn(room, game, "host-finished");
     }
     game.phase = "complete";
     game.deadline = 0;
