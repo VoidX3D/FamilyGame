@@ -1,33 +1,34 @@
 /* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 :root {
-  --bg: #0b1220;
-  --surface: #111a2b;
-  --surface-2: #18233a;
-  --surface-3: #22304c;
-  --on-surface: #f4f1ff;
-  --on-surface-muted: #aeb8d0;
-  --outline: #3b4a66;
+  --bg: #0b1020;
+  --surface: #151c32;
+  --surface-2: #1d2742;
+  --surface-3: #263456;
+  --on-surface: #f8f7f2;
+  --on-surface-muted: #aab5d0;
+  --outline: #3a496d;
 
-  --primary: #ff8a6b;
-  --primary-hover: #ffa085;
-  --on-primary: #2a0b04;
-  --primary-container: #5a1f12;
-  --on-primary-container: #ffdbd2;
+  --primary: #ffd166;
+  --primary-hover: #ffe08a;
+  --on-primary: #241b05;
+  --primary-container: #4d3b0f;
+  --on-primary-container: #ffe8a3;
 
-  --secondary: #5eead4;
-  --tertiary: #c4b5fd;
-  --error: #ffb4ab;
-  --error-container: #5a1f12;
-  --on-error-container: #ffdbd2;
+  --secondary: #55d6be;
+  --tertiary: #6c8cff;
+  --accent-pink: #ff7b9c;
+  --error: #ff7a7a;
+  --error-container: #5a2024;
+  --on-error-container: #ffd7d7;
 
   --border-soft: rgba(255, 255, 255, 0.09);
   --border-faint: rgba(255, 255, 255, 0.055);
-  --on-surface-faint: rgba(174, 184, 208, 0.72);
-  --field-placeholder: rgba(174, 184, 208, 0.72);
+  --on-surface-faint: rgba(170, 181, 208, 0.72);
+  --field-placeholder: rgba(170, 181, 208, 0.72);
   --card-sheen: rgba(255, 255, 255, 0.045);
   --shadow-card: 0 24px 70px rgba(0, 0, 0, 0.35);
   --shadow-pop: 0 14px 40px rgba(0, 0, 0, 0.4);
-  --banner-bg: rgba(34, 48, 76, 0.94);
+  --banner-bg: rgba(38, 52, 86, 0.94);
   --blob-opacity: 0.5;
 
   --radius-sm: 12px;
@@ -71,9 +72,9 @@ body {
   font-family: var(--font-sans);
   color: var(--on-surface);
   background:
-    radial-gradient(1100px 600px at 85% -10%, rgba(255, 138, 107, 0.16), transparent 60%),
-    radial-gradient(900px 520px at -10% 32%, rgba(94, 234, 212, 0.12), transparent 62%),
-    radial-gradient(800px 500px at 50% 110%, rgba(196, 181, 253, 0.1), transparent 65%),
+    radial-gradient(1100px 600px at 85% -10%, rgba(255, 209, 102, 0.16), transparent 60%),
+    radial-gradient(900px 520px at -10% 32%, rgba(85, 214, 190, 0.12), transparent 62%),
+    radial-gradient(800px 500px at 50% 110%, rgba(108, 140, 255, 0.1), transparent 65%),
     var(--bg);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -123,13 +124,13 @@ button {
 .blob-a {
   top: -26vw;
   right: -20vw;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 138, 107, 0.6), transparent 66%);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 209, 102, 0.6), transparent 66%);
 }
 
 .blob-b {
   bottom: -30vw;
   left: -24vw;
-  background: radial-gradient(circle at 60% 40%, rgba(94, 234, 212, 0.4), transparent 66%);
+  background: radial-gradient(circle at 60% 40%, rgba(85, 214, 190, 0.4), transparent 66%);
 }
 
 .page {
@@ -169,16 +170,16 @@ button {
 .install-button {
   min-height: 38px;
   padding: 0 14px;
-  border: 1px solid rgba(94, 234, 212, 0.35);
+  border: 1px solid rgba(85, 214, 190, 0.35);
   border-radius: var(--radius-pill);
-  background: rgba(94, 234, 212, 0.1);
+  background: rgba(85, 214, 190, 0.1);
   color: var(--secondary);
   font-size: 12px;
   font-weight: 800;
   cursor: pointer;
 }
 
-.install-button:hover { background: rgba(94, 234, 212, 0.18); }
+.install-button:hover { background: rgba(85, 214, 190, 0.18); }
 
 .shell {
   width: min(100% - 32px, 560px);
@@ -261,7 +262,7 @@ body[data-view="game"] .game-stage {
   height: 56px;
   display: block;
   object-fit: contain;
-  filter: drop-shadow(0 10px 24px rgba(255, 138, 107, 0.2));
+  filter: drop-shadow(0 10px 24px rgba(255, 209, 102, 0.2));
 }
 
 .brand-copy {
@@ -338,7 +339,7 @@ body[data-view="game"] .game-stage {
   padding: 8px 10px 8px 13px;
   border: 1px solid var(--border-faint);
   border-radius: var(--radius-md);
-  background: rgba(94, 234, 212, 0.06);
+  background: rgba(85, 214, 190, 0.06);
   color: var(--on-surface-muted);
   font-size: 12px;
 }
@@ -357,7 +358,7 @@ body[data-view="game"] .game-stage {
   cursor: pointer;
 }
 
-.saved-room-button:hover { background: rgba(94, 234, 212, 0.12); }
+.saved-room-button:hover { background: rgba(85, 214, 190, 0.12); }
 
 .saved-room-clear {
   width: 26px;
@@ -469,7 +470,7 @@ body[data-view="game"] .game-stage {
 .btn-primary {
   background: var(--primary);
   color: var(--on-primary);
-  box-shadow: 0 12px 34px rgba(255, 138, 107, 0.24);
+  box-shadow: 0 12px 34px rgba(255, 209, 102, 0.24);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -633,8 +634,8 @@ body[data-view="game"] .game-stage {
 }
 
 .player-row.is-you {
-  border-color: rgba(94, 234, 212, 0.35);
-  background: linear-gradient(90deg, rgba(94, 234, 212, 0.08), var(--surface-2));
+  border-color: rgba(85, 214, 190, 0.35);
+  background: linear-gradient(90deg, rgba(85, 214, 190, 0.08), var(--surface-2));
 }
 
 .avatar {
@@ -651,12 +652,12 @@ body[data-view="game"] .game-stage {
   letter-spacing: -0.02em;
 }
 
-.tone-0 { background: #c4b5fd; color: #1b1230; }
-.tone-1 { background: #5eead4; color: #00201c; }
-.tone-2 { background: #ffb38f; color: #2a0b04; }
-.tone-3 { background: #93c5fd; color: #0b1b33; }
-.tone-4 { background: #fda4af; color: #3b0712; }
-.tone-5 { background: #fde68a; color: #2b2100; }
+.tone-0 { background: #6c8cff; color: #1b1230; }
+.tone-1 { background: #55d6be; color: #00201c; }
+.tone-2 { background: #ff7b9c; color: #2a0b04; }
+.tone-3 { background: #8fa7ff; color: #0b1b33; }
+.tone-4 { background: #ff7b9c; color: #3b0712; }
+.tone-5 { background: #ffd166; color: #2b2100; }
 
 .player-name {
   min-width: 0;
@@ -671,7 +672,7 @@ body[data-view="game"] .game-stage {
 .you-badge {
   padding: 2px 8px;
   border-radius: var(--radius-pill);
-  background: rgba(94, 234, 212, 0.12);
+  background: rgba(85, 214, 190, 0.12);
   color: var(--secondary);
   font-size: 10px;
   font-weight: 800;
@@ -685,7 +686,7 @@ body[data-view="game"] .game-stage {
   height: 8px;
   border-radius: 50%;
   background: var(--secondary);
-  box-shadow: 0 0 0 4px rgba(94, 234, 212, 0.1);
+  box-shadow: 0 0 0 4px rgba(85, 214, 190, 0.1);
 }
 
 .connection-dot.is-offline {
@@ -792,8 +793,8 @@ body[data-view="game"] .game-stage {
 }
 
 .draw-tile.is-found {
-  border-color: rgba(94, 234, 212, 0.4);
-  background: rgba(94, 234, 212, 0.14);
+  border-color: rgba(85, 214, 190, 0.4);
+  background: rgba(85, 214, 190, 0.14);
   color: var(--secondary);
 }
 
@@ -825,12 +826,12 @@ body[data-view="game"] .game-stage {
 }
 
 .pill-accent {
-  background: rgba(94, 234, 212, 0.14);
+  background: rgba(85, 214, 190, 0.14);
   color: var(--secondary);
 }
 
 .pill-session {
-  background: rgba(196, 181, 253, 0.16);
+  background: rgba(108, 140, 255, 0.16);
   color: var(--tertiary);
 }
 
@@ -952,7 +953,7 @@ body[data-view="game"] .game-stage {
 }
 
 .choice:hover:not(:disabled) {
-  border-color: rgba(94, 234, 212, 0.35);
+  border-color: rgba(85, 214, 190, 0.35);
 }
 
 .choice:disabled {
@@ -987,16 +988,16 @@ body[data-view="game"] .game-stage {
 }
 
 .role-card.is-crew {
-  border-color: rgba(94, 234, 212, 0.32);
+  border-color: rgba(85, 214, 190, 0.32);
   background:
-    linear-gradient(160deg, rgba(94, 234, 212, 0.12), transparent 70%),
+    linear-gradient(160deg, rgba(85, 214, 190, 0.12), transparent 70%),
     var(--surface-2);
 }
 
 .role-card.is-imposter {
-  border-color: rgba(255, 138, 107, 0.36);
+  border-color: rgba(255, 209, 102, 0.36);
   background:
-    linear-gradient(160deg, rgba(255, 138, 107, 0.14), transparent 70%),
+    linear-gradient(160deg, rgba(255, 209, 102, 0.14), transparent 70%),
     var(--surface-2);
 }
 
@@ -1042,13 +1043,13 @@ body[data-view="game"] .game-stage {
 }
 
 .result-banner.is-win {
-  border-color: rgba(94, 234, 212, 0.4);
-  background: rgba(94, 234, 212, 0.12);
+  border-color: rgba(85, 214, 190, 0.4);
+  background: rgba(85, 214, 190, 0.12);
 }
 
 .result-banner.is-loss {
-  border-color: rgba(255, 138, 107, 0.4);
-  background: rgba(255, 138, 107, 0.1);
+  border-color: rgba(255, 209, 102, 0.4);
+  background: rgba(255, 209, 102, 0.1);
 }
 
 .result-title {
@@ -1182,7 +1183,7 @@ body[data-view="game"] .game-stage {
 }
 
 .result-row.is-you {
-  border-color: rgba(94, 234, 212, 0.35);
+  border-color: rgba(85, 214, 190, 0.35);
 }
 
 .badge {
@@ -1197,7 +1198,7 @@ body[data-view="game"] .game-stage {
 }
 
 .badge-correct {
-  background: rgba(94, 234, 212, 0.16);
+  background: rgba(85, 214, 190, 0.16);
   color: var(--secondary);
 }
 
@@ -1207,7 +1208,7 @@ body[data-view="game"] .game-stage {
 }
 
 .badge-you {
-  background: rgba(196, 181, 253, 0.16);
+  background: rgba(108, 140, 255, 0.16);
   color: var(--tertiary);
 }
 
@@ -1252,10 +1253,10 @@ body[data-view="game"] .game-stage {
   display: grid;
   gap: var(--space-3);
   padding: var(--space-4);
-  border: 1px solid rgba(255, 138, 107, 0.35);
+  border: 1px solid rgba(255, 209, 102, 0.35);
   border-radius: var(--radius-lg);
   background:
-    linear-gradient(160deg, rgba(255, 138, 107, 0.14), transparent 70%),
+    linear-gradient(160deg, rgba(255, 209, 102, 0.14), transparent 70%),
     var(--surface-2);
 }
 
@@ -1369,7 +1370,7 @@ body[data-view="game"] .game-stage {
 
 .draw-tool.is-active {
   border-color: var(--primary);
-  background: rgba(255, 138, 107, 0.16);
+  background: rgba(255, 209, 102, 0.16);
   color: var(--primary);
 }
 

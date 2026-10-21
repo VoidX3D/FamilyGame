@@ -1402,10 +1402,10 @@ function historyList(game) {
 
 /* The palette the drawer can pick from. */
 const DRAW_COLORS = [
-  "#f4f1ff",
-  "#ff8a6b",
-  "#5eead4",
-  "#c4b5fd",
+  "#f8f7f2",
+  "#ffd166",
+  "#55d6be",
+  "#6c8cff",
   "#ffd166",
   "#7dd3fc",
   "#86efac",
