@@ -135,7 +135,16 @@ function tallyVotes(room, game) {
   if (caught) {
     game.phase = "imposter-guess";
   } else {
-    finish(room, game, "imposter", top.length > 1 ? "vote_tie" : "no_consensus");
+    /* Two different things can happen here, and the room deserves to be
+     * told which one it was. A tie means nobody stood out. A clear vote
+     * for somebody who was not the imposter means the room was wrong,
+     * which is not the same thing at all. */
+    finish(
+      room,
+      game,
+      "imposter",
+      top.length > 1 ? "vote_tie" : "wrong_vote",
+    );
   }
 }
 

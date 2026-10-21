@@ -16,6 +16,8 @@ import { config } from "./config.js";
 import crypto from "node:crypto";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+/* The shape of the collections: one JSON entry per collection. */
+export const SCHEMA_FILE = path.join(here, "data", "content-schema.json");
 export const DEFAULT_CONTENT_FILE = path.join(
   here,
   "data",
@@ -35,7 +37,13 @@ export class ContentValidationError extends Error {
   }
 }
 
-export const COLLECTIONS = [
+/* The shape of every collection.
+ *
+ * It lives in server/data/content-schema.json, so a new collection is a
+ * JSON entry and not a change to this file. The built-in copy below is only
+ * used if that file is missing or broken, so the server always starts.
+ */
+const BUILTIN_COLLECTIONS = [
   {
     key: "oneOfUsWords",
     label: "One of Us words",
@@ -145,6 +153,30 @@ export const COLLECTIONS = [
     ],
   },
 ];
+
+function loadSchema() {
+  try {
+    const raw = readFileSync(SCHEMA_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    const list = parsed?.collections;
+    if (!Array.isArray(list) || list.length === 0) {
+      throw new Error("the schema file has no collections");
+    }
+    for (const collection of list) {
+      if (!collection?.key || !collection?.kind) {
+        throw new Error("a collection is missing its key or kind");
+      }
+    }
+    return list;
+  } catch (error) {
+    console.warn(
+      `[content] could not read ${SCHEMA_FILE} (${error.message}). Using the built-in collection list.`,
+    );
+    return BUILTIN_COLLECTIONS;
+  }
+}
+
+export const COLLECTIONS = loadSchema();
 
 function loadDefaultItems() {
   let parsed;
@@ -276,19 +308,36 @@ function resetToDefaults(key) {
   return true;
 }
 
+/* Load the built-in content.
+ *
+ * A collection that is registered but has no entries in the content file is
+ * a mistake, but it must not take the whole site down: the server used to
+ * throw here, which meant one missing entry stopped the API from starting
+ * and every game with it. Now the collection is reported and left empty,
+ * and the engine falls back to its own placeholder, so the rest of the
+ * evening still works.
+ */
 for (const collection of COLLECTIONS) {
+  const raw = DEFAULT_ITEMS[collection.key];
+  if (!Array.isArray(raw)) {
+    const message = `The collection "${collection.key}" is missing from the content file.`;
+    lastError = message;
+    console.warn(`[content] ${message} The game will use its placeholder.`);
+    DEFAULT_ITEMS[collection.key] = [];
+    resetToDefaults(collection.key);
+    continue;
+  }
+
   try {
-    DEFAULT_ITEMS[collection.key] = normalizeItems(
-      collection,
-      DEFAULT_ITEMS[collection.key],
-    );
+    DEFAULT_ITEMS[collection.key] = normalizeItems(collection, raw);
   } catch (error) {
     const details = Array.isArray(error?.details)
       ? error.details.join(" ")
       : error.message;
-    throw new Error(
-      `Invalid default content for ${collection.key}: ${details}`,
-    );
+    const message = `Invalid default content for ${collection.key}: ${details}`;
+    lastError = message;
+    console.warn(`[content] ${message} The game will use its placeholder.`);
+    DEFAULT_ITEMS[collection.key] = [];
   }
   resetToDefaults(collection.key);
 }
@@ -352,17 +401,32 @@ async function writeContentFile() {
       ),
     };
     const temporary = `${CONTENT_FILE}.${process.pid}.${crypto.randomUUID()}.tmp`;
+    const body = `${JSON.stringify(payload, null, 2)}\n`;
     try {
       await fs.mkdir(path.dirname(CONTENT_FILE), { recursive: true });
-      await fs.writeFile(temporary, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+      await fs.writeFile(temporary, body, "utf8");
       await fs.rename(temporary, CONTENT_FILE);
       persisted = true;
       lastError = "";
     } catch (error) {
-      persisted = false;
-      lastError = error.message;
-      await fs.rm(temporary, { force: true }).catch(() => {});
-      console.warn(`[content] could not save ${CONTENT_FILE}: ${error.message}`);
+      // A rename can fail on Windows when the file is open elsewhere. The
+      // edit still has to land, so it is written directly as a fallback
+      // rather than lost.
+      try {
+        await fs.writeFile(CONTENT_FILE, body, "utf8");
+        persisted = true;
+        lastError = "";
+        await fs.rm(temporary, { force: true }).catch(() => {});
+        console.warn(
+          `[content] renamed into place failed (${error.message}), wrote ${CONTENT_FILE} directly.`,
+        );
+        return;
+      } catch (fallbackError) {
+        persisted = false;
+        lastError = fallbackError.message;
+        await fs.rm(temporary, { force: true }).catch(() => {});
+        console.warn(`[content] could not save ${CONTENT_FILE}: ${fallbackError.message}`);
+      }
     }
   });
   await writeQueue;

@@ -43,6 +43,8 @@ const TURN_LENGTHS = [30, 45, 60, 90];
 const DEFAULT_TURN_SECONDS = 60;
 const REVEAL_MS = 10_000;
 const MAX_STROKES = 4000;
+/* How many guesses the running list keeps. */
+const MAX_GUESS_LOG = 120;
 
 /* A guess is compared without case, punctuation or spaces, so "hot dog",
  * "Hot-Dog!" and "hotdog" all count as the same word. A different word
@@ -56,6 +58,31 @@ export function normalizeGuess(value) {
 function guessMatches(guess, word) {
   const target = normalizeGuess(word);
   return target.length > 0 && normalizeGuess(guess) === target;
+}
+
+/* How close a wrong guess was.
+ *
+ * Skribble shows the letters of a wrong guess that landed in the right
+ * place, with the rest hidden. It is a hint, and it is safe: a guess can
+ * only match every position if it was the whole word, and a guess that
+ * was the whole word is a correct guess, which is never shown like this.
+ * So the mask can never spell the secret. */
+export function maskGuess(guess, word) {
+  const mine = normalizeGuess(guess);
+  const target = normalizeGuess(word);
+  if (!mine || !target || mine.length !== target.length) return null;
+
+  let mask = "";
+  let matched = 0;
+  for (let index = 0; index < mine.length; index += 1) {
+    if (mine[index] === target[index]) {
+      mask += mine[index];
+      matched += 1;
+    } else {
+      mask += "_";
+    }
+  }
+  return { mask, matched };
 }
 
 function currentDrawer(game) {
@@ -109,6 +136,23 @@ function revealed(game) {
   return game.phase === "reveal" || game.phase === "complete";
 }
 
+/* The running list of guesses, as the room sees it.
+ *
+ * A wrong guess is shown as it was typed, because the room hears it
+ * anyway. A correct guess is not: that text is the word, and the word is
+ * not public until the turn is over. */
+function safeGuessLog(game) {
+  return (game.guessLog ?? []).map((entry) => ({
+    id: entry.id,
+    playerId: entry.playerId,
+    playerName: entry.playerName,
+    text: entry.correct ? null : entry.text,
+    correct: entry.correct,
+    mask: entry.mask ?? null,
+    matched: entry.matched ?? 0,
+  }));
+}
+
 function beginTurn(game) {
   const drawer = currentDrawer(game);
   if (!drawer) {
@@ -125,6 +169,8 @@ function beginTurn(game) {
   game.strokes = [];
   game.strokeSeq = 0;
   game.guessers = [];
+  game.guessLog = [];
+  game.guessSeq = 0;
   game.wrongGuesses = 0;
   game.result = null;
   game.turnStartedAt = Date.now();
@@ -145,6 +191,8 @@ export function create(room) {
   game.strokes = [];
   game.strokeSeq = 0;
   game.guessers = [];
+  game.guessLog = [];
+  game.guessSeq = 0;
   game.wrongGuesses = 0;
   game.result = null;
   game.turnLengthMs = DEFAULT_TURN_SECONDS * 1000;
@@ -304,7 +352,7 @@ export function strokeHistory(game) {
 
 /* The tools the drawer can use. The server only checks that the tool is
  * one it knows; the drawing itself is done by the clients. */
-const TOOLS = new Set(["pen", "erase", "fill"]);
+const TOOLS = new Set(["pen", "erase", "fill", "line", "square"]);
 
 /* Removes the drawer's last stroke, so a mistake can be taken back. */
 export function undoStroke(room, game, playerId) {
@@ -365,7 +413,18 @@ export function action(room, game, playerId, payload) {
     if (game.phase !== "drawing") {
       return { ok: false, code: "wrong_phase", message: "Guessing is closed." };
     }
-    if (game.guessers.includes(playerId)) {
+
+    const text = cleanText(payload?.text, 60);
+    if (!text) {
+      return { ok: false, code: "empty_guess", message: "Type a guess first." };
+    }
+
+    const correct = guessMatches(text, game.word?.text);
+
+    /* A player may keep guessing until they get it, the way it works in
+     * Skribble. Guessing again after the word is found is pointless, so
+     * that is the one case that is turned away. */
+    if (correct && game.guessers.includes(playerId)) {
       return {
         ok: false,
         code: "already_guessed",
@@ -373,14 +432,34 @@ export function action(room, game, playerId, payload) {
       };
     }
 
-    const text = cleanText(payload?.text, 60);
-    if (!text) {
-      return { ok: false, code: "empty_guess", message: "Type a guess first." };
+    const near = correct ? null : maskGuess(text, game.word?.text);
+    game.guessLog = game.guessLog ?? [];
+    game.guessSeq = (game.guessSeq ?? 0) + 1;
+    game.guessLog.push({
+      id: game.guessSeq,
+      playerId,
+      playerName: playerName(game, playerId),
+      text,
+      correct,
+      mask: near?.mask ?? null,
+      matched: near?.matched ?? 0,
+      at: Date.now(),
+    });
+    /* The list is for the room, not an archive. */
+    if (game.guessLog.length > MAX_GUESS_LOG) {
+      game.guessLog.splice(0, game.guessLog.length - MAX_GUESS_LOG);
     }
 
-    if (!guessMatches(text, game.word?.text)) {
+    if (!correct) {
       game.wrongGuesses += 1;
-      return { ok: true, correct: false };
+      // The guesser gets the hint too: the letters that landed in the
+      // right place.
+      return {
+        ok: true,
+        correct: false,
+        mask: near?.mask ?? null,
+        matched: near?.matched ?? 0,
+      };
     }
 
     game.guessers.push(playerId);
@@ -390,21 +469,6 @@ export function action(room, game, playerId, payload) {
       endTurn(room, game, "guessed");
     }
     return { ok: true, correct: true };
-  }
-
-  if (type === "done") {
-    if (playerId !== game.drawerId) {
-      return {
-        ok: false,
-        code: "not_drawer",
-        message: "Only the drawer can end the turn.",
-      };
-    }
-    if (game.phase !== "drawing") {
-      return { ok: false, code: "wrong_phase", message: "The turn is over." };
-    }
-    endTurn(room, game, "drawer-done");
-    return { ok: true };
   }
 
   return { ok: false, code: "unknown_action", message: "Unknown action." };
@@ -510,6 +574,7 @@ export function publicView(game) {
     strokeCount: game.strokes?.length ?? 0,
     guessedCount: game.guessers?.length ?? 0,
     wrongCount: game.wrongGuesses ?? 0,
+    guessLog: safeGuessLog(game),
     word: shown ? safeWord(game.word) : null,
     result: shown ? safeResult(game.result) : null,
     history: game.history ?? [],
@@ -539,8 +604,8 @@ export function playerView(game, playerId) {
     canGuess:
       !isDrawer && game.phase === "drawing" && !youGuessed,
     canDraw: isDrawer && game.phase === "drawing",
-    canDone: isDrawer && game.phase === "drawing",
     canClear: isDrawer && game.phase === "drawing",
+    guessLog: safeGuessLog(game),
     result: shown ? safeResult(game.result) : null,
     history: game.history ?? [],
     waiting:
@@ -576,6 +641,7 @@ export function adminView(game, room) {
     ...publicView(game),
     word: safeWord(game.word),
     result: safeResult(game.result),
+    guessLog: safeGuessLog(game),
     history: game.history ?? [],
     controls,
     submissions: {

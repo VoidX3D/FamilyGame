@@ -72,6 +72,38 @@ export const openapi = {
         },
       },
     },
+    "/api": {
+      get: {
+        tags: ["Service"],
+        summary: "The API index",
+        description:
+          "What this service offers and where to find it. The front end is served from another host, so the API address on its own used to land on a page that did not exist.",
+        operationId: "getApiIndex",
+        responses: {
+          200: {
+            description: "The index.",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    ok: { type: "boolean", example: true },
+                    name: { type: "string", example: "Family Game Hub API" },
+                    version: { type: "string", example: "1.0.0" },
+                    documentation: { type: "string", example: "/api/docs" },
+                    openapi: { type: "string", example: "/api/openapi.json" },
+                    endpoints: {
+                      type: "object",
+                      additionalProperties: { type: "string" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     "/healthz": {
       get: {
         tags: ["Service"],

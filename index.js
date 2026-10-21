@@ -1,6 +1,7 @@
 /* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import http from "node:http";
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
@@ -30,8 +31,14 @@ import {
 import { GAME_LIST } from "./games/index.js";
 import { attachProtocol } from "./protocol.js";
 import { RoomStore } from "./rooms.js";
-import { docsPage } from "./docsPage.js";
+import { swaggerPage } from "./docsPage.js";
 import { openapi } from "./openapi.js";
+
+/* The Swagger UI is served from the backend, so the documentation is always
+ * the documentation of the running service. */
+const swaggerUiPath = path.dirname(
+  createRequire(import.meta.url).resolve("swagger-ui-dist/package.json"),
+);
 
 /* The version comes from the package file, so it is never out of date. */
 const packageVersion = (() => {
@@ -163,14 +170,61 @@ app.get("/api/rooms", (req, res) => {
   });
 });
 
+/* The API index.
+ *
+ * The front end is served from another host, so "the API address" on its
+ * own used to land on a page that did not exist. This lists what is
+ * here, so the address leads somewhere useful. */
+app.get("/api", (req, res) => {
+  res.json({
+    ok: true,
+    name: "Family Game Hub API",
+    version: packageVersion,
+    documentation: "/api/docs",
+    openapi: "/api/openapi.json",
+    endpoints: {
+      health: "/healthz",
+      games: "/api/games",
+      rooms: "/api/rooms",
+      docs: "/api/docs",
+      openapi: "/api/openapi.json",
+    },
+  });
+});
+
 /* The API description, in the OpenAPI format a Swagger UI, Postman or a
  * code generator understands. The page on /api/docs reads this same file. */
 app.get("/api/openapi.json", (req, res) => {
   res.json(openapi);
 });
 
+/* The documentation page: the real Swagger UI, served from the backend so
+ * it always matches the running service. */
 app.get("/api/docs", (req, res) => {
-  res.type("html").send(docsPage);
+  res.type("html").send(swaggerPage);
+});
+
+const SWAGGER_FILES = {
+  "swagger-ui.css": "text/css; charset=utf-8",
+  "swagger-ui-bundle.js": "text/javascript; charset=utf-8",
+  "swagger-ui-standalone-preset.js": "text/javascript; charset=utf-8",
+  "favicon-32x32.png": "image/png",
+  "favicon-16x16.png": "image/png",
+};
+
+app.get("/api/docs/:file", (req, res) => {
+  const name = req.params.file;
+  const type = SWAGGER_FILES[name];
+  if (!type) {
+    return res.status(404).json({ ok: false, error: "not_found" });
+  }
+  const file = path.join(swaggerUiPath, name);
+  res.type(type);
+  res.sendFile(file, (error) => {
+    if (error) {
+      res.status(404).json({ ok: false, error: "not_found" });
+    }
+  });
 });
 
 app.get("/api/games", (req, res) => {

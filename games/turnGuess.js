@@ -177,15 +177,6 @@ function createEngine({ id, name, tagline, contentType, contentKey, note }) {
     return game.phase === "reveal" || game.phase === "complete";
   }
 
-  function visibleHistory(game) {
-    if (reveal(game)) return game.history ?? [];
-    return (game.history ?? []).map((entry) => ({
-      ...entry,
-      answerId: null,
-      answerName: null,
-    }));
-  }
-
   function action(room, game, playerId, payload) {
     if (!playerInGame(game, playerId)) {
       return { ok: false, code: "not_in_game", message: "You are not in this game." };
@@ -311,7 +302,7 @@ function createEngine({ id, name, tagline, contentType, contentKey, note }) {
       activePlayerName: active?.name ?? playerName(game, game.activePlayerId),
       guessCount: game.guesses?.length ?? 0,
       result: reveal(game) ? safeResult(game.result) : null,
-      history: visibleHistory(game),
+      history: game.history ?? [],
     };
   }
 
@@ -341,7 +332,7 @@ function createEngine({ id, name, tagline, contentType, contentKey, note }) {
         : [],
       assignment: visibleAssignment,
       result: shown ? safeResult(game.result) : null,
-      history: visibleHistory(game),
+      history: game.history ?? [],
       waiting: !active && game.phase === "guess",
     };
   }
