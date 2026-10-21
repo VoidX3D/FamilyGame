@@ -2260,6 +2260,325 @@
         "word": "Piano keys",
         "category": "Music"
       }
+    ],
+    "emojiPuzzles": [
+      {
+        "id": "honey",
+        "emoji": "🐝 🍯",
+        "name": "Honey",
+        "category": "Food",
+        "aliases": [
+          "honey"
+        ],
+        "hints": [
+          "Sweet and made by a tiny flying worker"
+        ]
+      },
+      {
+        "id": "rainy-day",
+        "emoji": "🌧️ ☂️",
+        "name": "Rainy Day",
+        "category": "Weather",
+        "aliases": [
+          "rain"
+        ]
+      },
+      {
+        "id": "movie-night",
+        "emoji": "🎬 🍿",
+        "name": "Movie Night",
+        "category": "Activity",
+        "aliases": [
+          "cinema"
+        ]
+      },
+      {
+        "id": "sunny-day",
+        "emoji": "🌞 🕶️",
+        "name": "Sunny Day",
+        "category": "Weather",
+        "aliases": [
+          "sunshine"
+        ]
+      },
+      {
+        "id": "sushi",
+        "emoji": "🐟 🍚",
+        "name": "Sushi",
+        "category": "Food",
+        "aliases": [
+          "sushi roll"
+        ]
+      },
+      {
+        "id": "space-travel",
+        "emoji": "🚀 🌙",
+        "name": "Space Travel",
+        "category": "Adventure",
+        "aliases": [
+          "space trip"
+        ]
+      },
+      {
+        "id": "birthday-cake",
+        "emoji": "🎂 🎉",
+        "name": "Birthday Cake",
+        "category": "Celebration",
+        "aliases": [
+          "birthday"
+        ]
+      },
+      {
+        "id": "camping",
+        "emoji": "⛺ 🔥",
+        "name": "Camping",
+        "category": "Adventure",
+        "aliases": [
+          "camp"
+        ]
+      },
+      {
+        "id": "rainbow",
+        "emoji": "🌧️ 🌈",
+        "name": "Rainbow",
+        "category": "Nature",
+        "aliases": []
+      },
+      {
+        "id": "mountain-climb",
+        "emoji": "🏔️ 🧗",
+        "name": "Mountain Climbing",
+        "category": "Adventure",
+        "aliases": [
+          "climbing"
+        ]
+      }
+    ],
+    "captionPrompts": [
+      {
+        "id": "group-chat",
+        "text": "The family group chat at 2 a.m.",
+        "category": "Family"
+      },
+      {
+        "id": "selfie-camera",
+        "text": "Grandma discovers the selfie camera",
+        "category": "Family"
+      },
+      {
+        "id": "last-momo",
+        "text": "The last momo on the plate",
+        "category": "Food"
+      },
+      {
+        "id": "five-minutes",
+        "text": "When someone says “five more minutes”",
+        "category": "Everyday"
+      },
+      {
+        "id": "snack-packet",
+        "text": "A pet hears the snack packet open",
+        "category": "Pets"
+      },
+      {
+        "id": "wrong-door",
+        "text": "You confidently walk through the wrong door",
+        "category": "Awkward"
+      },
+      {
+        "id": "alarm",
+        "text": "Your alarm clock after a long weekend",
+        "category": "Everyday"
+      },
+      {
+        "id": "family-photo",
+        "text": "Everyone poses for the family photo",
+        "category": "Family"
+      },
+      {
+        "id": "wifi",
+        "text": "The Wi-Fi stops working during movie night",
+        "category": "Everyday"
+      },
+      {
+        "id": "cooking",
+        "text": "Someone says they can cook without a recipe",
+        "category": "Food"
+      }
+    ],
+    "spyfallLocations": [
+      {
+        "id": "airport",
+        "name": "Airport",
+        "category": "Travel",
+        "aliases": [
+          "the airport"
+        ]
+      },
+      {
+        "id": "school",
+        "name": "School",
+        "category": "Everyday",
+        "aliases": [
+          "classroom"
+        ]
+      },
+      {
+        "id": "wedding",
+        "name": "Wedding",
+        "category": "Celebration",
+        "aliases": [
+          "wedding ceremony"
+        ]
+      },
+      {
+        "id": "hospital",
+        "name": "Hospital",
+        "category": "Places",
+        "aliases": [
+          "clinic"
+        ]
+      },
+      {
+        "id": "cinema",
+        "name": "Cinema",
+        "category": "Entertainment",
+        "aliases": [
+          "movie theater"
+        ]
+      },
+      {
+        "id": "restaurant",
+        "name": "Restaurant",
+        "category": "Food",
+        "aliases": [
+          "cafe"
+        ]
+      },
+      {
+        "id": "market",
+        "name": "Market",
+        "category": "Shopping",
+        "aliases": [
+          "bazaar"
+        ]
+      },
+      {
+        "id": "picnic",
+        "name": "Picnic",
+        "category": "Outdoors",
+        "aliases": [
+          "park picnic"
+        ]
+      },
+      {
+        "id": "bus",
+        "name": "Bus",
+        "category": "Travel",
+        "aliases": [
+          "bus stop"
+        ]
+      },
+      {
+        "id": "beach",
+        "name": "Beach",
+        "category": "Outdoors",
+        "aliases": [
+          "seaside"
+        ]
+      }
+    ],
+    "wouldYouRatherQuestions": [
+      {
+        "id": "breakfast",
+        "optionA": "Have breakfast for dinner every day",
+        "optionB": "Have dinner for breakfast every day",
+        "category": "Food"
+      },
+      {
+        "id": "early",
+        "optionA": "Always be five minutes early",
+        "optionB": "Always be twenty minutes late",
+        "category": "Everyday"
+      },
+      {
+        "id": "space-ocean",
+        "optionA": "Explore space",
+        "optionB": "Explore the deepest ocean",
+        "category": "Adventure"
+      },
+      {
+        "id": "flying",
+        "optionA": "Be able to fly",
+        "optionB": "Be able to breathe underwater",
+        "category": "Superpowers"
+      },
+      {
+        "id": "books",
+        "optionA": "Read every book instantly",
+        "optionB": "Speak every language",
+        "category": "Skills"
+      },
+      {
+        "id": "rain",
+        "optionA": "Control the weather",
+        "optionB": "Talk to animals",
+        "category": "Superpowers"
+      },
+      {
+        "id": "travel",
+        "optionA": "Travel one year into the past",
+        "optionB": "Travel one year into the future",
+        "category": "Time"
+      },
+      {
+        "id": "music",
+        "optionA": "Only listen to one song forever",
+        "optionB": "Never listen to music again",
+        "category": "Choices"
+      }
+    ],
+    "twoTruthsTopics": [
+      {
+        "id": "topic-1",
+        "text": "A surprising thing about your childhood"
+      },
+      {
+        "id": "topic-2",
+        "text": "A food you secretly dislike"
+      },
+      {
+        "id": "topic-3",
+        "text": "A skill your family does not know about"
+      },
+      {
+        "id": "topic-4",
+        "text": "A memorable school moment"
+      },
+      {
+        "id": "topic-5",
+        "text": "A place you want to visit"
+      },
+      {
+        "id": "topic-6",
+        "text": "A harmless fear"
+      },
+      {
+        "id": "topic-7",
+        "text": "A funny recent mistake"
+      },
+      {
+        "id": "topic-8",
+        "text": "A family tradition"
+      },
+      {
+        "id": "topic-9",
+        "text": "A pet story"
+      },
+      {
+        "id": "topic-10",
+        "text": "A strange thing you have collected"
+      }
     ]
   }
 }

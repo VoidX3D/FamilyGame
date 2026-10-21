@@ -152,6 +152,58 @@ const BUILTIN_COLLECTIONS = [
       { key: "category", label: "Category", type: "text", max: 30 },
     ],
   },
+  {
+    key: "emojiPuzzles",
+    label: "Emoji Guess puzzles",
+    game: "Emoji Guess",
+    kind: "record",
+    fields: [
+      { key: "emoji", label: "Emoji clue", type: "text", max: 80, required: true },
+      { key: "name", label: "Answer", type: "text", max: 80, required: true },
+      { key: "category", label: "Category", type: "text", max: 30 },
+      { key: "aliases", label: "Accepted answers (one per line)", type: "lines", max: 80, maxItems: 8 },
+      { key: "hints", label: "Hints (one per line)", type: "lines", max: 120, maxItems: 2 },
+    ],
+  },
+  {
+    key: "captionPrompts",
+    label: "Caption This prompts",
+    game: "Caption This",
+    kind: "record",
+    fields: [
+      { key: "text", label: "Prompt", type: "text", max: 180, required: true },
+      { key: "category", label: "Category", type: "text", max: 30 },
+    ],
+  },
+  {
+    key: "spyfallLocations",
+    label: "Spyfall locations",
+    game: "Spyfall",
+    kind: "record",
+    fields: [
+      { key: "name", label: "Location", type: "text", max: 80, required: true },
+      { key: "category", label: "Category", type: "text", max: 30 },
+      { key: "aliases", label: "Accepted guesses (one per line)", type: "lines", max: 80, maxItems: 8 },
+    ],
+  },
+  {
+    key: "wouldYouRatherQuestions",
+    label: "Would You Rather questions",
+    game: "Would You Rather?",
+    kind: "record",
+    fields: [
+      { key: "optionA", label: "Option A", type: "text", max: 140, required: true },
+      { key: "optionB", label: "Option B", type: "text", max: 140, required: true },
+      { key: "category", label: "Category", type: "text", max: 30 },
+    ],
+  },
+  {
+    key: "twoTruthsTopics",
+    label: "Two Truths & One Lie topics",
+    game: "Two Truths & One Lie",
+    kind: "text",
+    max: 120,
+  },
 ];
 
 function loadSchema() {
