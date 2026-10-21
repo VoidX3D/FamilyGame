@@ -10,20 +10,22 @@
       content="The terms for using the Family Game Hub, a private party game for your family."
     />
     <title>Terms · Family Game Hub</title>
+    <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="pages.css" />
   </head>
   <body>
     <main class="page">
-      <div class="brand">
-        <div class="brand-mark"></div>
-        <div>
-          <h1>Family Game Hub</h1>
-          <p>Private games for your family</p>
-        </div>
-      </div>
+      <header class="brand">
+        <a class="brand-link" href="/" aria-label="Family Game Hub home">
+          <img class="brand-mark" src="assets/logo.svg" alt="" width="48" height="48" />
+          <span><strong>Family Game Hub</strong><small>Private games for your family</small></span>
+        </a>
+        <nav class="page-nav" aria-label="Site navigation"><a href="/about">About</a><a href="/privacy">Privacy</a></nav>
+      </header>
 
       <article>
+        <p class="kicker">A small set of good-game rules</p>
         <h1>Terms of Use</h1>
         <p class="updated">Last updated: 20 October 2026</p>
 
@@ -91,8 +93,7 @@
       </article>
 
       <p class="foot">
-        <a href="/">Back to the game</a> ·
-        <a href="/privacy.html">Privacy</a>
+        <a href="/">Back to the game</a><span>·</span><a href="/about">About</a><span>·</span><a href="/privacy">Privacy</a>
       </p>
     </main>
   </body>

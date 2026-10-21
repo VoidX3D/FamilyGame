@@ -22,6 +22,8 @@ window.addEventListener("unhandledrejection", (event) => {
 
 const SESSION_KEY = "fg:session:v1";
 const NAME_KEY = "fg:lastName:v1";
+const RECENT_ROOM_KEY = "fg:recentRoom:v1";
+let installPrompt = null;
 
 /* The name is remembered separately from the session, so a player whose
  * room disappeared only has to type their name once more. */
@@ -41,11 +43,49 @@ function lastName() {
   }
 }
 
+function loadRecentRoom() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(RECENT_ROOM_KEY) || "null");
+    return /^[A-Z2-9]{5}$/.test(parsed?.code) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function renderSavedRoom() {
+  const recent = loadRecentRoom();
+  if (!dom.savedRoom) return;
+  dom.savedRoom.hidden = !recent;
+  if (recent) dom.useSavedRoom.textContent = recent.code;
+}
+
+function rememberRoom(code, name = lastName()) {
+  try {
+    localStorage.setItem(RECENT_ROOM_KEY, JSON.stringify({ code, name, savedAt: Date.now() }));
+  } catch {
+    // Private browsing can reject storage.
+  }
+  renderSavedRoom();
+}
+
+function forgetRoom() {
+  try {
+    localStorage.removeItem(RECENT_ROOM_KEY);
+  } catch {
+    // Ignore storage failures.
+  }
+  renderSavedRoom();
+}
+
 const $ = (id) => document.getElementById(id);
 
 const dom = {
   banner: $("connection-banner"),
   toast: $("toast"),
+  installApp: $("install-app"),
+  savedRoom: $("saved-room"),
+  useSavedRoom: $("use-saved-room"),
+  clearSavedRoom: $("clear-saved-room"),
 
   codeForm: $("code-form"),
   codeInput: $("room-code"),
@@ -683,6 +723,7 @@ dom.nameForm.addEventListener("submit", async (event) => {
 
     saveSession({ code: result.code, token: result.token, name });
     rememberName(name);
+    rememberRoom(result.code, name);
     dom.lobbyCode.textContent = result.code;
     dom.lobbyStatus.textContent = "Joining the room…";
     showStep("lobby");
@@ -726,6 +767,48 @@ dom.lobbyInvite.addEventListener("click", async () => {
   }
 });
 
+dom.useSavedRoom.addEventListener("click", () => {
+  const recent = loadRecentRoom();
+  if (!recent) return;
+  dom.codeInput.value = recent.code;
+  dom.nameInput.value = recent.name || lastName();
+  void checkRoomCode(recent.code);
+});
+
+dom.clearSavedRoom.addEventListener("click", () => {
+  forgetRoom();
+  showToast("Saved room forgotten");
+});
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  installPrompt = event;
+  dom.installApp.hidden = false;
+});
+
+dom.installApp.addEventListener("click", async () => {
+  if (!installPrompt) return;
+  installPrompt.prompt();
+  const choice = await installPrompt.userChoice;
+  if (choice.outcome === "accepted") showToast("Family Game Hub installed");
+  installPrompt = null;
+  dom.installApp.hidden = true;
+});
+
+window.addEventListener("appinstalled", () => {
+  installPrompt = null;
+  dom.installApp.hidden = true;
+  showToast("Ready for game night");
+});
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/service-worker.js").catch(() => {
+      // The game remains fully usable if a host blocks service workers.
+    });
+  });
+}
+
 function intro() {
   if (!window.gsap || prefersReducedMotion()) return;
 
@@ -753,6 +836,7 @@ if (session) {
 }
 
 hydrateIcons();
+renderSavedRoom();
 connectSocket();
 intro();
 window.__FG_READY__ = "player";

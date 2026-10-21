@@ -5,6 +5,7 @@
     { "source": "/g/:code", "destination": "/index.html" },
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" },
+    { "source": "/about", "destination": "/about.html" },
     { "source": "/admin", "destination": "/admin.html" },
     { "source": "/admin/room", "destination": "/admin.html" },
     { "source": "/admin/playlist", "destination": "/admin.html" },

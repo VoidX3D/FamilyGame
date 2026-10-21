@@ -8,6 +8,7 @@ User-agent: *
 Allow: /$
 Allow: /privacy.html
 Allow: /terms.html
+Allow: /about
 Disallow: /admin
 Disallow: /g/
 Disallow: /game

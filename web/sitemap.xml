@@ -12,6 +12,11 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://funfamilygame.vercel.app/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://funfamilygame.vercel.app/terms.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>

@@ -18,6 +18,9 @@ browser loads the ES modules directly. Made by **VoidX3D (Sincere Bhattarai)**.
 | `styles.css` | The shared dark theme. |
 | `admin.css` | The host console layout. |
 | `pages.css` | The static pages: privacy and terms. |
+| `about.html` | The product story and hosting guide. |
+| `manifest.webmanifest` | Install metadata for phones, tablets, and desktops. |
+| `service-worker.js` | Offline app-shell caching; live room traffic is never cached. |
 | `config.js` | Which API the page talks to. |
 | `vercel.json` | The rewrites and the security headers. |
 | `vendor/` | The vendored GSAP, Lenis and Socket.IO browser builds. |
@@ -44,6 +47,13 @@ npm run dev:web
 | `/admin/config` | The settings. |
 | `/privacy.html` | The privacy policy. |
 | `/terms.html` | The terms. |
+| `/about` | What the hub is, how it works, and how to host it. |
+
+The player remembers the last display name, active seat, and most recent room
+code in the browser's local storage. It can be installed as a progressive web
+app where the browser supports installation. The service worker caches only
+the static shell; room state and Socket.IO traffic remain live and are never
+stored by the offline cache.
 
 ## How the screens are built
 
