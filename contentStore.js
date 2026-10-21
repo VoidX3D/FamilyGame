@@ -12,6 +12,7 @@ import { readFileSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { config } from "./config.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const DEFAULT_CONTENT_FILE = path.join(
@@ -20,7 +21,7 @@ export const DEFAULT_CONTENT_FILE = path.join(
   "default-content.json",
 );
 export const CONTENT_FILE =
-  process.env.CONTENT_FILE || path.join(here, "data", "content.json");
+  config.contentFile;
 const MEMORY_ONLY = CONTENT_FILE === ":memory:";
 
 export class ContentValidationError extends Error {

@@ -178,6 +178,7 @@ export const config = {
   passcodeFile,
   allowedOrigins,
   isOriginAllowed,
+  contentFile: setting("CONTENT_FILE", path.join(here, "data", "content.json")),
   maxPlayers: 10,
   minPlayers: 3,
   roomCodeLength: 5,
