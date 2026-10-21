@@ -5,7 +5,7 @@ import { Builder } from "selenium-webdriver";
 import chrome from "selenium-webdriver/chrome.js";
 
 export const WEB = process.env.WEB_URL || "http://localhost:5173";
-export const API = process.env.API_URL || "http://localhost:3000";
+export const API = process.env.API_URL || "http://localhost:12800";
 export const SHOTS = process.env.SCREENSHOT_DIR || path.resolve(".shots");
 export const PASSCODE = await loadPasscode();
 

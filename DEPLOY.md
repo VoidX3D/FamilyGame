@@ -109,7 +109,7 @@ environment variable always wins over the file. `npm start` also passes
 
 | Setting | Default | Notes |
 | --- | --- | --- |
-| `PORT` | `3000` | The panel's own port wins. |
+| `PORT` | `12800` | The panel's own port wins. |
 | `FRONTEND_ORIGINS` | `http://localhost:5173, http://127.0.0.1:5173, https://funfamilygame.vercel.app` | The deployed frontend is included, so the site works out of the box. A pattern such as `https://*.vercel.app` survives a domain change. |
 | `ADMIN_PASSCODE` | generated | See below. |
 | `ADMIN_LOGIN_ATTEMPTS` | `10` per address in ten minutes | |

@@ -1,6 +1,6 @@
 /* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 export const API_URL =
-  window.APP_CONFIG?.API_URL ?? "http://localhost:3000";
+  window.APP_CONFIG?.API_URL ?? "http://localhost:12800";
 
 export function createSocket(auth) {
   if (!window.io) {

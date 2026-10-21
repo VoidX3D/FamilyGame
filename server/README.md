@@ -30,12 +30,13 @@ npm install
 npm start          # or: npm run dev, which watches for changes
 ```
 
-The API listens on `http://localhost:3000` by default.
+The API listens on `http://localhost:12800`, the same port the hosting
+service uses.
 
 ```bash
-curl http://localhost:3000/healthz
-curl http://localhost:3000/api/games
-open http://localhost:3000/api/docs
+curl http://localhost:12800/healthz
+curl http://localhost:12800/api/games
+open http://localhost:12800/api/docs
 ```
 
 ## Writing a game

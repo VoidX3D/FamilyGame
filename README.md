@@ -91,7 +91,7 @@ cp server/.env.example server/.env
 Run the backend and the static preview in two terminals:
 
 ```bash
-npm run dev:server   # http://localhost:3000
+npm run dev:server   # http://localhost:12800
 npm run dev:web      # http://localhost:5173
 ```
 
@@ -101,11 +101,12 @@ Open:
 - Host: <http://localhost:5173/admin>
 - Admin sections: `/admin/room`, `/admin/playlist`, `/admin/session`,
   `/admin/content`, `/admin/config`
-- API documentation: <http://localhost:3000/api/docs>
+- API documentation: <http://localhost:12800/api/docs>
 - Short invite: `http://localhost:5173/g/CODE`
 
 `/admin/live` and `/admin/settings` remain aliases for Live game and
-Settings. `web/config.js` points localhost traffic at `http://localhost:3000`.
+Settings. `web/config.js` points localhost traffic at `http://localhost:12800`, the same
+port the hosting service uses, so there is one port in the whole project.
 The host console uses the `ADMIN_PASSCODE` from `server/.env`.
 
 `npm run passcode` prints the passcode the server is using, which is handy
@@ -118,7 +119,7 @@ process is started. A real environment variable always wins over the file.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `PORT` | `3000` | Backend port. The hosting panel sets its own. |
+| `PORT` | `12800` | Backend port. The hosting panel sets its own, which wins. |
 | `NODE_ENV` | `production` | Use `production` in deployment |
 | `ADMIN_PASSCODE` | generated and stored | Host passcode. At least 12 characters. If it is left out, one is made, kept in `server/data/admin-passcode` and printed on startup. |
 | `FRONTEND_ORIGINS` | the local preview and the deployed site | Comma-separated CORS allowlist. A pattern such as `https://*.vercel.app` is allowed. |

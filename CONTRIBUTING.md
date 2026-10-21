@@ -16,7 +16,7 @@ cp server/.env.example server/.env
 Set `ADMIN_PASSCODE` in `server/.env` to something you will remember, then:
 
 ```bash
-npm run dev:server   # the API on http://localhost:3000
+npm run dev:server   # the API on http://localhost:12800
 npm run dev:web      # the front end on http://localhost:5173
 ```
 

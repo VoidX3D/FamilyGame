@@ -1,5 +1,6 @@
 /* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import {
+  API,
   PASSCODE,
   SHOTS,
   WEB,
@@ -16,6 +17,14 @@ import {
   text,
   waitFor,
 } from "./ui-driver.mjs";
+
+/* The number of games the catalogue holds. It is read from the API rather
+ * than written down, so adding a game never breaks the browser suites. */
+async function catalogSize() {
+  const response = await fetch(`${API}/api/games`);
+  const data = await response.json();
+  return data.games.length;
+}
 
 async function findDriverWith(drivers, selector, timeout = 8000) {
   const started = Date.now();
@@ -481,7 +490,7 @@ try {
   );
   await waitFor(
     admin,
-    `document.querySelectorAll("#game-grid .game-card").length === 8`,
+    `document.querySelectorAll("#game-grid .game-card").length === ${await catalogSize()}`,
     "dynamic catalog",
   );
   await waitFor(

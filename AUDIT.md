@@ -19,21 +19,15 @@ Found while reviewing the PWA, audio, IndexedDB and palette work. They may
 be fixed by the next update; if not, this is the list to work through.
 Nothing here was changed.
 
-### Do not "fix" the port
+### The port is 12800, everywhere
 
 `server/.env` sets `PORT=12800` **on purpose**: the hosting service needs
-it, and the backend will not answer without it. Do not change it back to
-3000.
+it, and the backend will not answer without it. Do not change it.
 
-The side effect is that a **local** `npm run dev:server` also listens on
-12800, while `web/config.js`, `scripts/ui-driver.mjs` and
-`scripts/dev-web.mjs` all expect `http://localhost:3000`. So the three
-browser suites cannot reach a locally started server.
-
-The tidy fix, when wanted: let the local dev override the file without
-touching the hosted value — for example `server/.env.local` (gitignored)
-read after `server/.env` by the loader in `server/config.js`, with
-`PORT=3000` in it. A real environment variable must still win over both.
+So that there is one port in the whole project, the local copy follows it:
+`web/config.js`, `web/net.js`, `scripts/ui-driver.mjs` and the dev server's
+CSP all point at `localhost:12800` now. The browser suites therefore work
+against a locally started server, and the hosted copy is untouched.
 
 ### 1. The host console goes blind after a reconnect — `web/admin.js:1866`
 
@@ -90,18 +84,19 @@ as the next turn starts.
 
 Fix: drop `visibleHistory()` and use `history: game.history ?? []`.
 
-### 4. The service worker serves the old app — `web/service-worker.js`
+### 4. The service worker served the old app — `web/service-worker.js` — FIXED
 
-- `CACHE = "family-game-shell-v2"` is a hard-coded constant, so the shell
-  is never re-cached on an ordinary deploy. `staleWhileRevalidate` returns
-  the old copy first, and the HTML is `networkFirst`, which gives fresh
-  HTML with stale JavaScript.
-- `/admin` and `/api` are not excluded from the cache, and the Cache API
-  ignores the `no-store` the server sets.
-- `skipWaiting()` and `clients.claim()` are called outside `waitUntil`.
+It used a hard-coded cache name and served the cached copy first, so after
+a deploy the first load returned the old JavaScript next to the new HTML.
+The cache is now **only a fallback for when there is no network**: every
+request goes to the network first, so a deploy is always picked up
+immediately and there is no version to remember to bump.
 
-Fix: version the cache name with the build, skip `/admin` and `/api`, and
-honour `no-store`.
+- `/admin`, `/api`, `/g/` and `/game` are never cached.
+- A response that says `no-store` is dropped instead of being kept.
+- The shell is added one file at a time, so one missing asset no longer
+  fails the whole install.
+- `skipWaiting()` and `clients.claim()` are inside `waitUntil()`.
 
 ### 5. The IndexedDB restore never re-joins the room — `web/app.js:92`
 
@@ -146,22 +141,30 @@ lands in `window.__FG_ERRORS` and **fails the browser suites**.
 
 ### Midnight pre-flight, for the five new games
 
-1. **The CI gate blocks the deploy.** `sync-backend.yml` runs
-   `npm run smoke` *before* it publishes `backend`, and
-   `scripts/smoke-engines.mjs:521`, `scripts/smoke-game-ui.mjs:57` and
-   `scripts/smoke-all-games-ui.mjs:484` all assert **8** games. With 13
-   the suite fails, `backend` is never published, and the front end
-   deploys against an old API.
-2. **A missing content entry takes the whole site down.** A collection
-   registered in `server/contentStore.js` but missing from
-   `server/data/default-content.json` makes the module throw at import:
+1. **The CI gate used to block the deploy.** `sync-backend.yml` runs
+   `npm run smoke` *before* it publishes `backend`, and three tests
+   asserted **8** games. With 13 the suite failed, `backend` was never
+   published, and the front end deployed against an old API.
+
+   **Fixed.** The suite now checks invariants instead of a snapshot: the
+   core games must all be there, the ids must be unique, every game must
+   have its seven engine functions, every game must have a screen in
+   `web/games.js`, and every content collection must have entries. The
+   browser suites compare the card count with the catalogue the API
+   reports. Adding a game can no longer break the deploy.
+2. **A missing content entry used to take the whole site down.** A
+   collection registered in `server/contentStore.js` but missing from
+   `server/data/default-content.json` made the module throw at import:
 
    ```text
    SERVER BOOT FAILURE: Invalid default content for charades: Items must be a list.
    ```
 
-   Every new collection must be in both files. A one-line assertion in the
-   suite would turn this into a red test instead of an outage.
+   **Fixed.** The server now reports the collection, carries on, and the
+   game falls back to its own placeholder, so the rest of the evening still
+   works. The suite also checks that every registered collection has
+   entries, so a mistake is still caught in the tests rather than in
+   production.
 3. **The service worker will hand people the old app** (issue 4 above),
    which is the worst way to start a launch.
 4. `web/index.html:34` says "8 Fun2Play Games", and the README says

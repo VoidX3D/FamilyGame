@@ -34,7 +34,7 @@ const CONTENT_SECURITY_POLICY = [
   "img-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
   "script-src 'self'",
-  "connect-src 'self' http://localhost:3000 ws://localhost:3000 http://127.0.0.1:3000 ws://127.0.0.1:3000 https://familygame.wisp.uno wss://familygame.wisp.uno",
+  "connect-src 'self' http://localhost:12800 ws://localhost:12800 http://127.0.0.1:12800 ws://127.0.0.1:12800 https://familygame.wisp.uno wss://familygame.wisp.uno",
   "font-src 'self'",
   "object-src 'none'",
 ].join("; ");

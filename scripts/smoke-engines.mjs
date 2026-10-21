@@ -1,4 +1,5 @@
 /* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
+import { readFileSync } from "node:fs";
 import { GAME_LIST, getGame } from "../server/games/index.js";
 
 function assert(condition, message) {
@@ -508,7 +509,9 @@ check("draw-it full run", () => {
 });
 
 check("catalog shape", () => {
-  const expected = [
+  // The games that were always here. Newer games are welcome, but these
+  // must never disappear.
+  const core = [
     "act-it-out",
     "draw-it",
     "one-of-us",
@@ -518,16 +521,22 @@ check("catalog shape", () => {
     "truth-or-dare",
     "who-wrote-that",
   ];
-  assert(GAME_LIST.length === 8, "Expected eight games in the catalog");
+  const ids = GAME_LIST.map((meta) => meta.id);
+
+  for (const id of core) {
+    assert(ids.includes(id), `The core game "${id}" is missing from the catalog`);
+  }
   assert(
-    GAME_LIST.map((meta) => meta.id).sort().join(",") ===
-      [...expected].sort().join(","),
-    "Catalog does not match the eight active games",
+    new Set(ids).size === ids.length,
+    "Two games share the same id",
   );
+  assert(GAME_LIST.length > 0, "The catalog is empty");
+
   for (const meta of GAME_LIST) {
     const engine = getGame(meta.id);
     assert(engine, `Missing engine for ${meta.id}`);
     assert(meta.name, `Missing name for ${meta.id}`);
+    assert(meta.tagline, `Missing tagline for ${meta.id}`);
     assert(meta.minPlayers >= 3, `Bad minPlayers for ${meta.id}`);
     assert(meta.maxPlayers <= 10, `Bad maxPlayers for ${meta.id}`);
     assert(meta.maxRounds >= 0, `Bad maxRounds for ${meta.id}`);
@@ -545,6 +554,43 @@ check("catalog shape", () => {
         `${meta.id} is missing ${fn}()`,
       );
     }
+  }
+});
+
+check("every game has a screen on the client", () => {
+  // A game with no renderer shows "This game screen is not available yet."
+  // on a player's phone, which looks broken even though nothing crashed.
+  const source = readFileSync(
+    new URL("../web/games.js", import.meta.url),
+    "utf8",
+  );
+  const renderers = source.match(
+    /const RENDERERS = \{([\s\S]*?)\n\};/,
+  )?.[1] ?? "";
+
+  for (const meta of GAME_LIST) {
+    assert(
+      renderers.includes(`"${meta.id}"`),
+      `No player screen for "${meta.id}". Add it to RENDERERS in web/games.js.`,
+    );
+  }
+});
+
+check("every content collection has entries", () => {
+  // A collection that is registered but has no entries makes the server
+  // refuse to start, which takes the whole site down rather than one game.
+  const defaults = JSON.parse(
+    readFileSync(
+      new URL("../server/data/default-content.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const collections = defaults?.collections;
+  assert(collections && typeof collections === "object", "The content file has no collections");
+
+  for (const [key, items] of Object.entries(collections)) {
+    assert(Array.isArray(items), `The collection "${key}" is not a list`);
+    assert(items.length > 0, `The collection "${key}" is empty`);
   }
 });
 
