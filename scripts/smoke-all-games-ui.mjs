@@ -422,7 +422,7 @@ async function playDrawIt() {
     const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     let coloured = 0;
     for (let i = 0; i < data.length; i += 4) {
-      if (data[i] > 200 && data[i + 1] < 200) coloured += 1;
+      if (data[i + 3] > 0 && (data[i] !== 13 || data[i + 1] !== 21 || data[i + 2] !== 38)) coloured += 1;
     }
     return coloured;
   `);
