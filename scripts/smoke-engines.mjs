@@ -653,9 +653,13 @@ check("catalog shape", () => {
     "where-am-i",
     "truth-or-dare",
     "who-wrote-that",
+    "caption-this",
+    "emoji-guess",
+    "spyfall",
+    "would-you-rather",
+    "two-truths-one-lie",
   ];
   const ids = GAME_LIST.map((meta) => meta.id);
-
   for (const id of core) {
     assert(ids.includes(id), `The core game "${id}" is missing from the catalog`);
   }

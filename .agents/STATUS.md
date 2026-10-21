@@ -34,7 +34,7 @@ a branch to work on. See `AGENTS.md` §4.
 
 ## The games
 
-Eight games are in the catalogue. The id is the key used in the API, in
+Thirteen games are in the catalogue. The id is the key used in the API, in
 `server/games/index.js` and in the `RENDERERS` map in `web/games.js`.
 
 | Id | Name | Players | Rounds | Points |
@@ -47,13 +47,18 @@ Eight games are in the catalogue. The id is the key used in the API, in
 | `act-it-out` | Act It Out | 3 to 10 | One turn each | Actor and correct guesser 1 each. |
 | `truth-or-dare` | Truth or Dare | 3 to 10 | 2 cycles | No points. |
 | `who-wrote-that` | Who Wrote That?! | 3 to 10 | 3 | Each correct author match 1. |
+| `caption-this` | Caption This | 3 to 10 | 3 | Captions earn votes plus a crowd-favorite bonus. |
+| `emoji-guess` | Emoji Guess | 3 to 10 | 5 | First correct guess 3, later correct guesses 1. |
+| `spyfall` | Spyfall | 3 to 10 | 3 | Agents and spy score from the room vote. |
+| `would-you-rather` | Would You Rather? | 3 to 10 | 5 | Players on the majority side score 1. |
+| `two-truths-one-lie` | Two Truths & One Lie | 3 to 10 | 3 | Correct guesses score; the storyteller scores for fooled players. |
 
 **Draw It is the only game with a clock.** Everything else advances when the
 required players have done their part, or when the host uses a control.
 
 ## The content bank
 
-Nine collections, in `server/data/default-content.json`, with their shapes in
+Fourteen collections, in `server/data/default-content.json`, with their shapes in
 `server/data/content-schema.json`.
 
 | Collection | Game | Entries |
@@ -67,6 +72,11 @@ Nine collections, in `server/data/default-content.json`, with their shapes in
 | `dares` | Truth or Dare | 20 |
 | `charades` | Act It Out | 40 |
 | `drawingWords` | Draw It | 80 |
+| `emojiPuzzles` | Emoji Guess | 10 |
+| `captionPrompts` | Caption This | 10 |
+| `spyfallLocations` | Spyfall | 10 |
+| `wouldYouRatherQuestions` | Would You Rather? | 8 |
+| `twoTruthsTopics` | Two Truths & One Lie | 10 |
 
 A room remembers the content it has already used, for the whole session, so
 a game night never brings the same question back.

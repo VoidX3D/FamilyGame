@@ -20,7 +20,7 @@ There is no account, no database and no social graph. Rooms are private and
 short-lived. Everything that happens during a game travels over Socket.IO, not
 over REST.
 
-The eight games in the catalogue:
+The thirteen games in the catalogue:
 
 | Id | Name | How a round works |
 | --- | --- | --- |
@@ -32,6 +32,11 @@ The eight games in the catalogue:
 | `who-wrote-that` | Who Wrote That?! | Answers are anonymous; players match them to authors. |
 | `act-it-out` | Act It Out | One actor acts a prompt and taps the first correct guesser. |
 | `truth-or-dare` | Truth or Dare | Everyone submits a truth and a dare; the pool is dealt into turns. |
+| `caption-this` | Caption This | Everyone writes a caption; the room votes anonymously. |
+| `emoji-guess` | Emoji Guess | Decode an emoji clue; first correct guesses score more. |
+| `spyfall` | Spyfall | Everyone gets a location except the spy; the room votes. |
+| `would-you-rather` | Would You Rather? | Pick one of two options and optionally explain why. |
+| `two-truths-one-lie` | Two Truths & One Lie | Submit three statements; the room guesses the lie. |
 
 **Draw It has three rules that are easy to break by accident:**
 

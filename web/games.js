@@ -2365,6 +2365,41 @@ function drawHistory(game) {
   return block(blockTitle("Turn history"), list);
 }
 
+function newSocialGame(state, game, mine, actions) {
+  const nodes = [];
+  const wrap = block(blockTitle(game.name));
+  if (game.id === "emoji-guess") {
+    wrap.append(el("p", "word-display", game.puzzle?.emoji ?? "❓"));
+    wrap.append(note(`Solved: ${game.solvedCount ?? 0}/${game.totalPlayers ?? game.players.length}`));
+    if (mine.canGuess) {
+      const input = textInput("What do the emojis mean?", keyOf(game, "emoji"), { maxLength: 90 });
+      const submit = button("Guess");
+      formSubmit({ button: submit, actions, fallback: "Type a guess first.", read: () => input.value.trim() ? { type: "guess", guess: input.value.trim() } : null, onSuccess: () => { clearDraft(keyOf(game, "emoji")); input.value = ""; } });
+      wrap.append(input, submit);
+    } else if (mine.hasSolved) wrap.append(note("You solved it. Let the room catch up."));
+    if (game.phase === "results" || game.phase === "complete") wrap.append(note(`Answer: ${game.result ? (game.result.answer ?? game.result.name ?? "revealed") : "revealed"}`));
+  } else if (game.id === "would-you-rather") {
+    wrap.append(note(game.optionA ?? "Option A"));
+    if (mine.canVote) { wrap.append(button(game.optionA, "btn btn-primary", actOn(button("", "", null), actions, { type: "vote", choice: "a" }, "Choose an option."))); wrap.append(button(game.optionB, "btn btn-tonal", actOn(button("", "", null), actions, { type: "vote", choice: "b" }, "Choose an option."))); }
+    else if (mine.canExplain) { const input=textarea("Why? (optional)",keyOf(game,"reason"),180); const submit=button("Share reason"); formSubmit({button:submit,actions,read:()=>({type:"explain",text:input.value}),fallback:"Skip or write a reason.",onSuccess:()=>clearDraft(keyOf(game,"reason"))}); wrap.append(input,submit); }
+    else wrap.append(note(`A: ${game.optionA}  •  B: ${game.optionB}`));
+  } else if (game.id === "caption-this") {
+    wrap.append(note(game.prompt?.text ?? "Caption the scene"));
+    if (mine.canCaption) { const input=textarea("Write a caption",keyOf(game,"caption"),160); const submit=button("Submit caption"); formSubmit({button:submit,actions,read:()=>input.value.trim()?{type:"caption",caption:input.value}:null,fallback:"Write a caption first.",onSuccess:()=>clearDraft(keyOf(game,"caption"))}); wrap.append(input,submit); }
+    if (game.captions?.length) for (const caption of game.captions) wrap.append(button(caption.text,"btn btn-tonal",mine.canVote&&caption.id!==mine.yourCaptionId?actOn(button("","",null),actions,{type:"vote",captionId:caption.id},"Choose a caption."):null));
+  } else if (game.id === "two-truths-one-lie") {
+    if (mine.canSubmit) { const inputs=[0,1,2].map(i=>textarea(`Statement ${i+1}`,keyOf(game,`statement-${i}`),140)); const select=el("select","field-input"); [0,1,2].forEach(i=>{const o=el("option","",`Statement ${i+1} is the lie`);o.value=String(i);select.append(o);}); bindSelect(select,keyOf(game,"lie")); const submit=button("Submit statements"); formSubmit({button:submit,actions,read:()=>({type:"statements",statements:inputs.map(i=>i.value),lieIndex:Number(select.value)}),fallback:"Write all three statements.",onSuccess:()=>inputs.forEach(i=>i.value="")}); wrap.append(...inputs,select,submit); } else if (mine.canGuess) [0,1,2].forEach(i=>wrap.append(button(`Statement ${i+1}`,"btn btn-tonal",actOn(button("","",null),actions,{type:"guess",statementIndex:i},"Choose a statement.")))); else wrap.append(waiting("Waiting for the room…"));
+  } else {
+    if (mine.canReady) wrap.append(button("I’m ready", "btn btn-primary", actOn(button("","",null),actions,{type:"ready"},"Ready failed.")));
+    if (mine.location) wrap.append(el("p","word-display",mine.location.name));
+    if (mine.canVote) game.players.filter(p=>p.id!==state.you.playerId).forEach(p=>wrap.append(button(p.name,"btn btn-tonal",actOn(button("","",null),actions,{type:"vote",targetId:p.id},"Choose a player."))));
+    if (game.phase === "results") wrap.append(note(`Location: ${game.result?.location?.name ?? "revealed"}`));
+  }
+  nodes.push(wrap);
+  if (game.phase === "results" || game.phase === "complete") nodes.push(scoreboard(state, game));
+  return nodes;
+}
+
 const RENDERERS = {
   "act-it-out": actItOut,
   "draw-it": drawIt,
@@ -2374,6 +2409,11 @@ const RENDERERS = {
   "where-am-i": turnGuess,
   "who-wrote-that": whoWroteThat,
   "truth-or-dare": truthOrDare,
+  "emoji-guess": newSocialGame,
+  "caption-this": newSocialGame,
+  "spyfall": newSocialGame,
+  "would-you-rather": newSocialGame,
+  "two-truths-one-lie": newSocialGame,
 };
 
 /* The leave button sits at the bottom of the screen, well away from the

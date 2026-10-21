@@ -97,6 +97,11 @@ const GAME_ICONS = {
   "where-am-i": "map-pin",
   "truth-or-dare": "flame",
   "who-wrote-that": "pencil",
+  "caption-this": "sparkles",
+  "emoji-guess": "sparkles",
+  spyfall: "map-pin",
+  "would-you-rather": "sliders",
+  "two-truths-one-lie": "circle-help",
 };
 
 /* The shape of web/icons.js. The paths are filled in from the .svg files. */

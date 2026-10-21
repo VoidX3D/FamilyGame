@@ -133,7 +133,12 @@ const GAME_ICONS = {
   "who-am-i": "circle-help",
   "where-am-i": "map-pin",
   "truth-or-dare": "flame",
-  "who-wrote-that": "pencil"
+  "who-wrote-that": "pencil",
+  "caption-this": "sparkles",
+  "emoji-guess": "sparkles",
+  "spyfall": "map-pin",
+  "would-you-rather": "sliders",
+  "two-truths-one-lie": "circle-help"
 };
 
 export function icon(name, { className = "", size = 20 } = {}) {
