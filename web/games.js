@@ -517,9 +517,15 @@ function oneOfUs(state, game, mine, actions) {
       note(
         crewWon
           ? `${game.imposterName} was caught.`
-          : wasCaught
-            ? `${game.imposterName} was caught, but guessed the word anyway.`
-            : `${game.imposterName} fooled the room.`,
+          : game.outcomeReason === "no_guess"
+            ? `${game.imposterName} was caught, but no guess was made.`
+            : game.outcomeReason === "vote_tie"
+              ? "The vote was tied, so the imposter escaped."
+              : game.outcomeReason === "no_consensus"
+                ? "There was no decisive vote, so the imposter escaped."
+                : wasCaught
+                  ? `${game.imposterName} was caught, but guessed the word anyway.`
+                  : `${game.imposterName} fooled the room.`,
       ),
     );
     nodes.push(banner);

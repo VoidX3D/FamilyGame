@@ -58,6 +58,7 @@ function beginRound(game, round) {
   game.hintRounds = HINT_ROUNDS;
   game.speakerId = game.hintOrder[0] ?? null;
   game.spoken = [];
+  game.spokenTotal = 0;
 
   game.votes = {};
   game.winner = null;
@@ -81,10 +82,11 @@ function reveal(game) {
   return game.phase === "results" || game.phase === "complete";
 }
 
-function finish(room, game, winner) {
+function finish(room, game, winner, outcomeReason = null) {
   if (game.scored) return;
   game.scored = true;
   game.winner = winner;
+  game.outcomeReason = outcomeReason;
 
   if (winner === "crew") {
     for (const player of game.players) {
@@ -128,11 +130,12 @@ function tallyVotes(room, game) {
   );
   const caught = top.length === 1 && top[0].playerId === game.imposterId;
   game.caught = caught;
+  game.decisiveVote = top.length === 1;
 
   if (caught) {
     game.phase = "imposter-guess";
   } else {
-    finish(room, game, "imposter");
+    finish(room, game, "imposter", top.length > 1 ? "vote_tie" : "no_consensus");
   }
 }
 
@@ -193,6 +196,7 @@ export function action(room, game, playerId, payload) {
     }
 
     game.spoken.push(playerId);
+    game.spokenTotal = (game.spokenTotal ?? 0) + 1;
     nextSpeaker(game);
     return { ok: true };
   }
@@ -232,7 +236,7 @@ export function action(room, game, playerId, payload) {
 
     game.imposterGuess = guess;
     const correct = normalizeAnswer(guess) === normalizeAnswer(game.word);
-    finish(room, game, correct ? "imposter" : "crew");
+    finish(room, game, correct ? "imposter" : "crew", correct ? "imposter_guessed_word" : "imposter_wrong_guess");
     return { ok: true };
   }
 
@@ -255,13 +259,13 @@ export function adminAction(room, game, type) {
       tallyVotes(room, game);
       if (game.phase === "imposter-guess") {
         game.imposterGuess = "(No guess)";
-        finish(room, game, "imposter");
+        finish(room, game, "imposter", "no_guess");
       }
       return { ok: true };
     }
     if (game.phase === "imposter-guess") {
       game.imposterGuess = "(No guess)";
-      finish(room, game, "imposter");
+      finish(room, game, "imposter", "no_guess");
       return { ok: true };
     }
     return { ok: false, code: "wrong_phase", message: "There is nothing to reveal." };
@@ -304,6 +308,8 @@ export function publicView(game) {
     imposterId: shown ? game.imposterId : null,
     imposterName: shown ? playerName(game, game.imposterId) : null,
     imposterGuess: shown ? game.imposterGuess : null,
+    outcomeReason: shown ? game.outcomeReason : null,
+    decisiveVote: shown ? game.decisiveVote : null,
     voteCounts: shown ? game.voteCounts : null,
     voteBreakdown: shown ? game.voteBreakdown : null,
     canNextRound: game.phase === "results",
@@ -340,7 +346,7 @@ export function adminView(game) {
     submissions: {
       ready: { count: submittedCount(game.ready), total: game.players.length },
       hints: {
-        count: game.spoken?.length ?? 0,
+        count: game.spokenTotal ?? game.spoken?.length ?? 0,
         total: (game.hintOrder?.length ?? 0) * (game.hintRounds ?? HINT_ROUNDS),
       },
       votes: { count: submittedCount(game.votes), total: game.players.length },

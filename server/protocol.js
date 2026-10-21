@@ -201,6 +201,7 @@ function normalizeQueue(gameIds, { allowEmpty = false } = {}) {
 function startEngine(store, room, engine, players) {
   store.resetScores(room);
   room.gameId = engine.meta.id;
+  room.usedContentIds ??= {};
   room.game = engine.create({ ...room, players });
   room.phase = "playing";
   if (room.playlist) {

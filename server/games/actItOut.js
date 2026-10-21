@@ -264,6 +264,8 @@ export function adminAction(room, game, type) {
     if (game.phase !== "act") {
       return { ok: false, code: "wrong_phase", message: "There is no active prompt." };
     }
+    game.skippedPrompts.push(game.prompt?.text ?? "-");
+    game.skippedPrompts = game.skippedPrompts.slice(-30);
     const [prompt] = pickUnused(
       getCollection("charades"),
       game.usedPromptIds,
@@ -301,6 +303,9 @@ export function adminAction(room, game, type) {
   if (type === "finish") {
     if (game.phase === "complete") {
       return { ok: false, code: "already_complete", message: "The game is already complete." };
+    }
+    if (game.phase === "act") {
+      finishTurn(room, game, { gaveUp: true, skippedByHost: true });
     }
     game.phase = "complete";
     return { ok: true };

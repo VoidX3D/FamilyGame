@@ -212,7 +212,7 @@ export function publicView(game) {
     currentType: current?.type ?? null,
     completedTurns: game.completedTurns,
     totalTurns: totalTurns(game),
-    history: game.history.slice(-8),
+    history: game.phase === "complete" ? game.history : game.history.slice(-8),
     canNextRound: false,
   };
 }
