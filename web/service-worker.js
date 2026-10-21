@@ -12,6 +12,8 @@ const SHELL = [
   "/config.js",
   "/manifest.webmanifest",
   "/assets/logo.svg",
+  "/assets/icons/icon-192.png",
+  "/assets/icons/icon-512.png",
 ];
 
 self.addEventListener("install", (event) => {
