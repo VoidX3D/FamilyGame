@@ -845,30 +845,41 @@ dom.soundToggle.addEventListener("click", async () => {
   updateSoundButton();
 });
 
+function isStandaloneApp() {
+  return window.matchMedia?.("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+
+function updateInstallButton() {
+  dom.installApp.hidden = isStandaloneApp() || !installPrompt;
+}
+
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
   installPrompt = event;
-  dom.installApp.hidden = false;
+  updateInstallButton();
 });
 
 dom.installApp.addEventListener("click", async () => {
   if (!installPrompt) return;
-  installPrompt.prompt();
-  const choice = await installPrompt.userChoice;
-  if (choice.outcome === "accepted") showToast("Family Game Hub installed");
+  const prompt = installPrompt;
   installPrompt = null;
-  dom.installApp.hidden = true;
+  updateInstallButton();
+  prompt.prompt();
+  const choice = await prompt.userChoice;
+  if (choice.outcome === "accepted") showToast("Family Game Hub installed");
 });
 
 window.addEventListener("appinstalled", () => {
   installPrompt = null;
-  dom.installApp.hidden = true;
+  updateInstallButton();
   showToast("Ready for game night");
 });
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/service-worker.js").catch(() => {
+    navigator.serviceWorker.register("/service-worker.js").then((registration) => {
+      void registration.update();
+    }).catch(() => {
       // The game remains fully usable if a host blocks service workers.
     });
   });
@@ -903,6 +914,7 @@ if (session) {
 hydrateIcons();
 renderSavedRoom();
 updateSoundButton();
+updateInstallButton();
 void hydratePersistentState();
 connectSocket();
 intro();

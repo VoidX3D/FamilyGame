@@ -1,5 +1,5 @@
 /* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
-const CACHE = "family-game-shell-v1";
+const CACHE = "family-game-shell-v2";
 const SHELL = [
   "/",
   "/index.html",
@@ -19,7 +19,13 @@ const SHELL = [
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)));
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+    await cache.addAll(SHELL);
+    if (!(await cache.match("/audio.js"))) {
+      throw new Error("The audio module was not added to the offline shell.");
+    }
+  })());
   self.skipWaiting();
 });
 

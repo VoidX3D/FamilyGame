@@ -2,12 +2,15 @@
   "name": "Family Game Hub",
   "short_name": "Family Games",
   "description": "Private party games for your family and friends.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#0b1020",
   "theme_color": "#0b1020",
   "orientation": "portrait-primary",
+  "categories": ["games", "social", "entertainment"],
   "icons": [
     {
       "src": "/assets/icons/icon-192.png",
