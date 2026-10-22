@@ -2386,7 +2386,29 @@ function newSocialGame(state, game, mine, actions) {
   } else if (game.id === "caption-this") {
     wrap.append(note(game.prompt?.text ?? "Caption the scene"));
     if (mine.canCaption) { const input=textarea("Write a caption",keyOf(game,"caption"),160); const submit=button("Submit caption"); formSubmit({button:submit,actions,read:()=>input.value.trim()?{type:"caption",caption:input.value}:null,fallback:"Write a caption first.",onSuccess:()=>clearDraft(keyOf(game,"caption"))}); wrap.append(input,submit); }
-    if (game.captions?.length) for (const caption of game.captions) wrap.append(button(caption.text,"btn btn-tonal",mine.canVote&&caption.id!==mine.yourCaptionId?actOn(button("","",null),actions,{type:"vote",captionId:caption.id},"Choose a caption."):null));
+    if (game.captions?.length) {
+      for (const caption of game.captions) {
+        /* A caption of your own is not a caption you can vote for. It
+         * used to be a button that looked live and did nothing when
+         * tapped, so it is marked as yours and switched off. */
+        const own = caption.text === mine.yourCaption;
+        const canPick = Boolean(mine.canVote) && caption.id !== mine.yourCaptionId;
+        const node = button(
+          own ? `${caption.text} (your caption)` : caption.text,
+          canPick ? "btn btn-tonal" : "btn btn-tonal is-muted",
+          canPick
+            ? actOn(
+                button("", "", null),
+                actions,
+                { type: "vote", captionId: caption.id },
+                "Choose a caption.",
+              )
+            : null,
+        );
+        if (!canPick) node.disabled = true;
+        wrap.append(node);
+      }
+    }
     /* The tallies only come out when the round is over. Before that the
      * captions are buttons to vote on, and afterwards they are the
      * result, with the votes and the bonus. */
