@@ -2,6 +2,7 @@
 import { readFileSync } from "node:fs";
 import { GAME_LIST, getGame } from "../server/games/index.js";
 import { normalizeAnswer } from "../server/games/common.js";
+import { checkScreensMatchEngines } from "./check-screens.mjs";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -873,6 +874,14 @@ check("every content collection has entries", () => {
     assert(Array.isArray(items), `The collection "${key}" is not a list`);
     assert(items.length > 0, `The collection "${key}" is empty`);
   }
+});
+
+check("the screens read what the engines publish", () => {
+  /* A screen that reads a field the engine never sends shows nothing,
+   * and nothing on the screen says so. That is how the social games
+   * shipped: the engine published "results" and the screen read
+   * "result", so three reveals never appeared. */
+  checkScreensMatchEngines();
 });
 
 check("the schema and the content file agree", () => {

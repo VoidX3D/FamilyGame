@@ -8,6 +8,7 @@ import {
   assertNoBrowserErrors,
   assertNoOverflow,
   checkServers,
+  acceptConfirm,
   clickText,
   fillAndSubmit,
   makeDriver,
@@ -137,7 +138,6 @@ try {
     "start button enabled",
   );
 
-  await admin.executeScript(`window.confirm = () => true; return true;`);
   const started = await admin.executeScript(
     `const card = [...document.querySelectorAll("#game-grid .game-card")]
        .find((entry) => entry.querySelector("h3")?.textContent === "One of Us");
@@ -145,6 +145,7 @@ try {
      return Boolean(card);`,
   );
   assert(started, "Could not click One of Us start");
+  await acceptConfirm(admin);
 
   for (const player of players) {
     await waitFor(
@@ -307,10 +308,10 @@ try {
   await setViewport(players[0], 390, 844);
 
   await sleep(200);
-  await admin.executeScript(`window.confirm = () => true; return true;`);
   await admin.executeScript(
     `document.getElementById("end-game").click(); return true;`,
   );
+  await acceptConfirm(admin);
   await waitFor(
     admin,
     `!document.getElementById("game-catalog-card").hidden`,

@@ -8,6 +8,7 @@ import {
   assertNoBrowserErrors,
   assertNoOverflow,
   checkServers,
+  acceptConfirm,
   clickText,
   fillAndSubmit,
   makeDriver,
@@ -44,6 +45,7 @@ async function findDriverWith(drivers, selector, timeout = 8000) {
 const drivers = [];
 let admin;
 let players = [];
+let playerNames = [];
 let code;
 
 async function startGame(name) {
@@ -62,7 +64,6 @@ async function startGame(name) {
     `${name}: start enabled`,
   );
 
-  await admin.executeScript(`window.confirm = () => true; return true;`);
   const clicked = await admin.executeScript(
     `const card = [...document.querySelectorAll("#game-grid .game-card")]
        .find((entry) => entry.querySelector("h3")?.textContent === arguments[0]);
@@ -71,6 +72,7 @@ async function startGame(name) {
     name,
   );
   assert(clicked, `Could not start ${name}`);
+  await acceptConfirm(admin);
 
   for (const player of players) {
     await waitFor(
@@ -86,10 +88,10 @@ async function startGame(name) {
 }
 
 async function endGame() {
-  await admin.executeScript(`window.confirm = () => true; return true;`);
   await admin.executeScript(
     `document.getElementById("end-game").click(); return true;`,
   );
+  await acceptConfirm(admin);
   await waitFor(
     admin,
     `!document.getElementById("game-catalog-card").hidden`,
@@ -557,6 +559,212 @@ async function playDrawItGuessing(drawer, guesser) {
   );
 }
 
+/* The five social games.
+ *
+ * They all have one engine and one screen, but they are played
+ * differently enough that each one gets its own play-through. What
+ * every one of them must do is show a result: the reveal is the whole
+ * point of the game, and three of these shipped without one. */
+async function playSocialGame(name, shot) {
+  await startGame(name);
+
+  const clickButton = async (player, needle) => {
+    const clicked = await player.executeScript(
+      `const b = [...document.querySelectorAll("#step-game button")]
+         .find((n) => !n.disabled && n.textContent.trim().includes(arguments[0]));
+       if (b) { b.click(); return true; }
+       return false;`,
+      needle,
+    );
+    assert(clicked, `${name}: no button matching "${needle}"`);
+    await sleep(400);
+  };
+
+  const typeInto = async (player, selector, text) => {
+    await player.executeScript(
+      `const n = document.querySelector(arguments[0]);
+       if (!n) return false;
+       const proto = n.tagName === "TEXTAREA"
+         ? window.HTMLTextAreaElement.prototype
+         : window.HTMLInputElement.prototype;
+       const set = Object.getOwnPropertyDescriptor(proto, "value").set;
+       set.call(n, arguments[1]);
+       n.dispatchEvent(new Event("input", { bubbles: true }));
+       return true;`,
+      selector,
+      text,
+    );
+  };
+
+  if (name === "Emoji Guess") {
+    for (const player of players) {
+      await typeInto(player, "#step-game input", "something wrong");
+      await clickButton(player, "Guess");
+    }
+    /* The host reveals it, so the room can see the answer. */
+    await admin.executeScript(
+      `[...document.querySelectorAll("#game-controls button")]
+         .find((n) => n.textContent.trim() === "Reveal result")?.click();
+       return true;`,
+    );
+    await sleep(700);
+  }
+
+  if (name === "Would You Rather?") {
+    /* The vote buttons carry the option text, which the content bank
+     * chooses, so the step looks for the primary button instead. */
+    for (const player of players) {
+      const voted = await player.executeScript(
+        `const b = document.querySelector("#step-game .btn-primary");
+         if (b && !b.disabled) { b.click(); return true; }
+         return false;`,
+      );
+      assert(voted, "Would You Rather?: no option button to vote on");
+      await sleep(400);
+    }
+    for (const player of players) {
+      await typeInto(player, "#step-game textarea", "Because I said so");
+      await clickButton(player, "Share reason");
+    }
+  }
+
+  if (name === "Caption This") {
+    for (const player of players) {
+      await typeInto(
+        player,
+        "#step-game textarea",
+        `A caption from ${playerNames[players.indexOf(player)]}`,
+      );
+      await clickButton(player, "Submit caption");
+    }
+    /* Everybody votes for a caption that is not their own. */
+    for (const player of players) {
+      const voted = await player.executeScript(
+        `const own = arguments[0];
+         const b = [...document.querySelectorAll("#step-game button")]
+           .find((n) => !n.disabled
+             && n.textContent.trim().startsWith("A caption")
+             && !n.textContent.includes(own));
+         if (b) { b.click(); return true; }
+         return false;`,
+        `A caption from ${playerNames[players.indexOf(player)]}`,
+      );
+      assert(voted, "Caption This: could not vote for another caption");
+      await sleep(400);
+    }
+  }
+
+  if (name === "Two Truths & One Lie") {
+    /* The tells rotate, and every phase answers to whoever the room is
+     * waiting on: three statements go in at once, then the room hunts
+     * the teller's lie, and the host paces one tell into the next. */
+    for (let round = 0; round < 50; round += 1) {
+      /* The host moves a finished tell on, or reads what is left. The
+       * console shows "Play again" once the last tell is told. */
+      const host = await admin.executeScript(
+        `const buttons = [...document.querySelectorAll("#game-controls button")];
+         const next = buttons.find(
+           (n) => n.textContent.trim() === "Next round" && !n.disabled,
+         );
+         if (next) { next.click(); return "advanced"; }
+         return buttons.map((n) => n.textContent.trim()).join(",");`,
+      );
+      if (String(host).includes("Play again")) break;
+      await sleep(300);
+
+      let acted = false;
+      for (const player of players) {
+        const step = await player.executeScript(
+          `const stage = document.querySelector("#step-game")?.textContent ?? "";
+           if (stage.includes("Submit statements")) {
+             const areas = [...document.querySelectorAll("#step-game textarea")];
+             const set = Object.getOwnPropertyDescriptor(
+               window.HTMLTextAreaElement.prototype, "value").set;
+             areas.forEach((area, position) => {
+               set.call(area, "Pond " + position + " lies ahead");
+               area.dispatchEvent(new Event("input", { bubbles: true }));
+             });
+             const select = document.querySelector("#step-game select");
+             if (select) select.value = "1";
+             select?.dispatchEvent(new Event("change", { bubbles: true }));
+             const submit = [...document.querySelectorAll("#step-game button")]
+               .find((n) => n.textContent.includes("Submit statements"));
+             submit?.click();
+             return "told";
+           }
+           const lie = [...document.querySelectorAll("#step-game button")]
+             .find((n) => !n.disabled && n.textContent.includes("is the lie"));
+           if (lie) { lie.click(); return "guessed"; }
+           return "waiting";`,
+        );
+        if (step === "told" || step === "guessed") acted = true;
+        if (acted) await sleep(350);
+      }
+      if (!acted) await sleep(600);
+    }
+
+    /* The statements have to be readable, or nobody could have picked
+     * the lie. */
+    const readable = await players[0].executeScript(
+      `return document.querySelector("#step-game").textContent.includes("Pond");`,
+    );
+    assert(readable, "Two Truths & One Lie: the statements are not on the screen");
+  }
+
+  if (name === "Spyfall") {
+    for (const player of players) {
+      await clickButton(player, "ready");
+    }
+    for (const player of players) {
+      const voted = await player.executeScript(
+        `const b = [...document.querySelectorAll("#step-game button")]
+           .find((n) => !n.disabled
+             && n.textContent.trim() !== "Leave this room"
+             && n.textContent.trim().length > 0);
+         if (b) { b.click(); return true; }
+         return false;`,
+      );
+      assert(voted, "Spyfall: could not vote for a player");
+      await sleep(400);
+    }
+  }
+
+  /* Whatever the game, the result has to be on the screen: the reveal
+   * is the whole point, and three of these shipped without one. */
+  const outcomeMarker = name === "Spyfall"
+    ? /* The spy is named, caught or escaped. */
+      `document.querySelector("#step-game").textContent.includes("was the spy")`
+    : name === "Two Truths & One Lie"
+      ? `document.querySelector("#step-game").textContent.includes("fooled")`
+      : `["Results", "Final results"].includes(
+           document.querySelector("#step-game .game-title")?.parentElement
+             ?.querySelector(".pill")?.textContent?.trim(),
+         ) || document.querySelector("#step-game").textContent.includes("Results")`;
+  for (const player of players) {
+    await waitFor(player, outcomeMarker, `${name}: the result screen`, 20000);
+  }
+
+  /* And the screen has to say something. */
+  const screen = await players[0].executeScript(
+    `return document.querySelector("#step-game").textContent.replace(/\s+/g, " ").trim();`,
+  );
+  assert(screen.length > 40, `${name}: the result screen is empty`);
+
+  /* Every screen has to be free of errors. */
+  for (const player of players) {
+    const errors = await player.executeScript(
+      `return (window.__FG_ERRORS ?? []).slice(0, 3);`,
+    );
+    assert(
+      errors.length === 0,
+      `${name}: the screen raised ${JSON.stringify(errors)}`,
+    );
+  }
+
+  if (shot) await screenshot(players[0], shot);
+  await endGame();
+}
+
 try {
   await checkServers();
 
@@ -589,10 +797,12 @@ try {
 
   const names = ["Aarati", "Bikash", "Chhaya"];
   players = [];
+  playerNames = [];
   for (const name of names) {
     const player = await makeDriver(390, 844);
     drivers.push(player);
     players.push(player);
+    playerNames.push(name);
     await player.get(`${WEB}/`);
     await waitFor(player, 'window.__FG_READY__ === "player"', `${name} ready`);
     await waitFor(
@@ -619,7 +829,6 @@ try {
     `document.querySelectorAll("#admin-players .player-row").length === 3`,
     "three players",
   );
-  await admin.executeScript(`window.confirm = () => true; return true;`);
 
   await playWhoIsIt();
   await playSecretGuess("Who Am I?", "ui-who-am-i");
@@ -628,6 +837,11 @@ try {
   await playWhoWroteThat();
   await playTruthOrDare();
   await playDrawIt();
+  await playSocialGame("Emoji Guess", "ui-emoji-guess");
+  await playSocialGame("Would You Rather?", "ui-would-you-rather");
+  await playSocialGame("Caption This", "ui-caption-this");
+  await playSocialGame("Two Truths & One Lie", "ui-two-truths");
+  await playSocialGame("Spyfall", "ui-spyfall");
 
   for (const [index, driver] of drivers.entries()) {
     const errors = await driver.executeScript(

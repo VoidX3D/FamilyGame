@@ -2482,7 +2482,8 @@ function newSocialGame(state, game, mine, actions) {
       /* The statements are the whole game. They were published but
        * never shown, so a player had to guess which one was the lie
        * without being able to read them. */
-      const outcome = game.result ?? game.results;
+      /* The public view publishes this one as "results". */
+      const outcome = game.results;
       const statements = game.statements ?? [];
       if (statements.length) {
         wrap.append(note(`${game.storytellerName ?? "Someone"} says:`));

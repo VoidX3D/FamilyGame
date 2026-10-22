@@ -125,6 +125,32 @@ export async function text(driver, selector) {
   );
 }
 
+/* Destructive host actions ask in an application dialog now, not in a
+ * native confirm() popup, so the suites click the accept button
+ * whenever one is on screen. A dialog that never appears (the host can
+ * turn the asking off in the preferences) is simply not clicked. */
+export async function acceptConfirm(driver) {
+  try {
+    await driver.wait(async () => {
+      try {
+        return Boolean(
+          await driver.executeScript(
+            `return Boolean(document.querySelector("[data-confirm-accept]"));`,
+          ),
+        );
+      } catch {
+        return false;
+      }
+    }, 5000, "the confirm dialog");
+  } catch {
+    return false;
+  }
+  return driver.executeScript(
+    `document.querySelector("[data-confirm-accept]").click();
+     return true;`,
+  );
+}
+
 export async function clickText(driver, selector, label) {
   return driver.executeScript(
     `const node = [...document.querySelectorAll(arguments[0])]

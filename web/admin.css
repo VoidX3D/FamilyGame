@@ -1467,3 +1467,61 @@ body.admin-body[data-view="login"] .admin-shell {
     flex: 1 1 auto;
   }
 }
+
+/* The in-app confirmation dialog. Native confirm() is grey system
+ * chrome that steals focus and can be blocked by embedded browsers, so
+ * destructive actions ask here instead. */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: max(24px, env(safe-area-inset-bottom));
+  background: rgba(5, 8, 18, 0.62);
+  backdrop-filter: blur(3px);
+}
+
+.dialog-card {
+  width: min(420px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-pop);
+  padding: var(--space-5);
+  display: grid;
+  gap: var(--space-4);
+  animation: dialog-in var(--duration-base) var(--ease-emphasized);
+}
+
+/* The card rises into place. The reduced-motion rule in styles.css
+ * shortens this to nothing for anybody who asks for it. */
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.dialog-text {
+  margin: 0;
+  color: var(--on-surface);
+  font-size: 1rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}
+
+.dialog-actions .btn {
+  min-width: 96px;
+}

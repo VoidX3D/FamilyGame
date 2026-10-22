@@ -7,6 +7,7 @@ import {
   assertNoBrowserErrors,
   assertNoOverflow,
   checkServers,
+  acceptConfirm,
   fillAndSubmit,
   makeDriver,
   setViewport,
@@ -218,7 +219,6 @@ try {
     "admin still sees three seats after refresh",
   );
 
-  await admin.executeScript(`window.confirm = () => true; return true;`);
   const clickedRemove = await admin.executeScript(
     `const row = [...document.querySelectorAll("#admin-players .player-row")]
        .find((candidate) => candidate.querySelector(".player-name")?.textContent === "Chhaya");
@@ -227,6 +227,7 @@ try {
      return true;`,
   );
   assert(clickedRemove, "Could not find Chhaya's remove button");
+  await acceptConfirm(admin);
 
   await waitFor(
     admin,
@@ -243,10 +244,10 @@ try {
     "Removed player did not get a clear message",
   );
 
-  await admin.executeScript(`window.confirm = () => true; return true;`);
   await admin.executeScript(
     `document.getElementById("reset-room").click(); return true;`,
   );
+  await acceptConfirm(admin);
   await waitFor(
     admin,
     `(() => {

@@ -11,6 +11,42 @@ Read [`STATUS.md`](STATUS.md) for what is true right now, and
 
 ## 2026-10-22
 
+### The browser suites now play all of the games, and the console asks in-app
+
+Two of the open P2 items closed in one pass.
+
+- The three previous browser suites covered the older games; the five
+  social games told their clients nothing to click through. A new
+  play-through runs all of them in Chrome: an emoji gets guessed wrong
+  and revealed, a would-you-rather vote is cast with reasons, three
+  captions go up and are voted for, the two-truths tells each run their
+  full round with the host pacing "Next round", and a spy
+  falls. Every step asserts what the screen shows — the reveal, the
+  tallies, the named spy — because it was the un-shown reveal, not the
+  engine, that broke three times before.
+- The suites no longer monkey-patch `window.confirm` in the host
+  console either, because the console has an in-app dialog now (a dim
+  overlay, a card, Cancel and Confirm — styled from the tokens). Every
+  destructive ask — starting a game, ending one, restart, resetting the
+  room, removing a player, discarding content edits, ending or skipping
+  a playlist game — now goes through it and awaits the answer. The
+  `beforeunload` guard keeps the native protection, being a browser
+  guarantee rather than a styling choice.
+- The turn-based play-through taught the driver what a human knows:
+  submitting your statements in the writing phase beats guessing in the
+  current one, "Next round" is the host's job, and the console's "Play
+  again" button is how you tell the game is over.
+
+### A standing check that every screen reads only what its engine sends
+
+The screens and the engines now have to agree on field names, checked
+by the engine suite. It extracts every `game.x` and `mine.x` read from
+each client screen, splits a shared screen into its per-game branches,
+and drives each engine through its states; anything a screen reads that
+no state ever publishes is a failure. The public view and the player's
+own view are checked apart, because that is exactly the split that hid
+the `result`/`results` bug. The check runs in `npm run smoke:engines`.
+
 ### The five new games had no content at all
 
 The content file had the five collections for the social games, but the

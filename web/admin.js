@@ -319,8 +319,65 @@ async function copyRoomCode() {
   }
 }
 
+/* Native confirm() popups are system chrome pasted on top of the
+ * console: they steal focus, they freeze the whole tab until they are
+ * answered, and some embedded browsers block them outright. Destructive
+ * actions ask in-app instead. The answer is always a promise, and
+ * everything that asks awaits it. */
+function adminConfirm(
+  message,
+  { confirmLabel = "Confirm", cancelLabel = "Cancel" } = {},
+) {
+  return new Promise((resolve) => {
+    const previousFocus = document.activeElement;
+    const overlay = make("div", "dialog-overlay");
+    const card = make("div", "dialog-card");
+    card.setAttribute("role", "dialog");
+    card.setAttribute("aria-modal", "true");
+
+    card.append(make("p", "dialog-text", message));
+
+    const actions = make("div", "dialog-actions");
+    /* btn-inline keeps the buttons compact: the base .btn is full
+     * width, which suits a phone over a dialog row. */
+    const cancel = make("button", "btn btn-tonal btn-inline", cancelLabel);
+    cancel.type = "button";
+    const accept = make("button", "btn btn-primary btn-inline", confirmLabel);
+    accept.type = "button";
+    /* The suites click this attribute instead of monkey-patching
+     * window.confirm, which no longer has anything to patch. */
+    accept.dataset.confirmAccept = "";
+
+    const close = (answer) => {
+      window.removeEventListener("keydown", onKey, true);
+      overlay.remove();
+      previousFocus?.focus?.();
+      resolve(answer);
+    };
+    const onKey = (event) => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        close(false);
+      }
+    };
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) close(false);
+    });
+    cancel.addEventListener("click", () => close(false));
+    accept.addEventListener("click", () => close(true));
+
+    actions.append(cancel, accept);
+    card.append(actions);
+    overlay.append(card);
+    document.body.append(overlay);
+    window.addEventListener("keydown", onKey, true);
+    accept.focus();
+  });
+}
+
 function confirmAction(message) {
-  return confirmDestructive ? window.confirm(message) : true;
+  if (!confirmDestructive) return Promise.resolve(true);
+  return adminConfirm(message);
 }
 
 function switchAdminTab(tab, { focus = false, historyMode = "push" } = {}) {
@@ -1448,8 +1505,8 @@ function contentControls(index) {
   const remove = make("button", "icon-button icon-button-danger");
   remove.type = "button";
   decorateIconButton(remove, "trash", "Remove this content entry");
-  remove.addEventListener("click", () => {
-    if (!confirmAction("Remove this content entry?")) return;
+  remove.addEventListener("click", async () => {
+    if (!await confirmAction("Remove this content entry?")) return;
     contentDraft.splice(index, 1);
     markContentDirty();
     renderContent();
@@ -1697,10 +1754,10 @@ async function loadContent({ force = false } = {}) {
   }
 }
 
-function selectContentCollection(key) {
+async function selectContentCollection(key) {
   if (key === contentKey) return;
   contentPage = 1;
-  if (contentDirty && !confirmAction("Discard unsaved content changes?")) {
+  if (contentDirty && !await confirmAction("Discard unsaved content changes?")) {
     dom.contentCollection.value = contentKey;
     return;
   }
@@ -1829,7 +1886,7 @@ async function resetContent() {
   const collection = currentCollection();
   if (!collection) return;
   if (
-    !confirmAction(
+    !await confirmAction(
       `Reset ${collection.game} content to the built-in list? This replaces all edits in this collection.`,
     )
   ) {
@@ -1983,7 +2040,7 @@ async function verifyStoredToken() {
 }
 
 async function removePlayer(player) {
-  if (!confirmAction(`Remove ${player.name} from the room?`)) return;
+  if (!await confirmAction(`Remove ${player.name} from the room?`)) return;
 
   const result = await emitAdmin(
     "admin:removePlayer",
@@ -2006,7 +2063,7 @@ async function startGame(game) {
     ? " This clears the finished playlist summary and starts a fresh session score."
     : "";
   if (
-    !confirmAction(
+    !await confirmAction(
       `Start ${game.name} with ${admin.connectedCount} ${
         admin.connectedCount === 1 ? "player" : "players"
       }?${offlineNote}${extra}`,
@@ -2049,7 +2106,7 @@ async function endGame() {
   const message = playlistMode
     ? "End the current playlist game? Its scores are final, and the playlist will wait for you to start the next game."
     : "End the current game and return to the lobby?";
-  if (!confirmAction(message)) return;
+  if (!await confirmAction(message)) return;
 
   dom.endGame.disabled = true;
   try {
@@ -2072,7 +2129,7 @@ async function replayGame() {
     return;
   }
 
-  if (!confirmAction("Restart this game from round one? Scores will reset.")) {
+  if (!await confirmAction("Restart this game from round one? Scores will reset.")) {
     return;
   }
 
@@ -2109,7 +2166,7 @@ async function startPlaylist() {
       ? " Offline players will sit out the first game and can rejoin later."
       : "";
   if (
-    !confirmAction(
+    !await confirmAction(
       `Start a ${playlistDraft.length}-game playlist with ${first.name} first?${offlineNote}`,
     )
   ) {
@@ -2168,7 +2225,7 @@ async function skipPlaylistGame() {
   const playlist = currentState?.admin?.playlist;
   const current = playlist?.queue?.[playlist.index];
   if (
-    !confirmAction(
+    !await confirmAction(
       `Skip ${current?.name ?? "the current game"}? Its current scores are final for the game night total.`,
     )
   ) {
@@ -2195,7 +2252,7 @@ async function skipPlaylistGame() {
 async function endPlaylist() {
   if (playlistBusy) return;
   if (
-    !confirmAction(
+    !await confirmAction(
       "End the game night playlist? Session scores will be kept in the final summary.",
     )
   ) {
@@ -2335,10 +2392,10 @@ dom.contentSearch.addEventListener("input", () => {
   contentSearch = dom.contentSearch.value;
   renderContent();
 });
-dom.contentRefresh.addEventListener("click", () => {
+dom.contentRefresh.addEventListener("click", async () => {
   if (
     contentDirty &&
-    !confirmAction("Discard unsaved content changes and reload from the server?")
+    !await confirmAction("Discard unsaved content changes and reload from the server?")
   ) {
     return;
   }
@@ -2347,9 +2404,9 @@ dom.contentRefresh.addEventListener("click", () => {
 dom.contentReset.addEventListener("click", () => void resetContent());
 dom.contentAdd.addEventListener("click", addContentEntry);
 dom.contentSave.addEventListener("click", () => void saveContent());
-dom.contentDiscard.addEventListener("click", () => {
+dom.contentDiscard.addEventListener("click", async () => {
   if (!contentDirty) return;
-  if (!confirmAction("Discard unsaved content changes?")) return;
+  if (!await confirmAction("Discard unsaved content changes?")) return;
   contentDraft = cloneJson(contentData?.items?.[contentKey] ?? []) ?? [];
   contentDirty = false;
   renderContent();
@@ -2367,7 +2424,7 @@ renderContent();
 
 dom.resetRoom.addEventListener("click", async () => {
   if (
-    !confirmAction(
+    !await confirmAction(
       "Close this room and create a new code? Everyone will need to rejoin.",
     )
   ) {
