@@ -47,6 +47,31 @@ author, the votes and the bonus.
 The answer was computed and never published, so the end of the round
 said "revealed" and nothing else.
 
+### The reveals were half finished
+
+One of Us never said who the imposter was. The engine has published the
+name since the first version, and the reveal screen showed the word, the
+category, the imposter's guess and the vote counts, and then stopped. The
+room finished the game without ever finding out who the imposter was,
+which is the one thing the reveal is for. Spyfall had the same problem
+with the spy.
+
+Would You Rather collected a reason from everybody and threw it away. The
+split between the two sides was not shown either. The whole point of the
+game is hearing why people chose.
+
+Two Truths & One Lie could not really be played. The three statements
+were published but never drawn, so a player had to pick which one was the
+lie without being able to read any of them. The result was never shown
+either. And the result is published under a different name than the
+other games use, so the screen was looking in the wrong place.
+
+### The new games had the wrong phase names on screen
+
+They reuse phase names from the older games, so Emoji Guess said
+"Guessing authors" and Two Truths & One Lie said "Writing answers".
+Each game now has its own labels.
+
 ### The playlist looked broken
 
 Adding games to the queue worked, but the screen kept saying "Add games

@@ -18,6 +18,8 @@ const PHASE_LABELS = {
   complete: "Final results",
   writing: "Writing answers",
   guessing: "Guessing authors",
+  voting: "Voting",
+  explain: "Say why",
   collect: "Write your prompts",
   play: "Turns",
   between: "Between games",
@@ -25,10 +27,16 @@ const PHASE_LABELS = {
 
 /* Games that reuse a phase name with a different meaning. In Who Am I? and
  * Where Am I? the "reveal" phase means the answer is being shown, not that a
- * role is being revealed. */
+ * role is being revealed. The social games reuse "reveal", "vote",
+ * "writing" and "guessing" for their own meanings. */
 const PHASE_LABEL_OVERRIDES = {
   "who-am-i": { reveal: "The answer" },
   "where-am-i": { reveal: "The answer" },
+  "emoji-guess": { guessing: "Guessing the emoji" },
+  "caption-this": { writing: "Writing captions", voting: "Voting" },
+  "two-truths-one-lie": { writing: "Writing statements", guessing: "Finding the lie" },
+  "would-you-rather": { vote: "Choose a side", explain: "Say why" },
+  spyfall: { reveal: "Your role", vote: "Who is the spy?" },
 };
 
 function el(tag, className, text) {
@@ -2474,6 +2482,7 @@ function newSocialGame(state, game, mine, actions) {
       /* The statements are the whole game. They were published but
        * never shown, so a player had to guess which one was the lie
        * without being able to read them. */
+      const outcome = game.result ?? game.results;
       const statements = game.statements ?? [];
       if (statements.length) {
         wrap.append(note(`${game.storytellerName ?? "Someone"} says:`));
@@ -2482,7 +2491,7 @@ function newSocialGame(state, game, mine, actions) {
           const item = el("li", "history-row");
           item.append(el("span", "player-name", `Statement ${index + 1}`));
           item.append(el("span", "history-type", text));
-          if (game.result && game.result.lieIndex === index) {
+          if (outcome && outcome.lieIndex === index) {
             item.append(pill("the lie", "badge badge-wrong"));
           }
           list.append(item);
@@ -2492,12 +2501,12 @@ function newSocialGame(state, game, mine, actions) {
       if (mine.canGuess) {
         [0,1,2].forEach(i=>wrap.append(button(`Statement ${i+1} is the lie`,"btn btn-tonal",actOn(button("", "", null),actions,{type:"guess",statementIndex:i},"Choose a statement."))));
       }
-      if (game.result) {
+      if (outcome) {
         wrap.append(
           note(
-            game.result.correctCount === 1
-              ? `${game.result.storytellerName} fooled one of you.`
-              : `${game.result.storytellerName} fooled ${game.result.correctCount} of you.`,
+            outcome.correctCount === 1
+              ? `${outcome.storytellerName} fooled one of you.`
+              : `${outcome.storytellerName} fooled ${outcome.correctCount} of you.`,
           ),
         );
       } else if (!mine.canGuess) {
