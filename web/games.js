@@ -2377,7 +2377,7 @@ function newSocialGame(state, game, mine, actions) {
       formSubmit({ button: submit, actions, fallback: "Type a guess first.", read: () => input.value.trim() ? { type: "guess", guess: input.value.trim() } : null, onSuccess: () => { clearDraft(keyOf(game, "emoji")); input.value = ""; } });
       wrap.append(input, submit);
     } else if (mine.hasSolved) wrap.append(note("You solved it. Let the room catch up."));
-    if (game.phase === "results" || game.phase === "complete") wrap.append(note(`Answer: ${game.result ? (game.result.answer ?? game.result.name ?? "revealed") : "revealed"}`));
+    if (game.phase === "results" || game.phase === "complete") wrap.append(note(`Answer: ${game.answer ?? "revealed"}`));
   } else if (game.id === "would-you-rather") {
     wrap.append(note(game.optionA ?? "Option A"));
     if (mine.canVote) { wrap.append(button(game.optionA, "btn btn-primary", actOn(button("", "", null), actions, { type: "vote", choice: "a" }, "Choose an option."))); wrap.append(button(game.optionB, "btn btn-tonal", actOn(button("", "", null), actions, { type: "vote", choice: "b" }, "Choose an option."))); }
@@ -2387,6 +2387,25 @@ function newSocialGame(state, game, mine, actions) {
     wrap.append(note(game.prompt?.text ?? "Caption the scene"));
     if (mine.canCaption) { const input=textarea("Write a caption",keyOf(game,"caption"),160); const submit=button("Submit caption"); formSubmit({button:submit,actions,read:()=>input.value.trim()?{type:"caption",caption:input.value}:null,fallback:"Write a caption first.",onSuccess:()=>clearDraft(keyOf(game,"caption"))}); wrap.append(input,submit); }
     if (game.captions?.length) for (const caption of game.captions) wrap.append(button(caption.text,"btn btn-tonal",mine.canVote&&caption.id!==mine.yourCaptionId?actOn(button("","",null),actions,{type:"vote",captionId:caption.id},"Choose a caption."):null));
+    /* The tallies only come out when the round is over. Before that the
+     * captions are buttons to vote on, and afterwards they are the
+     * result, with the votes and the bonus. */
+    if (game.result?.length) {
+      const list = el("ul", "history-list");
+      for (const row of game.result) {
+        const item = el("li", "history-row");
+        item.append(el("span", "player-name", row.authorName));
+        item.append(el("span", "history-type", row.text));
+        item.append(
+          pill(
+            `${row.votes} vote${row.votes === 1 ? "" : "s"}${row.bonus ? " +2" : ""}`,
+            row.bonus ? "badge badge-correct" : "badge",
+          ),
+        );
+        list.append(item);
+      }
+      wrap.append(list);
+    }
   } else if (game.id === "two-truths-one-lie") {
     if (mine.canSubmit) { const inputs=[0,1,2].map(i=>textarea(`Statement ${i+1}`,keyOf(game,`statement-${i}`),140)); const select=el("select","field-input"); [0,1,2].forEach(i=>{const o=el("option","",`Statement ${i+1} is the lie`);o.value=String(i);select.append(o);}); bindSelect(select,keyOf(game,"lie")); const submit=button("Submit statements"); formSubmit({button:submit,actions,read:()=>({type:"statements",statements:inputs.map(i=>i.value),lieIndex:Number(select.value)}),fallback:"Write all three statements.",onSuccess:()=>inputs.forEach(i=>i.value="")}); wrap.append(...inputs,select,submit); } else if (mine.canGuess) [0,1,2].forEach(i=>wrap.append(button(`Statement ${i+1}`,"btn btn-tonal",actOn(button("","",null),actions,{type:"guess",statementIndex:i},"Choose a statement.")))); else wrap.append(waiting("Waiting for the room…"));
   } else {

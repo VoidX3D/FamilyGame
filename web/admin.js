@@ -1030,7 +1030,8 @@ function renderPlaylistBuilder(admin) {
   dom.playlistShuffle.disabled = playlistDraft.length < 2;
 
   if (!hasQueue) {
-    dom.playlistHint.textContent = "Add games to the queue.";
+    dom.playlistHint.textContent =
+      "Add games to build the queue. You decide when each one starts.";
   } else if (!ready) {
     dom.playlistHint.textContent = `${playlistDraft.length} ${
       playlistDraft.length === 1 ? "game" : "games"
@@ -1189,10 +1190,10 @@ function renderPlaylist(admin) {
   dom.playlistLive.hidden = !playlist;
 
   if (canBuild) {
+    // The builder writes the hint, because only it knows how many games
+    // are queued. Overwriting it here made the screen look as if
+    // nothing had been added.
     renderPlaylistBuilder(admin);
-    dom.playlistHint.textContent = playlist
-      ? "The game night is running. Add or remove the upcoming games below."
-      : "Add games to build the queue. You decide when each one starts.";
   } else if (playlist) {
     dom.playlistHint.textContent =
       "The game night is running. Edit the upcoming games below.";

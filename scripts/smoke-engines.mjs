@@ -641,6 +641,150 @@ check("draw-it guessing is open and the list is shared", () => {
   );
 });
 
+/* The five social games, driven to the end.
+ *
+ * They share one engine, so one pass over the five proves the shape of
+ * all of them: everybody plays, the round finishes, and the scores come
+ * out right. */
+check("the social games can be played to the end", () => {
+  const social = [
+    "would-you-rather",
+    "caption-this",
+    "emoji-guess",
+    "two-truths-one-lie",
+    "spyfall",
+  ];
+
+  for (const id of social) {
+    const room = makeRoom(4);
+    const engine = getGame(id);
+    assert(engine, `There is no engine for ${id}`);
+    const game = engine.create(room);
+    const players = room.players;
+
+    /* The content has to be real. A game that starts with its
+     * placeholder is not the game anybody signed up for. */
+    const publicView = engine.publicView(game, room);
+    assert(
+      publicView && typeof publicView === "object",
+      `${id} has no public view`,
+    );
+    assert(
+      !JSON.stringify(publicView).includes("Stay in"),
+      `${id} fell back to its placeholder content`,
+    );
+
+    const everyone = (fn) => {
+      for (const player of players) {
+        const result = fn(player);
+        expectOk(result, `${id} for ${player.id}`);
+      }
+    };
+
+    if (id === "would-you-rather") {
+      everyone((player) =>
+        engine.action(room, game, player.id, {
+          type: "vote",
+          choice: "a",
+        }),
+      );
+      assert(game.phase === "explain", `${id} should ask for reasons`);
+      everyone((player) =>
+        engine.action(room, game, player.id, {
+          type: "explain",
+          text: "Because of course",
+        }),
+      );
+    } else if (id === "caption-this") {
+      everyone((player) =>
+        engine.action(room, game, player.id, {
+          type: "caption",
+          caption: `A very good caption by ${player.id}`,
+        }),
+      );
+      assert(game.phase === "voting", `${id} should go to the vote`);
+      const captions = game.captions.map((caption) => caption.id);
+      for (const player of players) {
+        const other = captions.find(
+          (captionId) =>
+            game.captions.find((c) => c.id === captionId).authorId !== player.id,
+        );
+        expectOk(
+          engine.action(room, game, player.id, {
+            type: "vote",
+            captionId: other,
+          }),
+          `${id} vote`,
+        );
+      }
+    } else if (id === "emoji-guess") {
+      const answer = game.item.name;
+      for (const player of players) {
+        const result = engine.action(room, game, player.id, {
+          type: "guess",
+          guess: answer,
+        });
+        expectOk(result, `${id} guess`);
+        assert(result.correct === true, `${id} should accept the answer`);
+      }
+    } else if (id === "two-truths-one-lie") {
+      everyone((player) =>
+        engine.action(room, game, player.id, {
+          type: "statements",
+          statements: ["One", "Two", "Three"],
+          lieIndex: 1,
+        }),
+      );
+      assert(game.phase === "guessing", `${id} should go to the guess`);
+      const storyteller = game.players[game.round - 1] ?? game.players[0];
+      for (const player of players) {
+        if (player.id === storyteller.id) continue;
+        expectOk(
+          engine.action(room, game, player.id, {
+            type: "guess",
+            statementIndex: 1,
+          }),
+          `${id} guess`,
+        );
+      }
+    } else {
+      everyone((player) =>
+        engine.action(room, game, player.id, { type: "ready" }),
+      );
+      assert(game.phase === "vote", `${id} should go to the vote`);
+      const spy = game.spyId;
+      for (const player of players) {
+        const target = player.id === spy ? firstOther(players, player.id) : spy;
+        expectOk(
+          engine.action(room, game, player.id, {
+            type: "vote",
+            targetId: target,
+          }),
+          `${id} vote`,
+        );
+      }
+    }
+
+    assert(
+      game.phase === "results",
+      `${id} should finish, but it is in ${game.phase}`,
+    );
+    assert(game.results, `${id} finished with no result`);
+
+    const view = engine.publicView(game, room);
+    assert(
+      view.result || view.results,
+      `${id} has no result in the public view`,
+    );
+    if (id === "emoji-guess") {
+      assert(view.answer, `${id} never says what the emojis meant`);
+    }
+
+    const total = Object.values(room.scores).reduce((sum, n) => sum + n, 0);
+    assert(total > 0, `${id} finished without scoring a single point`);
+  }
+});
+
 check("catalog shape", () => {
   // The games that were always here. Newer games are welcome, but these
   // must never disappear.
@@ -728,6 +872,68 @@ check("every content collection has entries", () => {
   for (const [key, items] of Object.entries(collections)) {
     assert(Array.isArray(items), `The collection "${key}" is not a list`);
     assert(items.length > 0, `The collection "${key}" is empty`);
+  }
+});
+
+check("the schema and the content file agree", () => {
+  /* A collection in the content file that is not in the schema is loaded
+   * by nobody. The game that wanted it falls back to its placeholder,
+   * and the content looks like it is there while it is not. This is how
+   * the five social games ended up with "Stay in" and "Go out". */
+  const schema = JSON.parse(
+    readFileSync(
+      new URL("../server/data/content-schema.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const defaults = JSON.parse(
+    readFileSync(
+      new URL("../server/data/default-content.json", import.meta.url),
+      "utf8",
+    ),
+  );
+
+  const declared = new Set(
+    (schema?.collections ?? []).map((collection) => collection.key),
+  );
+  const present = new Set(Object.keys(defaults?.collections ?? {}));
+
+  for (const key of present) {
+    assert(
+      declared.has(key),
+      `The collection "${key}" is in the content file but not in the schema, so nothing loads it.`,
+    );
+  }
+  for (const key of declared) {
+    assert(
+      present.has(key),
+      `The collection "${key}" is in the schema but not in the content file.`,
+    );
+  }
+
+  /* Every game that asks for content must ask for a collection that is
+   * really there. */
+  for (const meta of GAME_LIST) {
+    const own = new URL(`../server/games/${meta.id}.js`, import.meta.url);
+    const shared = new URL("../server/games/socialGames.js", import.meta.url);
+    let source = "";
+    try {
+      source = readFileSync(own, "utf8");
+    } catch {
+      // The social games share one file.
+      source = readFileSync(shared, "utf8");
+    }
+    const asked = [
+      ...[...source.matchAll(/getCollection\(\s*"([^"]+)"/g)].map((m) => m[1]),
+      // The social games read the collection name out of a table.
+      ...[...source.matchAll(/collection:\s*"([^"]+)"/g)].map((m) => m[1]),
+    ];
+    for (const key of asked) {
+      assert(
+        declared.has(key),
+        `${meta.id} asks for the collection "${key}", which is not in the schema.`,
+      );
+    }
   }
 });
 

@@ -9,6 +9,55 @@ Read [`STATUS.md`](STATUS.md) for what is true right now, and
 
 ---
 
+## 2026-10-22
+
+### The five new games had no content at all
+
+The content file had the five collections for the social games, but the
+schema did not. The content store only loads the collections the schema
+declares, so all five were silently thrown away and every round fell
+back to the engine's placeholder: "Stay in or go out", "Rainbow", a
+blank drawing, "Airport".
+
+- The schema now declares all five: `wouldYouRatherQuestions`,
+  `captionPrompts`, `emojiPuzzles`, `twoTruthsTopics` and
+  `spyfallLocations`.
+- The content is real now: 48 would-you-rather questions, 42 caption
+  prompts, 35 emoji puzzles, 38 two-truths topics and 36 locations.
+- The suite now checks that the schema and the content file agree, and
+  that every game asks for a collection that is really there. This is
+  how it slipped through: the old check walked the schema, so a
+  collection missing from the schema was invisible to it.
+
+### Emoji Guess never scored a point
+
+The engine worked out who had solved it and what they were owed, and
+then never handed the points over. Everybody finished with zero. The
+first solver is worth three, the rest are worth one.
+
+### Caption This never showed the result
+
+The tallies were published in the list of captions, where the client
+looks for a result, so the room saw the captions and never saw who
+won. The engine publishes them properly now, and the screen shows the
+author, the votes and the bonus.
+
+### Emoji Guess never said what the emojis meant
+
+The answer was computed and never published, so the end of the round
+said "revealed" and nothing else.
+
+### The playlist looked broken
+
+Adding games to the queue worked, but the screen kept saying "Add games
+to build the queue" afterwards, because the render overwrote the message
+the builder had just written. The queue looked empty and the Start
+button looked dead, so the whole thing read as broken. The hint now
+belongs to the builder, which is the only part that knows how many
+games are queued.
+
+---
+
 ## 2026-10-21
 
 ### One place for the addresses, and no more stale ports
