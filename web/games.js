@@ -539,6 +539,13 @@ function oneOfUs(state, game, mine, actions) {
     nodes.push(banner);
 
     const reveal = block(blockTitle("The reveal"));
+    /* The whole reveal is the name of the imposter. The engine has
+     * published it since the beginning and the screen never showed it,
+     * so the room finished the game without ever finding out. */
+    if (game.imposterName) {
+      reveal.append(el("p", "role-caption", "The imposter was"));
+      reveal.append(el("p", "word-display", game.imposterName));
+    }
     reveal.append(el("p", "role-caption", "The secret word was"));
     reveal.append(el("p", "word-display", game.word ?? "-"));
     reveal.append(note(`Category: ${game.category}`));
@@ -2382,7 +2389,33 @@ function newSocialGame(state, game, mine, actions) {
     wrap.append(note(game.optionA ?? "Option A"));
     if (mine.canVote) { wrap.append(button(game.optionA, "btn btn-primary", actOn(button("", "", null), actions, { type: "vote", choice: "a" }, "Choose an option."))); wrap.append(button(game.optionB, "btn btn-tonal", actOn(button("", "", null), actions, { type: "vote", choice: "b" }, "Choose an option."))); }
     else if (mine.canExplain) { const input=textarea("Why? (optional)",keyOf(game,"reason"),180); const submit=button("Share reason"); formSubmit({button:submit,actions,read:()=>({type:"explain",text:input.value}),fallback:"Skip or write a reason.",onSuccess:()=>clearDraft(keyOf(game,"reason"))}); wrap.append(input,submit); }
-    else wrap.append(note(`A: ${game.optionA}  •  B: ${game.optionB}`));
+    else {
+      wrap.append(note(`A: ${game.optionA}  •  B: ${game.optionB}`));
+      /* The whole point of the game is hearing why people chose. The
+       * reasons were collected and then never shown. */
+      const counts = game.voteCounts;
+      if (counts) {
+        const tally = el("div", "vote-count-list");
+        const rowA = el("div", "vote-count-row");
+        rowA.append(el("span", "player-name", `A: ${game.optionA}`));
+        rowA.append(el("span", "history-type", `${counts.a} chose this`));
+        const rowB = el("div", "vote-count-row");
+        rowB.append(el("span", "player-name", `B: ${game.optionB}`));
+        rowB.append(el("span", "history-type", `${counts.b} chose this`));
+        tally.append(rowA, rowB);
+        wrap.append(tally);
+      }
+      if (game.results?.length) {
+        const list = el("ul", "history-list");
+        for (const reason of game.results) {
+          const item = el("li", "history-row");
+          item.append(el("span", "player-name", reason.playerName));
+          item.append(el("span", "history-type", reason.text));
+          list.append(item);
+        }
+        wrap.append(list);
+      }
+    }
   } else if (game.id === "caption-this") {
     wrap.append(note(game.prompt?.text ?? "Caption the scene"));
     if (mine.canCaption) { const input=textarea("Write a caption",keyOf(game,"caption"),160); const submit=button("Submit caption"); formSubmit({button:submit,actions,read:()=>input.value.trim()?{type:"caption",caption:input.value}:null,fallback:"Write a caption first.",onSuccess:()=>clearDraft(keyOf(game,"caption"))}); wrap.append(input,submit); }
@@ -2429,12 +2462,65 @@ function newSocialGame(state, game, mine, actions) {
       wrap.append(list);
     }
   } else if (game.id === "two-truths-one-lie") {
-    if (mine.canSubmit) { const inputs=[0,1,2].map(i=>textarea(`Statement ${i+1}`,keyOf(game,`statement-${i}`),140)); const select=el("select","field-input"); [0,1,2].forEach(i=>{const o=el("option","",`Statement ${i+1} is the lie`);o.value=String(i);select.append(o);}); bindSelect(select,keyOf(game,"lie")); const submit=button("Submit statements"); formSubmit({button:submit,actions,read:()=>({type:"statements",statements:inputs.map(i=>i.value),lieIndex:Number(select.value)}),fallback:"Write all three statements.",onSuccess:()=>inputs.forEach(i=>i.value="")}); wrap.append(...inputs,select,submit); } else if (mine.canGuess) [0,1,2].forEach(i=>wrap.append(button(`Statement ${i+1}`,"btn btn-tonal",actOn(button("","",null),actions,{type:"guess",statementIndex:i},"Choose a statement.")))); else wrap.append(waiting("Waiting for the room…"));
+    if (mine.canSubmit) {
+      const inputs=[0,1,2].map(i=>textarea(`Statement ${i+1}`,keyOf(game,`statement-${i}`),140));
+      const select=el("select","field-input");
+      [0,1,2].forEach(i=>{const o=el("option","",`Statement ${i+1} is the lie`);o.value=String(i);select.append(o);});
+      bindSelect(select,keyOf(game,"lie"));
+      const submit=button("Submit statements");
+      formSubmit({button:submit,actions,read:()=>({type:"statements",statements:inputs.map(i=>i.value),lieIndex:Number(select.value)}),fallback:"Write all three statements.",onSuccess:()=>inputs.forEach(i=>i.value="")});
+      wrap.append(...inputs,select,submit);
+    } else {
+      /* The statements are the whole game. They were published but
+       * never shown, so a player had to guess which one was the lie
+       * without being able to read them. */
+      const statements = game.statements ?? [];
+      if (statements.length) {
+        wrap.append(note(`${game.storytellerName ?? "Someone"} says:`));
+        const list = el("ul", "history-list");
+        statements.forEach((text, index) => {
+          const item = el("li", "history-row");
+          item.append(el("span", "player-name", `Statement ${index + 1}`));
+          item.append(el("span", "history-type", text));
+          if (game.result && game.result.lieIndex === index) {
+            item.append(pill("the lie", "badge badge-wrong"));
+          }
+          list.append(item);
+        });
+        wrap.append(list);
+      }
+      if (mine.canGuess) {
+        [0,1,2].forEach(i=>wrap.append(button(`Statement ${i+1} is the lie`,"btn btn-tonal",actOn(button("", "", null),actions,{type:"guess",statementIndex:i},"Choose a statement."))));
+      }
+      if (game.result) {
+        wrap.append(
+          note(
+            game.result.correctCount === 1
+              ? `${game.result.storytellerName} fooled one of you.`
+              : `${game.result.storytellerName} fooled ${game.result.correctCount} of you.`,
+          ),
+        );
+      } else if (!mine.canGuess) {
+        wrap.append(waiting("Waiting for the room…"));
+      }
+    }
   } else {
     if (mine.canReady) wrap.append(button("I’m ready", "btn btn-primary", actOn(button("","",null),actions,{type:"ready"},"Ready failed.")));
     if (mine.location) wrap.append(el("p","word-display",mine.location.name));
     if (mine.canVote) game.players.filter(p=>p.id!==state.you.playerId).forEach(p=>wrap.append(button(p.name,"btn btn-tonal",actOn(button("","",null),actions,{type:"vote",targetId:p.id},"Choose a player."))));
-    if (game.phase === "results") wrap.append(note(`Location: ${game.result?.location?.name ?? "revealed"}`));
+    if (game.phase === "results" || game.phase === "complete") {
+      const result = game.result;
+      if (result?.location?.name) wrap.append(note(`Location: ${result.location.name}`));
+      if (result?.spyName) {
+        wrap.append(
+          note(
+            result.caught
+              ? `${result.spyName} was the spy, and the room caught them.`
+              : `${result.spyName} was the spy, and got away with it.`,
+          ),
+        );
+      }
+    }
   }
   nodes.push(wrap);
   if (game.phase === "results" || game.phase === "complete") nodes.push(scoreboard(state, game));
