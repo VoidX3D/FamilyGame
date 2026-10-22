@@ -37,6 +37,8 @@ The fix is written but is not finished, not verified, or not deployed.
 
 | Item | What is wrong |
 | --- | --- |
+| **The five new games have no browser test** | They have a play-through in the engine suite now, but the browser suites do not play them. The bugs this round were all in the client screens, so the browser suite is where they would have been caught. |
+| **The host console still uses a native confirm** | Starting a game or a playlist puts a browser dialog on the screen. It works, but it does not look like the rest of the app. |
 | **`web/pages.css` was minified** | It was minified into one rule per line, which is not the house style. It should be re-formatted to match the other stylesheets. Do not change what the rules do while re-formatting it. |
 | **Draw It still has no ellipse tool** | The pen, the eraser, the fill, a line and a box are there. An ellipse would be the natural next one, and it is the same shape of change as the box: a tool the server knows, and a stroke the clients replay the same way. |
 | **The guess list does not scroll to the newest entry** | The list is capped and it shows the oldest first, so the room has to scroll down to see the latest guess. Skribble keeps the newest in view. |
