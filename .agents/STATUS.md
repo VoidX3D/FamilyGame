@@ -3,7 +3,7 @@
 The current state of Family Game Hub. Everything in this file is either
 live right now or is an exact statement about the code in `main`.
 
-Last reviewed: **2026-10-21**.
+Last reviewed: **2026-10-23**.
 
 ## Live
 
@@ -107,7 +107,8 @@ drawing strokes. The full list is at the bottom of `/api/docs`.
 
 | Area | State |
 | --- | --- |
-| The eight games | Playing. Every one has a server engine, a player screen and a play-through in the suites. |
+| The thirteen games | Playing. Every one has a server engine, a player screen and a play-through in the suites. |
+| The five social games | Submission, waiting, reveal, scoring, and content-schema contracts are covered by focused engine regressions and Chrome smoke suites. |
 | The host console | Working, with the reconnect fix in flight. |
 | The front end | Working as a PWA, installed and offline-capable. |
 | The API and its docs | Live, documented, and covered by the suites. |

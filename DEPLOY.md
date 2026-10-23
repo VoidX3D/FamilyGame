@@ -201,8 +201,8 @@ After Vercel assigns the domain:
 
 ## 3. Smoke checklist in production
 
-- [ ] `/healthz` reports `games: 7`
-- [ ] `/api/games` returns all seven games
+- [ ] `/healthz` reports `games: 13`
+- [ ] `/api/games` returns all thirteen games
 - [ ] Host passcode works; wrong passcode is rejected
 - [ ] Room code and short `/g/CODE` invite link can be copied from the host console
 - [ ] Three players can join from different devices or browser profiles
@@ -212,7 +212,7 @@ After Vercel assigns the domain:
 - [ ] Truth or Dare prompt text is visible only to the current player
 - [ ] A player can refresh and resume their seat
 - [ ] The host can end a game and the room returns to the lobby
-- [ ] The Content tab loads eight collections, and a saved edit survives a restart
+- [ ] The Content tab loads fourteen collections, and a saved edit survives a restart
 - [ ] An unknown path shows the custom 404 page
 
 ## Current deployment state

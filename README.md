@@ -45,6 +45,11 @@ More in [`preview/`](preview/).
 | Act It Out | 3 to 10 | One turn each | Actor and correct guesser: 1 each. |
 | Truth or Dare | 3 to 10 | 2 cycles | Just for fun; no points. |
 | Draw It | 3 to 10 | 1 turn each | Each correct guess: 1. The drawer: 1. |
+| Caption This | 3 to 10 | 3 | Captions earn votes plus a crowd-favorite bonus. |
+| Emoji Guess | 3 to 10 | 5 | First correct guess: 3; later correct guesses: 1. |
+| Spyfall | 3 to 10 | 3 | Agents and spy score from the room vote. |
+| Would You Rather? | 3 to 10 | 5 | Players on the majority side score 1. |
+| Two Truths & One Lie | 3 to 10 | 3 | Correct guesses score; the storyteller scores for fooled players. |
 
 Nothing is timed, with one deliberate exception: **Draw It** runs on a clock,
 because a drawing turn that never ends is not a game. Everywhere else a phase
@@ -187,7 +192,7 @@ That runs the checks:
 - `smoke:config`: the server works with no configuration, and the passcode survives a restart
 - `smoke:foundation`: auth, rooms, sockets, reconnect, lock, reset
 - `smoke:engines`: every game engine driven to completion, including secret-leak checks
-- `smoke:games`: real Socket.IO play-through of all eight games
+- `smoke:games`: real Socket.IO play-through of all thirteen games
 
 Browser tests need the backend and web preview running, plus Chrome. They read
 `ADMIN_PASSCODE` from the environment, from `server/.env`, or from the
@@ -196,7 +201,7 @@ generated `server/data/admin-passcode` file:
 ```bash
 npm run smoke:ui        # login, routes, invite links, lobby, layout, reset, 404
 npm run smoke:game-ui   # full One of Us game, host controls, lock, all viewports
-npm run smoke:ui-all    # the other seven games end-to-end in Chrome
+npm run smoke:ui-all    # all active games end-to-end in Chrome
 ```
 
 Screenshots are written to `.shots/` (gitignored). Set `ADMIN_PASSCODE`,
@@ -291,7 +296,7 @@ web/
   app.js            Player connection and session flow
   admin.js          Host console
   admin.css         Host console layout and responsive styles
-  games.js          Player screens for all eight games
+  games.js          Player screens for all thirteen games
   dom.js            Small shared DOM helpers
   styles.css        Shared Material Expressive-inspired dark UI
   404.html           Custom not-found page
@@ -331,6 +336,11 @@ English is the only v1 locale. The built-in content lives in
 | Truth or Dare dares | 20 |
 | Act It Out prompts | 40 |
 | Draw It words | 80 |
+| Emoji Guess puzzles | 10 |
+| Caption This prompts | 10 |
+| Spyfall locations | 10 |
+| Would You Rather questions | 8 |
+| Two Truths topics | 10 |
 
 `server/contentStore.js` loads these defaults at startup and overlays any saved
 collections from `server/data/content.json`. If that file does not exist, the

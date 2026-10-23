@@ -265,10 +265,10 @@ requires that port.
 | `npm run smoke:config` | The server works with no configuration, and the passcode survives a restart. |
 | `npm run smoke:foundation` | Auth, rooms, sockets, reconnect, lock, reset. |
 | `npm run smoke:engines` | Every game engine driven to completion, including the secret-leak checks. |
-| `npm run smoke:games` | A real Socket.IO play-through of all eight games. |
+| `npm run smoke:games` | A real Socket.IO play-through of all thirteen games. |
 | `npm run smoke:ui` | Login, routes, invite links, lobby, layout, reset, 404. |
 | `npm run smoke:game-ui` | A full One of Us game, host controls, lock, all viewports. |
-| `npm run smoke:ui-all` | The other seven games end-to-end in Chrome. |
+| `npm run smoke:ui-all` | All active games end-to-end in Chrome. |
 
 The three browser suites need **both dev servers running** and **Chrome**.
 They read `ADMIN_PASSCODE` from the environment, from `server/.env` or from
@@ -278,7 +278,7 @@ defaults.
 
 **The suites check invariants, not a snapshot of the game count.** They assert
 that the core games are present, that ids are unique, that every game
-exports its seven functions, that every game has a client screen and that
+exports its seven functions, that every active game has a client screen and that
 every content collection has entries. The browser suites compare the card
 count with the API catalogue instead of a hard-coded number.
 
@@ -312,13 +312,15 @@ server/
     actItOut.js  drawIt.js  oneOfUs.js  whoIsIt.js
     turnGuess.js     Who Am I? and Where Am I?, one file, two engines
     truthOrDare.js  whoWroteThat.js
+    socialGames.js  captionThis.js  emojiGuess.js  spyfall.js
+    wouldYouRather.js  twoTruthsOneLie.js
 web/
   index.html        Player shell
   admin.html        Host shell
   app.js            Player connection, session, seat token
   admin.js          The host console
   admin.css         Host console layout and responsive styles
-  games.js          The player screens for all eight games
+  games.js          The player screens for all thirteen games
                     (the RENDERERS map is near the end of the file)
   dom.js            Shared DOM helpers: initials, avatars, tone classes
   styles.css        The shared dark UI; the :root token block is at the top

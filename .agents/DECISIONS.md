@@ -9,11 +9,11 @@ reason here, in the same commit.
 
 ---
 
-## 1. Seven games have no timer. Draw It does, on purpose.
+## 1. Twelve games have no timer. Draw It does, on purpose.
 
-**Decision.** One of Us, Who Is It?, Who Am I?, Where Am I?, Who Wrote
-That?!, Act It Out and Truth or Dare advance on state, not on a clock. Draw
-It runs on a server-owned deadline.
+**Decision.** Every active game except Draw It advances on state, not on a clock.
+Draw It runs on a server-owned deadline. The thirteen-game catalog therefore has
+twelve non-timed games and one server-timed drawing game.
 
 **Why.** A party game is played by people who are also talking, eating and
 laughing. A timer that cuts a round off while somebody is answering makes
@@ -218,6 +218,26 @@ their own questions does not want to write them again.
 service restarts on a deploy, so this is a known cost and it is the right
 one. If it ever stops being the right one, that is a decision to make
 deliberately, not a bug to patch.
+
+---
+
+## 10. Every submission has a visible, server-authoritative state.
+
+**Decision.** A player who has submitted sees the saved submission and a clear
+waiting state. The server tracks eligible submitters, voters and guessers for
+each phase; a round never advances because an unrelated player's count happens
+to match another collection's length.
+
+**Why.** These are pass-the-phone games. If a form disappears after a tap, the
+player assumes the answer was lost and submits again. If it comes back, the
+browser is contradicting the server. The server must remain authoritative, but
+the client must render that authority clearly.
+
+**In practice.** Two Truths accepts statements only from the storyteller;
+Caption This counts eligible voters rather than captions; optional answers are
+represented by property presence, so an empty “skip” is still a submission;
+and every renderer has explicit submitted, waiting and result states. Secrets
+remain hidden until the phase that intentionally reveals them.
 
 ---
 

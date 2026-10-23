@@ -28,7 +28,7 @@ The fix is written but is not finished, not verified, or not deployed.
 | **The drawing must survive a mid-turn phone reload** | The stroke ids carry a per-page prefix now. It still needs the reload tested on a real phone-sized viewport, and a deploy. |
 | **The turn history must stay visible in Who Am I? and Where Am I?** | The redaction that hid it is gone. It still needs a play-through that checks the history mid-round. |
 | **The seat token must stay out of IndexedDB** | The token lives in `localStorage` now and the remembered room record expires after a week. It needs the old IndexedDB entries cleared on the upgrade path, and a check that the token really is gone from IndexedDB. |
-| **The whole session needs a deploy** | Everything above is written and the suites pass. None of it is live until the backend branch is published and the front end is rebuilt. |
+| **The whole session needs a deploy** | Main and the generated backend branch are published and the suites pass. The remaining step is an operator-side Wispbyte pull/restart and a production smoke check. |
 | **The preview images need a script** | `preview/` is refreshed by hand from the shots the browser suite leaves in `.shots/`. A small script would copy the right ones across, so the pictures never fall behind the code. |
 
 ---

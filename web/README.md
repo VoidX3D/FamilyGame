@@ -88,9 +88,9 @@ more:
 
 - The strokes go out on their own socket event, not in the game state.
   They are a stream, and pushing the whole state on every pointer move
-  would not scale to eight phones.
+  would not scale to ten phones.
 - The canvas is sized to the layout and to the device pixel ratio.
-- The tools are a pen, an eraser and a fill, an eight colour palette and
+- The tools are a pen, an eraser and a fill, a ten colour palette and
   four brush sizes. The fill is done on the client and replayed with the
   other strokes, so every phone ends up with the same picture.
 

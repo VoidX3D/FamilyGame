@@ -7,7 +7,8 @@
 rather than typed One of Us, the connection work and the API documentation.
 **Third pass:** 2026-10-21 — review of the PWA, audio, IndexedDB and
 palette work, plus the open issues below.
-**Status:** first prototype complete and live. Eight games.
+**Status:** historical snapshot from before the catalog expanded to thirteen
+games. Use `AGENTS.md` and `.agents/STATUS.md` for the current state.
 **Scope:** Critical + High + Medium findings across `server/`, `web/`, `scripts/`.
 **Method:** every source file read in full; live UI measured in Chrome (computed styles, layout rects); all suites executed; every client contract cross-checked against all 8 game engines.
 

@@ -1,11 +1,11 @@
 # Family Game Hub — Project Specification
 
-**Status:** first prototype complete and live (seven games). The drawing
-game, the first one with a clock, is now built and in the catalog.
+**Status:** the thirteen-game catalog is implemented and live. The drawing
+game remains the only game with a server-owned clock.
 **Type:** private, browser-based family party-game platform
 **Players:** 3–10 per room
 **Host:** one admin console per room
-**Brand:** Family Game Hub — “8 Fun2Play Games”
+**Brand:** Family Game Hub — “13 Fun2Play Games”
 **Primary language:** English (the content model leaves room for Nepali later)
 **Live:** frontend `https://funfamilygame.vercel.app`, backend
 `https://familygame.wisp.uno`
@@ -13,9 +13,9 @@ game, the first one with a clock, is now built and in the catalog.
 ### What the prototype proved
 
 - The platform holds up: one room engine, one scoring model, one admin
-  console, one playlist, seven games.
+  console, one playlist, thirteen games.
 - Private information stays private. Every engine keeps its secrets in the
-  server, and the browser suites now play all seven games end to end.
+  server, and the browser suites now play all thirteen games end to end.
 - The "no timers" rule works for every game that has shipped. It is also
   the one rule the next game breaks on purpose (see §2.8).
 
@@ -35,7 +35,7 @@ game, the first one with a clock, is now built and in the catalog.
 
 ## 2. Games
 
-There are **eight active games**.
+There are **thirteen active games**.
 
 ### 2.1 Act It Out
 
@@ -195,7 +195,7 @@ first game with a clock**, and the first one that is not made of text.
 4. A correct guess locks in as a revealed tile and the guesser scores
    1 point. The drawer cannot see the guesses at all.
 5. The turn ends early when every other player has guessed, or when the
-   drawer presses **Done**, or when the clock runs out.
+   the clock runs out. The drawer cannot end the turn.
 6. On a timeout the word is revealed, and nobody scores that turn. A
    drawer only scores when the word was actually guessed.
 7. The next player draws. After everyone has drawn, the round is over and
@@ -222,12 +222,12 @@ first game with a clock**, and the first one that is not made of text.
 - The turn also ends early if everyone guesses, so a fast word does not
   cost the family the rest of the round.
 
-**What this needs that the other seven games do not**
+**What this needs that the other twelve games do not**
 - A `<canvas>` on the player page, with pointer and touch support, sized
   for the device pixel ratio.
 - A separate stroke channel. Drawing is a stream of coordinates, and
   pushing the whole game state on every pointer move will not scale to
-  eight phones. Strokes go out on their own event, batched while the
+  ten phones. Strokes go out on their own event, batched while the
   finger is down, and carry an id so the server can order them.
 - The server keeps the strokes of the current turn, so a player who
   reconnects, or a player who joins mid-turn, sees the drawing so far
@@ -235,6 +235,37 @@ first game with a clock**, and the first one that is not made of text.
 - A guess list that the server validates. The word never enters another
   player's payload, and the revealed tiles are the only feedback a
   guesser gets.
+
+### 2.9 Caption This
+
+Everyone receives the same family-friendly prompt and writes a caption. The
+captions are shown anonymously, the room votes, and the best caption earns the
+round points. Prompts and submissions stay server-authoritative until reveal.
+
+### 2.10 Emoji Guess
+
+The room decodes an emoji puzzle. Players may submit repeated guesses until the
+answer is found; the first correct player earns the larger award and later
+correct players receive a smaller award. The answer stays private until reveal.
+
+### 2.11 Spyfall
+
+The room receives a location while one player is secretly the spy. Players use
+spoken questions and the shared vote flow to identify the spy. The spy can win
+by avoiding the vote or identifying the location after being caught. The
+location and role assignment remain private until the result.
+
+### 2.12 Would You Rather?
+
+Players choose between two family-friendly options. The room sees the split and
+the majority-side players score. The game is intentionally quick and has no
+timer or host decision inside a round.
+
+### 2.13 Two Truths & One Lie
+
+Players submit three statements about a topic, with one lie. The room guesses
+which statement is false, then the storyteller and guessers receive result
+points. Submissions stay private until the reveal.
 
 ---
 
@@ -516,7 +547,7 @@ The admin console is discreet and host-only.
 
 ### 8.1 Branding
 
-- Player pages: Family Game Hub / **7 Fun2Play Games**.
+- Player pages: Family Game Hub / **13 Fun2Play Games**.
 - Admin pages: Family Game Hub / Host access.
 - Both lockups sit in the true top-left of the page.
 - The header is hidden during gameplay.
@@ -574,7 +605,7 @@ Single-game mode is the same flow with a queue of one game.
 - `npm run smoke:ui` — join, lobby, admin login, branding, responsive checks.
 - `npm run smoke:game-ui` — full One of Us flow.
 - `npm run smoke:ui-all` — the remaining active games and new game flows.
-- Firefox is the default test browser.
+- Chrome is the default test browser for the browser smoke suites.
 
 ### The drawing game
 
@@ -617,7 +648,7 @@ own kind of test:
   - `ADMIN_LOGIN_ATTEMPTS`
 - Production admin passcode must be set explicitly.
 - Content persistence requires a writable path on the backend.
-- Final deployment URLs are still pending.
+- Deployment URLs are live: frontend `https://funfamilygame.vercel.app`, backend `https://familygame.wisp.uno`.
 
 ---
 
