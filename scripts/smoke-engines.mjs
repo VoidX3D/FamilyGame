@@ -783,6 +783,15 @@ check("the social games can be played to the end", () => {
 
     const total = Object.values(room.scores).reduce((sum, n) => sum + n, 0);
     assert(total > 0, `${id} finished without scoring a single point`);
+    if (id === "spyfall") {
+      assert(game.results.caught === true, "Spyfall should catch the spy in this vote");
+      assert(room.scores[game.spyId] === 0, "A caught spy must not receive agent points");
+      for (const player of players) {
+        if (player.id !== game.spyId) {
+          assert(room.scores[player.id] === 1, "Each agent should score for catching the spy");
+        }
+      }
+    }
   }
 });
 

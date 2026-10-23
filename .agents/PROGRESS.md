@@ -9,6 +9,17 @@ Read [`STATUS.md`](STATUS.md) for what is true right now, and
 
 ---
 
+## 2026-10-23 — final verification
+
+The focused Chrome game smoke and the all-games Chrome smoke both pass. The
+all-games run covers all thirteen catalogue entries and leaves fresh previews
+for the five social games. The icon and sitemap generators also report clean.
+
+The engine smoke now asserts Spyfall's repaired scoring path directly: when the
+room catches the spy, every agent receives one point and the spy receives none.
+
+---
+
 ## 2026-10-22
 
 ### The browser suites now play all of the games, and the console asks in-app
