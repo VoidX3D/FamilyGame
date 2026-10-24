@@ -76,7 +76,20 @@ export function answerMatches(guess, item) {
   const normalized = normalizeAnswer(guess);
   if (!normalized) return false;
   const candidates = [item.name, ...(item.aliases ?? [])];
-  return candidates.some((candidate) => normalizeAnswer(candidate) === normalized);
+  return candidates.some((candidate) => {
+    if (normalizeAnswer(candidate) === normalized) return true;
+
+    /* A person's family name is a useful answer when the full name is
+     * displayed, but a single partial word is too permissive. Accept a
+     * two-or-more-word suffix such as “Da Vinci” for “Leonardo da Vinci”.
+     * Content aliases still remain the preferred way to define exceptions. */
+    const words = String(candidate ?? "").trim().split(/\s+/).filter(Boolean);
+    if (words.length < 3) return false;
+    for (let start = 1; start < words.length - 1; start += 1) {
+      if (normalizeAnswer(words.slice(start).join(" ")) === normalized) return true;
+    }
+    return false;
+  });
 }
 
 export function gameState(meta, room) {
