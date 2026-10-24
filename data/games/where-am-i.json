@@ -1,0 +1,385 @@
+{
+  "version": 1,
+  "gameId": "where-am-i",
+  "collections": {
+    "places": [
+      {
+        "id": "kathmandu",
+        "name": "Kathmandu",
+        "hints": [
+          "The capital of Nepal",
+          "Home to Durbar Square and Swayambhunath"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "pokhara",
+        "name": "Pokhara",
+        "hints": [
+          "A city beside Phewa Lake",
+          "A gateway to Annapurna treks"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "lalitpur",
+        "name": "Lalitpur (Patan)",
+        "hints": [
+          "A city of fine arts",
+          "Home to Patan Durbar Square"
+        ],
+        "aliases": [
+          "Lalitpur",
+          "Patan"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "bhaktapur",
+        "name": "Bhaktapur",
+        "hints": [
+          "A medieval city in the Kathmandu Valley",
+          "Known for Nyatapola Temple"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "chitwan",
+        "name": "Chitwan",
+        "hints": [
+          "Home to a national park",
+          "Famous for rhinos and elephants"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "lumbini",
+        "name": "Lumbini",
+        "hints": [
+          "The birthplace of Buddha",
+          "Site of the Maya Devi Temple"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "janakpur",
+        "name": "Janakpur",
+        "hints": [
+          "A city linked to Sita",
+          "Home to Janaki Mandir"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "biratnagar",
+        "name": "Biratnagar",
+        "hints": [
+          "An industrial city in eastern Nepal",
+          "Near the Koshi River"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "birgunj",
+        "name": "Birgunj",
+        "hints": [
+          "A border city in southern Nepal",
+          "A major trade gateway to India"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "dharan",
+        "name": "Dharan",
+        "hints": [
+          "A city at the foot of the eastern hills",
+          "Known for BP Koirala Institute"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "butwal",
+        "name": "Butwal",
+        "hints": [
+          "A western Nepal trade city",
+          "Near the Tinau River"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "nepalgunj",
+        "name": "Nepalgunj",
+        "hints": [
+          "A city in the western plains",
+          "Hot and close to the Indian border"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "hetauda",
+        "name": "Hetauda",
+        "hints": [
+          "A city in Makwanpur",
+          "Surrounded by hills and forests"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "tansen",
+        "name": "Tansen (Palpa)",
+        "hints": [
+          "A hill town with an old bazaar",
+          "Known for dhaka fabric and karuwa"
+        ],
+        "aliases": [
+          "Tansen",
+          "Palpa"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "gorkha",
+        "name": "Gorkha",
+        "hints": [
+          "The ancestral home of the Shah dynasty",
+          "Site of Gorkha Durbar"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "bandipur",
+        "name": "Bandipur",
+        "hints": [
+          "A preserved hilltop bazaar",
+          "Car-free streets with mountain views"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "mustang",
+        "name": "Mustang",
+        "hints": [
+          "A high desert region",
+          "Home to Muktinath and Lo Manthang"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "muktinath",
+        "name": "Muktinath",
+        "hints": [
+          "A pilgrimage site",
+          "A temple with 108 water spouts"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "everest-base-camp",
+        "name": "Everest Base Camp",
+        "hints": [
+          "The starting point for Everest climbers",
+          "In the Khumbu region"
+        ],
+        "aliases": [
+          "EBC"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "annapurna",
+        "name": "Annapurna",
+        "hints": [
+          "A famous mountain range",
+          "Home to Annapurna I"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "rara-lake",
+        "name": "Rara Lake",
+        "hints": [
+          "The largest lake in Nepal",
+          "In Mugu district"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "phewa-lake",
+        "name": "Phewa Lake",
+        "hints": [
+          "A lake in Pokhara",
+          "Reflects the Annapurna range"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "tilicho-lake",
+        "name": "Tilicho Lake",
+        "hints": [
+          "A high-altitude lake",
+          "In the Annapurna region"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "pathibhara",
+        "name": "Pathibhara",
+        "hints": [
+          "A hilltop temple in Taplejung",
+          "A popular pilgrimage in eastern Nepal"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "ilam",
+        "name": "Ilam",
+        "hints": [
+          "An eastern hill district",
+          "Famous for tea gardens"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "jomsom",
+        "name": "Jomsom",
+        "hints": [
+          "A windy town in Mustang",
+          "Gateway to the Kali Gandaki valley"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "dolpo",
+        "name": "Dolpo",
+        "hints": [
+          "A remote highland region",
+          "Known for Shey Phoksundo Lake"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "khaptad",
+        "name": "Khaptad",
+        "hints": [
+          "A national park in far western Nepal",
+          "Rolling grasslands and temples"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "bardia",
+        "name": "Bardia",
+        "hints": [
+          "A national park in western Nepal",
+          "Known for tigers and wild elephants"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "namche-bazaar",
+        "name": "Namche Bazaar",
+        "hints": [
+          "A Sherpa town in Khumbu",
+          "The last big stop before Everest Base Camp"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "paris",
+        "name": "Paris",
+        "hints": [
+          "The capital of France",
+          "Home to the Eiffel Tower"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "london",
+        "name": "London",
+        "hints": [
+          "The capital of the United Kingdom",
+          "Home to Big Ben"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "tokyo",
+        "name": "Tokyo",
+        "hints": [
+          "The capital of Japan",
+          "Home to Shibuya Crossing"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "rome",
+        "name": "Rome",
+        "hints": [
+          "The capital of Italy",
+          "Home to the Colosseum"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "cairo",
+        "name": "Cairo",
+        "hints": [
+          "The capital of Egypt",
+          "Near the Pyramids of Giza"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "beijing",
+        "name": "Beijing",
+        "hints": [
+          "The capital of China",
+          "Home to the Forbidden City"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "canberra",
+        "name": "Canberra",
+        "hints": [
+          "The capital of Australia",
+          "A planned city with Lake Burley Griffin"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "brasilia",
+        "name": "Brasília",
+        "hints": [
+          "The capital of Brazil",
+          "Known for modernist architecture"
+        ],
+        "aliases": [
+          "Brasilia"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "ottawa",
+        "name": "Ottawa",
+        "hints": [
+          "The capital of Canada",
+          "On the Ottawa River"
+        ],
+        "group": "World"
+      },
+      {
+        "id": "new-delhi",
+        "name": "New Delhi",
+        "hints": [
+          "The capital of India",
+          "Home to India Gate"
+        ],
+        "aliases": [
+          "Delhi"
+        ],
+        "group": "World"
+      }
+    ]
+  }
+}

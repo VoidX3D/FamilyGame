@@ -1,0 +1,408 @@
+{
+  "version": 1,
+  "gameId": "draw-it",
+  "collections": {
+    "drawingWords": [
+      {
+        "id": "draw-1",
+        "word": "Momos",
+        "category": "Food"
+      },
+      {
+        "id": "draw-2",
+        "word": "Samosa",
+        "category": "Food"
+      },
+      {
+        "id": "draw-3",
+        "word": "Churros",
+        "category": "Food"
+      },
+      {
+        "id": "draw-4",
+        "word": "Ice cream",
+        "category": "Food"
+      },
+      {
+        "id": "draw-5",
+        "word": "Pizza",
+        "category": "Food"
+      },
+      {
+        "id": "draw-6",
+        "word": "Burger",
+        "category": "Food"
+      },
+      {
+        "id": "draw-7",
+        "word": "Pancakes",
+        "category": "Food"
+      },
+      {
+        "id": "draw-8",
+        "word": "Lollipop",
+        "category": "Food"
+      },
+      {
+        "id": "draw-9",
+        "word": "Donut",
+        "category": "Food"
+      },
+      {
+        "id": "draw-10",
+        "word": "Popcorn",
+        "category": "Food"
+      },
+      {
+        "id": "draw-11",
+        "word": "Watermelon",
+        "category": "Food"
+      },
+      {
+        "id": "draw-12",
+        "word": "Mushroom",
+        "category": "Food"
+      },
+      {
+        "id": "draw-13",
+        "word": "Sunflower",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-14",
+        "word": "Cactus",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-15",
+        "word": "Butterfly",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-16",
+        "word": "Thunderstorm",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-17",
+        "word": "Waterfall",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-18",
+        "word": "Snowflake",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-19",
+        "word": "Rainbow",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-20",
+        "word": "Volcano",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-21",
+        "word": "Spider web",
+        "category": "Nature"
+      },
+      {
+        "id": "draw-22",
+        "word": "Oxygen",
+        "category": "Science"
+      },
+      {
+        "id": "draw-23",
+        "word": "Atom",
+        "category": "Science"
+      },
+      {
+        "id": "draw-24",
+        "word": "Telescope",
+        "category": "Science"
+      },
+      {
+        "id": "draw-25",
+        "word": "Magnet",
+        "category": "Science"
+      },
+      {
+        "id": "draw-26",
+        "word": "Rocket ship",
+        "category": "Science"
+      },
+      {
+        "id": "draw-27",
+        "word": "Microscope",
+        "category": "Science"
+      },
+      {
+        "id": "draw-28",
+        "word": "Lightning",
+        "category": "Science"
+      },
+      {
+        "id": "draw-29",
+        "word": "Dinosaur",
+        "category": "Animals"
+      },
+      {
+        "id": "draw-30",
+        "word": "Penguin",
+        "category": "Animals"
+      },
+      {
+        "id": "draw-31",
+        "word": "Elephant",
+        "category": "Animals"
+      },
+      {
+        "id": "draw-32",
+        "word": "Flamingo",
+        "category": "Animals"
+      },
+      {
+        "id": "draw-34",
+        "word": "Turtle",
+        "category": "Animals"
+      },
+      {
+        "id": "draw-35",
+        "word": "Octopus",
+        "category": "Animals"
+      },
+      {
+        "id": "draw-36",
+        "word": "Snail",
+        "category": "Animals"
+      },
+      {
+        "id": "draw-37",
+        "word": "Beekeeper",
+        "category": "People"
+      },
+      {
+        "id": "draw-38",
+        "word": "Astronaut",
+        "category": "People"
+      },
+      {
+        "id": "draw-39",
+        "word": "Firefighter",
+        "category": "People"
+      },
+      {
+        "id": "draw-40",
+        "word": "Barber",
+        "category": "People"
+      },
+      {
+        "id": "draw-41",
+        "word": "Grandma",
+        "category": "People"
+      },
+      {
+        "id": "draw-42",
+        "word": "Postman",
+        "category": "People"
+      },
+      {
+        "id": "draw-43",
+        "word": "Puppeteer",
+        "category": "People"
+      },
+      {
+        "id": "draw-44",
+        "word": "Skeleton",
+        "category": "People"
+      },
+      {
+        "id": "draw-45",
+        "word": "Castle",
+        "category": "Places"
+      },
+      {
+        "id": "draw-46",
+        "word": "Eiffel Tower",
+        "category": "Places"
+      },
+      {
+        "id": "draw-47",
+        "word": "Waterfall bridge",
+        "category": "Places"
+      },
+      {
+        "id": "draw-48",
+        "word": "Lighthouse",
+        "category": "Places"
+      },
+      {
+        "id": "draw-49",
+        "word": "Windmill",
+        "category": "Places"
+      },
+      {
+        "id": "draw-50",
+        "word": "Igloo",
+        "category": "Places"
+      },
+      {
+        "id": "draw-51",
+        "word": "Bridge",
+        "category": "Places"
+      },
+      {
+        "id": "draw-52",
+        "word": "Temple",
+        "category": "Places"
+      },
+      {
+        "id": "draw-53",
+        "word": "Hospital",
+        "category": "Places"
+      },
+      {
+        "id": "draw-54",
+        "word": "Airport",
+        "category": "Places"
+      },
+      {
+        "id": "draw-55",
+        "word": "Football",
+        "category": "Sports"
+      },
+      {
+        "id": "draw-56",
+        "word": "Skiing",
+        "category": "Sports"
+      },
+      {
+        "id": "draw-57",
+        "word": "Boxing",
+        "category": "Sports"
+      },
+      {
+        "id": "draw-58",
+        "word": "Surfing",
+        "category": "Sports"
+      },
+      {
+        "id": "draw-59",
+        "word": "Tennis",
+        "category": "Sports"
+      },
+      {
+        "id": "draw-60",
+        "word": "Archery",
+        "category": "Sports"
+      },
+      {
+        "id": "draw-61",
+        "word": "Skateboard",
+        "category": "Sports"
+      },
+      {
+        "id": "draw-62",
+        "word": "Trophy",
+        "category": "Sports"
+      },
+      {
+        "id": "draw-63",
+        "word": "Umbrella",
+        "category": "Things"
+      },
+      {
+        "id": "draw-64",
+        "word": "Lighthouse lamp",
+        "category": "Things"
+      },
+      {
+        "id": "draw-65",
+        "word": "Backpack",
+        "category": "Things"
+      },
+      {
+        "id": "draw-66",
+        "word": "Toothbrush",
+        "category": "Things"
+      },
+      {
+        "id": "draw-67",
+        "word": "Scissors",
+        "category": "Things"
+      },
+      {
+        "id": "draw-68",
+        "word": "Clock",
+        "category": "Things"
+      },
+      {
+        "id": "draw-69",
+        "word": "Kite",
+        "category": "Things"
+      },
+      {
+        "id": "draw-70",
+        "word": "Lantern",
+        "category": "Things"
+      },
+      {
+        "id": "draw-71",
+        "word": "Sunflower seed",
+        "category": "Things"
+      },
+      {
+        "id": "draw-72",
+        "word": "Treehouse",
+        "category": "Things"
+      },
+      {
+        "id": "draw-73",
+        "word": "Rain boots",
+        "category": "Things"
+      },
+      {
+        "id": "draw-74",
+        "word": "Guitar",
+        "category": "Music"
+      },
+      {
+        "id": "draw-75",
+        "word": "Drum",
+        "category": "Music"
+      },
+      {
+        "id": "draw-76",
+        "word": "Microphone",
+        "category": "Music"
+      },
+      {
+        "id": "draw-77",
+        "word": "Headphones",
+        "category": "Music"
+      },
+      {
+        "id": "draw-78",
+        "word": "Saxophone",
+        "category": "Music"
+      },
+      {
+        "id": "draw-79",
+        "word": "Tambourine",
+        "category": "Music"
+      },
+      {
+        "id": "draw-80",
+        "word": "DJ turntable",
+        "category": "Music"
+      },
+      {
+        "id": "draw-81",
+        "word": "Piano keys",
+        "category": "Music"
+      }
+    ]
+  }
+}

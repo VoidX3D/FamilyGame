@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "gameId": "who-wrote-that",
+  "collections": {
+    "whoWrotePrompts": [
+      {
+        "id": "who-wrote-1",
+        "text": "What is the funniest excuse for being late?"
+      },
+      {
+        "id": "who-wrote-2",
+        "text": "What is the strangest thing you have ever eaten?"
+      },
+      {
+        "id": "who-wrote-3",
+        "text": "What is the best way to cheer someone up?"
+      },
+      {
+        "id": "who-wrote-4",
+        "text": "What would you do with one free afternoon?"
+      },
+      {
+        "id": "who-wrote-5",
+        "text": "What is the most useless talent you have?"
+      },
+      {
+        "id": "who-wrote-6",
+        "text": "What is the funniest thing a pet could say?"
+      },
+      {
+        "id": "who-wrote-7",
+        "text": "What is the best snack for a road trip?"
+      },
+      {
+        "id": "who-wrote-8",
+        "text": "What is the worst song to sing at a wedding?"
+      },
+      {
+        "id": "who-wrote-9",
+        "text": "What is a completely normal thing that sounds suspicious?"
+      },
+      {
+        "id": "who-wrote-10",
+        "text": "What is the best gift you have ever received?"
+      },
+      {
+        "id": "who-wrote-11",
+        "text": "What is the most ridiculous thing you believed as a child?"
+      },
+      {
+        "id": "who-wrote-12",
+        "text": "What is the best excuse to avoid washing dishes?"
+      },
+      {
+        "id": "who-wrote-13",
+        "text": "What is the first thing you would do if you became invisible?"
+      },
+      {
+        "id": "who-wrote-14",
+        "text": "What is the strangest dream you can remember?"
+      },
+      {
+        "id": "who-wrote-15",
+        "text": "What is the best thing about a rainy day?"
+      },
+      {
+        "id": "who-wrote-16",
+        "text": "What is a movie you would watch again and again?"
+      },
+      {
+        "id": "who-wrote-17",
+        "text": "What is the funniest name for a family pet?"
+      },
+      {
+        "id": "who-wrote-18",
+        "text": "What is the best topping for momos?"
+      },
+      {
+        "id": "who-wrote-19",
+        "text": "What is the most creative way to avoid a phone call?"
+      },
+      {
+        "id": "who-wrote-20",
+        "text": "What would your superpower be, and why?"
+      }
+    ]
+  }
+}
