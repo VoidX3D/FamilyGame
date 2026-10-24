@@ -153,6 +153,22 @@ try {
   assert(new Set(players.map((player) => player.id)).size === 3, "Player IDs are not unique");
   assert(new Set(players.map((player) => player.token)).size === 3, "Player tokens are not unique");
 
+  /* A host closing the tab must not create a second room. A new tab uses the
+   * same authenticated session and createRoom restores the server-side room
+   * mapping, including the players already seated in it. */
+  const replacementAdmin = await connect({ role: "admin", token: loginBody.token });
+  const replacementState = waitForState(
+    replacementAdmin,
+    (state) => state.admin?.playerCount === 3,
+  );
+  const restored = await emit(replacementAdmin, "admin:createRoom", {});
+  assert(
+    restored.ok && restored.code === code,
+    `Host room was not restored: ${JSON.stringify(restored)}`,
+  );
+  await replacementState;
+  replacementAdmin.disconnect();
+
   const duplicate = await connect({ role: "player" });
   const duplicateResult = await emit(duplicate, "room:join", { code, name: "Aarati" });
   assert(duplicateResult.ok === false && duplicateResult.code === "name_taken", "Duplicate name was accepted");

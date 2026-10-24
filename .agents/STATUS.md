@@ -109,7 +109,7 @@ drawing strokes. The full list is at the bottom of `/api/docs`.
 | --- | --- |
 | The thirteen games | Playing. Every one has a server engine, a player screen and a play-through in the suites. |
 | The five social games | Submission, waiting, reveal, scoring, and content-schema contracts are covered by focused engine regressions and Chrome smoke suites. |
-| The host console | Working, with the reconnect fix in flight. |
+| The host console | Working. The authenticated room is restored when the host reconnects or opens a new tab; the server and browser suites cover the path. |
 | The front end | Working as a PWA, installed and offline-capable. |
 | The API and its docs | Live, documented, and covered by the suites. |
 | The content editor | Working, with the schema now in JSON and a big collection drawn in pages. |

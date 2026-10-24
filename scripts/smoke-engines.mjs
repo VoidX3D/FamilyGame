@@ -1,7 +1,7 @@
 /* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 import { readFileSync } from "node:fs";
 import { GAME_LIST, getGame } from "../server/games/index.js";
-import { normalizeAnswer } from "../server/games/common.js";
+import { answerMatches, normalizeAnswer } from "../server/games/common.js";
 import { checkScreensMatchEngines } from "./check-screens.mjs";
 
 function assert(condition, message) {
@@ -77,6 +77,15 @@ check("answers are compared the same way everywhere", () => {
       `The Nepali word ${word} was changed by the sanitiser`,
     );
   }
+
+  assert(
+    answerMatches("Da Vinci", { name: "Leonardo da Vinci" }),
+    "A recognized multi-word surname should match the full name",
+  );
+  assert(
+    !answerMatches("Vinci", { name: "Leonardo da Vinci" }),
+    "A single partial surname must not match by accident",
+  );
 });
 
 check("one-of-us full run", () => {
@@ -720,7 +729,16 @@ check("the social games can be played to the end", () => {
       }
     } else if (id === "emoji-guess") {
       const answer = game.item.name;
-      for (const player of players) {
+      expectOk(
+        engine.action(room, game, players[0].id, { type: "skip" }),
+        `${id} skip`,
+      );
+      assert(game.phase === "guessing", `${id} should wait after one skip`);
+      assert(
+        engine.playerView(game, players[0].id).hasSkipped,
+        `${id} should remember the skip`,
+      );
+      for (const player of players.slice(1)) {
         const result = engine.action(room, game, player.id, {
           type: "guess",
           guess: answer,
@@ -792,6 +810,30 @@ check("the social games can be played to the end", () => {
         }
       }
     }
+  }
+});
+
+check("social hosts can skip a stalled round", () => {
+  for (const id of [
+    "would-you-rather",
+    "caption-this",
+    "emoji-guess",
+    "two-truths-one-lie",
+    "spyfall",
+  ]) {
+    const room = makeRoom(3);
+    const engine = getGame(id);
+    const game = engine.create(room);
+    const controls = engine.adminView(game, room).controls;
+    assert(
+      controls.some((control) => control.id === "skipRound"),
+      `${id} should expose Skip round`,
+    );
+    expectOk(engine.adminAction(room, game, "skipRound"), `${id} skip round`);
+    assert(
+      game.phase === "results" || game.phase === "complete",
+      `${id} skip should finish the round`,
+    );
   }
 });
 

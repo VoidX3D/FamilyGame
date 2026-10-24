@@ -282,6 +282,13 @@ function cleanLines(value, max, maxItems) {
     .slice(0, maxItems);
 }
 
+function answerKey(value) {
+  return String(value ?? "")
+    .toLocaleLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^\p{L}\p{N}]+/gu, "");
+}
+
 function cleanId(value, fallback) {
   const id = String(value ?? "")
     .trim()
@@ -323,6 +330,19 @@ function normalizeItem(collection, raw, index, usedIds) {
         errors.push(`Item ${index + 1}: ${field.label.toLowerCase()} is required.`);
       }
     }
+  }
+
+  /* An alias equal to the canonical answer is noise in the editor and can
+   * hide a genuinely useful alias. Keep the first spelling and remove all
+   * duplicates case-insensitively. */
+  if (Array.isArray(item.aliases)) {
+    const seen = new Set([answerKey(item.name ?? item.word)]);
+    item.aliases = item.aliases.filter((alias) => {
+      const key = answerKey(alias);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   }
 
   return { item, errors };

@@ -601,10 +601,11 @@ async function playSocialGame(name, shot) {
       await typeInto(player, "#step-game input", "something wrong");
       await clickButton(player, "Guess");
     }
-    /* The host reveals it, so the room can see the answer. */
+    /* The host skips it, so the room can see the answer even when nobody
+     * solved the puzzle. */
     await admin.executeScript(
       `[...document.querySelectorAll("#game-controls button")]
-         .find((n) => n.textContent.trim() === "Reveal result")?.click();
+         .find((n) => n.textContent.trim() === "Skip round")?.click();
        return true;`,
     );
     await sleep(700);

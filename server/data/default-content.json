@@ -553,9 +553,7 @@
           "An 18th-century king",
           "Began uniting Nepal from Gorkha"
         ],
-        "aliases": [
-          "Prithvinarayan Shah"
-        ],
+        "aliases": [],
         "group": "Nepal"
       },
       {
@@ -590,7 +588,6 @@
           "Also a short-story writer"
         ],
         "aliases": [
-          "BP Koirala",
           "Bishweshwar Prasad Koirala"
         ],
         "group": "Nepal"
@@ -674,9 +671,7 @@
           "A romantic Nepali film star",
           "Also known for singing and directing"
         ],
-        "aliases": [
-          "Bhuwan KC"
-        ],
+        "aliases": [],
         "group": "Nepal"
       },
       {
@@ -722,9 +717,7 @@
           "A young Nepali film actor",
           "Starred in Hostel Returns"
         ],
-        "aliases": [
-          "Anmol KC"
-        ],
+        "aliases": [],
         "group": "Nepal"
       },
       {
@@ -735,8 +728,7 @@
           "Known for romantic films"
         ],
         "aliases": [
-          "Samragyee Shah",
-          "Samragyee RL Shah"
+          "Samragyee Shah"
         ],
         "group": "Nepal"
       },
@@ -2268,7 +2260,6 @@
         "name": "Honey",
         "category": "Food",
         "aliases": [
-          "honey",
           "bee honey"
         ],
         "hints": [
@@ -2282,7 +2273,6 @@
         "category": "Weather",
         "aliases": [
           "rain",
-          "rainy day",
           "wet day"
         ],
         "hints": [
@@ -2322,7 +2312,6 @@
         "name": "Road Trip",
         "category": "Travel",
         "aliases": [
-          "road trip",
           "driving trip",
           "car trip"
         ],
@@ -2336,7 +2325,6 @@
         "name": "Halloween",
         "category": "Celebration",
         "aliases": [
-          "halloween",
           "trick or treat"
         ],
         "hints": [
@@ -2349,7 +2337,6 @@
         "name": "Reading",
         "category": "Activity",
         "aliases": [
-          "reading",
           "reading a book",
           "book"
         ],
@@ -2363,7 +2350,6 @@
         "name": "Basketball",
         "category": "Sport",
         "aliases": [
-          "basketball",
           "hoops"
         ],
         "hints": [
@@ -2376,7 +2362,6 @@
         "name": "Surfing",
         "category": "Sport",
         "aliases": [
-          "surfing",
           "surf"
         ],
         "hints": [
@@ -2389,7 +2374,6 @@
         "name": "Campfire",
         "category": "Activity",
         "aliases": [
-          "campfire",
           "camping",
           "bonfire"
         ],
@@ -2403,7 +2387,6 @@
         "name": "Phone Call",
         "category": "Everyday",
         "aliases": [
-          "phone call",
           "calling",
           "telephone"
         ],
@@ -2417,7 +2400,6 @@
         "name": "Snowman",
         "category": "Weather",
         "aliases": [
-          "snowman",
           "snow"
         ],
         "hints": [
@@ -2430,7 +2412,6 @@
         "name": "Rock Band",
         "category": "Activity",
         "aliases": [
-          "rock band",
           "band",
           "concert"
         ],
@@ -2444,7 +2425,6 @@
         "name": "Detective",
         "category": "Activity",
         "aliases": [
-          "detective",
           "detective work",
           "sleuth"
         ],
@@ -2458,7 +2438,6 @@
         "name": "Wedding",
         "category": "Celebration",
         "aliases": [
-          "wedding",
           "marriage"
         ],
         "hints": [
@@ -2471,7 +2450,6 @@
         "name": "Holiday",
         "category": "Travel",
         "aliases": [
-          "holiday",
           "vacation",
           "trip"
         ],
@@ -2485,7 +2463,6 @@
         "name": "Noodles",
         "category": "Food",
         "aliases": [
-          "noodles",
           "ramen",
           "noodle"
         ],
@@ -2499,7 +2476,6 @@
         "name": "Wild Animal",
         "category": "Animals",
         "aliases": [
-          "wild animal",
           "animal",
           "beast"
         ],
@@ -2513,7 +2489,6 @@
         "name": "Fishing",
         "category": "Activity",
         "aliases": [
-          "fishing",
           "fisherman"
         ],
         "hints": [
@@ -2526,7 +2501,6 @@
         "name": "Yoga",
         "category": "Activity",
         "aliases": [
-          "yoga",
           "meditation",
           "calm"
         ],
@@ -2540,7 +2514,6 @@
         "name": "Space",
         "category": "Adventure",
         "aliases": [
-          "space",
           "outer space",
           "astronaut"
         ],
@@ -2554,7 +2527,6 @@
         "name": "Farm",
         "category": "Places",
         "aliases": [
-          "farm",
           "farmhouse",
           "countryside"
         ],
@@ -2568,7 +2540,6 @@
         "name": "Skiing",
         "category": "Sport",
         "aliases": [
-          "skiing",
           "ski",
           "snow sport"
         ],
@@ -2583,8 +2554,7 @@
         "category": "Food",
         "aliases": [
           "donut",
-          "doughnut",
-          "donuts"
+          "doughnut"
         ],
         "hints": [
           "Sugary, and gone in a minute"
@@ -2596,7 +2566,6 @@
         "name": "Butterfly",
         "category": "Animals",
         "aliases": [
-          "butterfly",
           "butterflies"
         ],
         "hints": [
@@ -2609,8 +2578,7 @@
         "name": "Tortoise and Hare",
         "category": "Stories",
         "aliases": [
-          "tortoise and the hare",
-          "tortoise and hare"
+          "tortoise and the hare"
         ],
         "hints": [
           "Slow and steady, and a very smug hare"
@@ -2622,7 +2590,6 @@
         "name": "Puzzle",
         "category": "Activity",
         "aliases": [
-          "puzzle",
           "puzzles",
           "riddle"
         ],
@@ -2636,7 +2603,6 @@
         "name": "Dinner Date",
         "category": "Celebration",
         "aliases": [
-          "dinner date",
           "date",
           "romantic dinner"
         ],
@@ -2650,7 +2616,6 @@
         "name": "Photo Album",
         "category": "Activity",
         "aliases": [
-          "photo album",
           "photos",
           "photographs"
         ],
@@ -2664,7 +2629,6 @@
         "name": "Fish and Chips",
         "category": "Food",
         "aliases": [
-          "fish and chips",
           "fish and chip"
         ],
         "hints": [
@@ -2677,7 +2641,6 @@
         "name": "Circus",
         "category": "Activity",
         "aliases": [
-          "circus",
           "big top"
         ],
         "hints": [
@@ -2690,7 +2653,6 @@
         "name": "Kingdom",
         "category": "Stories",
         "aliases": [
-          "kingdom",
           "castle",
           "king"
         ],
@@ -2704,7 +2666,6 @@
         "name": "Thunderstorm",
         "category": "Weather",
         "aliases": [
-          "thunderstorm",
           "storm",
           "thunder"
         ],
@@ -2718,7 +2679,6 @@
         "name": "Kitchen",
         "category": "Places",
         "aliases": [
-          "kitchen",
           "cooking"
         ],
         "hints": [
@@ -2731,7 +2691,6 @@
         "name": "First Love",
         "category": "Stories",
         "aliases": [
-          "first love",
           "love"
         ],
         "hints": [
@@ -3065,8 +3024,7 @@
         "category": "Everyday",
         "aliases": [
           "the barber",
-          "hair salon",
-          "barbershop"
+          "hair salon"
         ]
       },
       {
@@ -3126,8 +3084,7 @@
         "name": "Hotel lobby",
         "category": "Travel",
         "aliases": [
-          "the hotel",
-          "hotel lobby"
+          "the hotel"
         ]
       },
       {
@@ -3240,8 +3197,7 @@
         "name": "Photography studio",
         "category": "Places",
         "aliases": [
-          "the photo studio",
-          "photography studio"
+          "the photo studio"
         ]
       },
       {

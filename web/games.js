@@ -2385,18 +2385,31 @@ function newSocialGame(state, game, mine, actions) {
   const wrap = block(blockTitle(game.name));
   if (game.id === "emoji-guess") {
     wrap.append(el("p", "word-display", game.puzzle?.emoji ?? "❓"));
-    wrap.append(note(`Solved: ${game.solvedCount ?? 0}/${game.totalPlayers ?? game.players.length}`));
+    wrap.append(note(`Solved: ${game.solvedCount ?? 0}/${game.totalPlayers ?? game.players.length}${game.skippedCount ? ` • Skipped: ${game.skippedCount}` : ""}`));
+    if (game.puzzle?.category) wrap.append(note(`Category: ${game.puzzle.category}`, "muted"));
+    if (game.puzzle?.hints?.length) {
+      const hints = el("ul", "hint-list");
+      for (const hint of game.puzzle.hints) hints.append(el("li", "game-note", hint));
+      wrap.append(hints);
+    }
     if (mine.canGuess) {
       const input = textInput("What do the emojis mean?", keyOf(game, "emoji"), { maxLength: 90 });
       const submit = button("Guess");
       formSubmit({ button: submit, actions, fallback: "Type a guess first.", read: () => input.value.trim() ? { type: "guess", guess: input.value.trim() } : null, onSuccess: () => { clearDraft(keyOf(game, "emoji")); input.value = ""; } });
-      wrap.append(input, submit);
-    } else if (mine.hasSolved) wrap.append(note("You solved it. Let the room catch up."));
+      const skip = actOn(button("Skip this puzzle", "btn btn-tonal"), actions, { type: "skip" }, "Skip failed.");
+      wrap.append(input, submit, skip);
+    } else if (mine.hasSolved) {
+      wrap.append(note("You solved it. Let the remaining players finish."));
+    } else if (mine.hasSkipped) {
+      wrap.append(note("You skipped this puzzle. Waiting for the room…"));
+    } else if (game.phase === "guessing") {
+      wrap.append(waiting("Waiting for the room…"));
+    }
     if (game.phase === "results" || game.phase === "complete") wrap.append(note(`Answer: ${game.answer ?? "revealed"}`));
   } else if (game.id === "would-you-rather") {
     wrap.append(note(game.optionA ?? "Option A"));
     if (mine.canVote) { wrap.append(button(game.optionA, "btn btn-primary", actOn(button("", "", null), actions, { type: "vote", choice: "a" }, "Choose an option."))); wrap.append(button(game.optionB, "btn btn-tonal", actOn(button("", "", null), actions, { type: "vote", choice: "b" }, "Choose an option."))); }
-    else if (mine.canExplain) { const input=textarea("Why? (optional)",keyOf(game,"reason"),180); const submit=button("Share reason"); formSubmit({button:submit,actions,read:()=>({type:"explain",text:input.value}),fallback:"Skip or write a reason.",onSuccess:()=>clearDraft(keyOf(game,"reason"))}); wrap.append(input,submit); }
+    else if (mine.canExplain) { const input=textarea("Why? (optional)",keyOf(game,"reason"),180); const submit=button("Share reason"); formSubmit({button:submit,actions,read:()=>({type:"explain",text:input.value}),fallback:"Skip or write a reason.",onSuccess:()=>clearDraft(keyOf(game,"reason"))}); const skip=actOn(button("Skip reason","btn btn-tonal"),actions,{type:"explain",text:""},"Skip failed."); wrap.append(input,submit,skip); }
     else {
       wrap.append(note(`A: ${game.optionA}  •  B: ${game.optionB}`));
       /* The whole point of the game is hearing why people chose. The

@@ -180,7 +180,7 @@ activeTab = tabFromPath();
 
 function readToken() {
   try {
-    return sessionStorage.getItem(TOKEN_KEY) || "";
+    return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || "";
   } catch {
     return "";
   }
@@ -243,8 +243,13 @@ function decorateIconButton(button, iconName, label) {
 function storeToken(next) {
   token = next;
   try {
-    if (next) sessionStorage.setItem(TOKEN_KEY, next);
-    else sessionStorage.removeItem(TOKEN_KEY);
+    if (next) {
+      localStorage.setItem(TOKEN_KEY, next);
+      sessionStorage.setItem(TOKEN_KEY, next);
+    } else {
+      localStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(TOKEN_KEY);
+    }
   } catch {
     // The tab can still use an in-memory token.
   }

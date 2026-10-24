@@ -9,6 +9,27 @@ Read [`STATUS.md`](STATUS.md) for what is true right now, and
 
 ---
 
+## 2026-10-24 — Emoji, skip, validation, and host recovery
+
+The final social-game polish pass fixed four related sources of friction:
+
+- Emoji Guess now publishes its hints and category, records a player's explicit
+  skip, waits for the remaining players instead of reopening the form, and can
+  always be ended safely by the host with **Skip round**.
+- Every social-game host view now has a **Skip round** control, and Would You
+  Rather has a player-facing **Skip reason** action for its optional explanation.
+- Answer matching accepts deliberate multi-word suffixes such as “Da Vinci”
+  for “Leonardo da Vinci”, while still rejecting unsafe one-word partials.
+  Content normalization removes duplicate canonical aliases from built-in and
+  host-edited collections.
+- The admin token is copied to `localStorage`, so opening `/admin` in a new tab
+  restores the same server-side room and the players already seated in it.
+
+The backend foundation, engine, focused Chrome, and all-games Chrome suites
+cover these paths and pass.
+
+---
+
 ## 2026-10-23 — final verification
 
 The focused Chrome game smoke and the all-games Chrome smoke both pass. The
