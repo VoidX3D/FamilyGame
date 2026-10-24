@@ -1,0 +1,198 @@
+{
+  "version": 1,
+  "gameId": "two-truths-one-lie",
+  "collections": {
+    "twoTruthsTopics": [
+      {
+        "id": "childhood-surprise",
+        "text": "A surprising thing about your childhood",
+        "category": "Stories"
+      },
+      {
+        "id": "secret-dislike",
+        "text": "A food you secretly dislike",
+        "category": "Food"
+      },
+      {
+        "id": "hidden-skill",
+        "text": "A skill your family still does not know about",
+        "category": "Talent"
+      },
+      {
+        "id": "completely-wrong",
+        "text": "A time you were completely wrong about something",
+        "category": "Stories"
+      },
+      {
+        "id": "worst-gift",
+        "text": "The worst gift you have ever received",
+        "category": "Gifts"
+      },
+      {
+        "id": "broke-rule",
+        "text": "A rule you broke as a child",
+        "category": "Childhood"
+      },
+      {
+        "id": "secret-proud",
+        "text": "Something you are quietly, secretly proud of",
+        "category": "Feelings"
+      },
+      {
+        "id": "still-thinks-about",
+        "text": "A place you went that you still think about",
+        "category": "Travel"
+      },
+      {
+        "id": "stupid-money",
+        "text": "The most money you have ever spent on something stupid",
+        "category": "Money"
+      },
+      {
+        "id": "not-spoken",
+        "text": "A person you have not spoken to in years",
+        "category": "People"
+      },
+      {
+        "id": "afraid-as-adult",
+        "text": "Something you were genuinely afraid of as an adult",
+        "category": "Feelings"
+      },
+      {
+        "id": "still-getting-away",
+        "text": "A lie you told that you are still getting away with",
+        "category": "Stories"
+      },
+      {
+        "id": "no-phone",
+        "text": "The longest you have gone without a phone",
+        "category": "Everyday"
+      },
+      {
+        "id": "would-give-up",
+        "text": "A habit you would give up tomorrow if somebody asked nicely",
+        "category": "Everyday"
+      },
+      {
+        "id": "made-them-cry",
+        "text": "Something you did that made your parents cry, in a good way",
+        "category": "Family"
+      },
+      {
+        "id": "job-nearly-took",
+        "text": "A job you nearly took",
+        "category": "Work"
+      },
+      {
+        "id": "bad-guy",
+        "text": "A time you were the bad guy",
+        "category": "Stories"
+      },
+      {
+        "id": "nobody-knows",
+        "text": "Something you do that nobody else in this room knows about",
+        "category": "Secrets"
+      },
+      {
+        "id": "worst-meal",
+        "text": "The worst meal you have ever cooked",
+        "category": "Food"
+      },
+      {
+        "id": "wanted-pet",
+        "text": "A pet you wanted but never got",
+        "category": "Pets"
+      },
+      {
+        "id": "made-you-cry",
+        "text": "The first song that made you cry",
+        "category": "Music"
+      },
+      {
+        "id": "feels-like-home",
+        "text": "A place you always feel at home",
+        "category": "Home"
+      },
+      {
+        "id": "never-again",
+        "text": "Something you would never do again",
+        "category": "Stories"
+      },
+      {
+        "id": "worst-photo",
+        "text": "The most embarrassing thing in your camera roll",
+        "category": "Phones"
+      },
+      {
+        "id": "compliment",
+        "text": "A compliment you still remember years later",
+        "category": "People"
+      },
+      {
+        "id": "got-away",
+        "text": "A time you got away with something you should not have",
+        "category": "Stories"
+      },
+      {
+        "id": "bravest",
+        "text": "The bravest thing you have ever done",
+        "category": "Feelings"
+      },
+      {
+        "id": "better-at",
+        "text": "Something you are better at than you let on",
+        "category": "Talent"
+      },
+      {
+        "id": "hardest-no",
+        "text": "The hardest no you have ever had to say",
+        "category": "People"
+      },
+      {
+        "id": "live-again",
+        "text": "A single day you would happily live again",
+        "category": "Feelings"
+      },
+      {
+        "id": "quiet-proud",
+        "text": "One thing you are quietly proud of this year",
+        "category": "Feelings"
+      },
+      {
+        "id": "bad-habit",
+        "text": "A habit of yours that would worry a doctor",
+        "category": "Health"
+      },
+      {
+        "id": "first-pay",
+        "text": "What you did with your very first pay cheque",
+        "category": "Money"
+      },
+      {
+        "id": "advice",
+        "text": "Advice you keep giving that you do not follow yourself",
+        "category": "People"
+      },
+      {
+        "id": "accident-good",
+        "text": "An accident that turned out well",
+        "category": "Stories"
+      },
+      {
+        "id": "voice",
+        "text": "A voice you would recognise anywhere, even now",
+        "category": "People"
+      },
+      {
+        "id": "perfect-saturday",
+        "text": "What a perfect Saturday looks like in your house",
+        "category": "Everyday"
+      },
+      {
+        "id": "two-wishes",
+        "text": "Two wishes you would make if you had two",
+        "category": "Fun"
+      }
+    ]
+  }
+}

@@ -1,0 +1,296 @@
+{
+  "version": 1,
+  "gameId": "would-you-rather",
+  "collections": {
+    "wouldYouRatherQuestions": [
+      {
+        "id": "dal-bhat-year",
+        "optionA": "Eat dal bhat every single day for a year",
+        "optionB": "Eat pizza every single day for a year",
+        "category": "Food"
+      },
+      {
+        "id": "never-momo",
+        "optionA": "Never eat a momo again for the rest of your life",
+        "optionB": "Never eat a samosa again for the rest of your life",
+        "category": "Food"
+      },
+      {
+        "id": "four-am",
+        "optionA": "Wake up at 4 a.m. every day for a year",
+        "optionB": "Sleep until noon every day for a year",
+        "category": "Everyday"
+      },
+      {
+        "id": "early-late",
+        "optionA": "Always be five minutes early",
+        "optionB": "Always be twenty minutes late",
+        "category": "Everyday"
+      },
+      {
+        "id": "nepali-hindi",
+        "optionA": "Learn to speak fluent Nepali",
+        "optionB": "Learn to speak fluent Hindi",
+        "category": "Language"
+      },
+      {
+        "id": "temples-beaches",
+        "optionA": "Visit every temple in Nepal",
+        "optionB": "Visit every beach in the world",
+        "category": "Travel"
+      },
+      {
+        "id": "smart-pretty",
+        "optionA": "Be ten percent smarter than you are now",
+        "optionB": "Be ten percent better looking than you are now",
+        "category": "Superpower"
+      },
+      {
+        "id": "truth-lie",
+        "optionA": "Be unable to lie for the rest of your life",
+        "optionB": "Be unable to tell the truth for the rest of your life",
+        "category": "Superpower"
+      },
+      {
+        "id": "memory-forget",
+        "optionA": "Have a perfect memory",
+        "optionB": "Be able to forget anything you want, on purpose",
+        "category": "Superpower"
+      },
+      {
+        "id": "know-lies",
+        "optionA": "Always know the moment someone is lying to you",
+        "optionB": "Always know exactly what someone is thinking",
+        "category": "Superpower"
+      },
+      {
+        "id": "phone-talks",
+        "optionA": "Your phone could talk for one whole day",
+        "optionB": "Your television could talk for one whole day",
+        "category": "Crazy"
+      },
+      {
+        "id": "animal-vegetable",
+        "optionA": "Talk to animals",
+        "optionB": "Talk to plants",
+        "category": "Superpower"
+      },
+      {
+        "id": "clone-friend",
+        "optionA": "Have a clone of yourself",
+        "optionB": "Have a clone of your best friend",
+        "category": "Crazy"
+      },
+      {
+        "id": "two-hundred-years",
+        "optionA": "Live two hundred years ago",
+        "optionB": "Live two hundred years from now",
+        "category": "Time"
+      },
+      {
+        "id": "space-ocean",
+        "optionA": "Explore space",
+        "optionB": "Explore the deepest ocean",
+        "category": "Adventure"
+      },
+      {
+        "id": "rich-liked",
+        "optionA": "Be rich and nobody likes you",
+        "optionB": "Stay poor and everybody loves you",
+        "category": "People"
+      },
+      {
+        "id": "favourite-food",
+        "optionA": "Never eat your favourite food again",
+        "optionB": "Never hear music again",
+        "category": "Pain"
+      },
+      {
+        "id": "no-arguments",
+        "optionA": "Win every argument you have, forever",
+        "optionB": "Never have to have an argument again",
+        "category": "People"
+      },
+      {
+        "id": "funny-important",
+        "optionA": "Be the funniest person in every room you walk into",
+        "optionB": "Be the most important person in every room you walk into",
+        "category": "People"
+      },
+      {
+        "id": "book-travel",
+        "optionA": "Keep every book you have ever read in your head",
+        "optionB": "Keep every place you have ever been in your head",
+        "category": "Superpower"
+      },
+      {
+        "id": "perfect-body",
+        "optionA": "Have the perfect body",
+        "optionB": "Have the perfect memory",
+        "category": "Superpower"
+      },
+      {
+        "id": "city-village",
+        "optionA": "Live in the city, forever",
+        "optionB": "Live in the countryside, forever",
+        "category": "Home"
+      },
+      {
+        "id": "mountains-beach",
+        "optionA": "Live in the mountains",
+        "optionB": "Live on a beach",
+        "category": "Home"
+      },
+      {
+        "id": "train-plane",
+        "optionA": "Travel only by train for the rest of your life",
+        "optionB": "Travel only by plane for the rest of your life",
+        "category": "Travel"
+      },
+      {
+        "id": "bad-good-phone",
+        "optionA": "Your phone only ever rings with bad news",
+        "optionB": "Your phone only ever rings with good news",
+        "category": "Crazy"
+      },
+      {
+        "id": "pause-rewind",
+        "optionA": "Be able to pause time for ten seconds a day",
+        "optionB": "Be able to rewind time for ten seconds a day",
+        "category": "Superpower"
+      },
+      {
+        "id": "taste-music-food",
+        "optionA": "Live in a world where nobody has any taste in music",
+        "optionB": "Live in a world where nobody has any taste in food",
+        "category": "Crazy"
+      },
+      {
+        "id": "first-secret",
+        "optionA": "Always be the first person to know a secret",
+        "optionB": "Always be the last person to know a secret",
+        "category": "People"
+      },
+      {
+        "id": "ship-treehouse",
+        "optionA": "Your house is a spaceship",
+        "optionB": "Your house is a treehouse",
+        "category": "Crazy"
+      },
+      {
+        "id": "over-under",
+        "optionA": "Always be overdressed",
+        "optionB": "Always be underdressed",
+        "category": "Style"
+      },
+      {
+        "id": "no-thirst",
+        "optionA": "Never be hungry again",
+        "optionB": "Never be thirsty again",
+        "category": "Superpower"
+      },
+      {
+        "id": "silly-famous",
+        "optionA": "Be famous for something completely silly",
+        "optionB": "Be famous for something completely serious",
+        "category": "Fame"
+      },
+      {
+        "id": "music-food",
+        "optionA": "Your cooking is always perfect",
+        "optionB": "Your singing is always perfect",
+        "category": "Talent"
+      },
+      {
+        "id": "garden-house",
+        "optionA": "Live in a tiny house with a huge garden",
+        "optionB": "Live in a huge house with no garden at all",
+        "category": "Home"
+      },
+      {
+        "id": "martian-life",
+        "optionA": "Live ten years on Mars",
+        "optionB": "Live ten years under the sea",
+        "category": "Adventure"
+      },
+      {
+        "id": "no-phones",
+        "optionA": "Never use a phone again",
+        "optionB": "Never watch a screen again",
+        "category": "Life"
+      },
+      {
+        "id": "cook-eat",
+        "optionA": "Never cook again, only eat what others make",
+        "optionB": "Never eat at a restaurant again, only cook at home",
+        "category": "Food"
+      },
+      {
+        "id": "slow-fast",
+        "optionA": "Everything you do takes twice as long",
+        "optionB": "Everything you do takes half as long",
+        "category": "Crazy"
+      },
+      {
+        "id": "invisible-fame",
+        "optionA": "Be invisible but everybody loves you",
+        "optionB": "Be famous but everybody forgets you",
+        "category": "People"
+      },
+      {
+        "id": "tiger-elephant",
+        "optionA": "Keep a pet tiger",
+        "optionB": "Keep a pet elephant",
+        "category": "Crazy"
+      },
+      {
+        "id": "homework-queue",
+        "optionA": "Never have homework again",
+        "optionB": "Never have to wait in a queue again",
+        "category": "Life"
+      },
+      {
+        "id": "sugar-coffee",
+        "optionA": "Never eat sugar again",
+        "optionB": "Never drink coffee again",
+        "category": "Pain"
+      },
+      {
+        "id": "work-off",
+        "optionA": "Never work a day in your life",
+        "optionB": "Never have a day off in your life",
+        "category": "Life"
+      },
+      {
+        "id": "one-song",
+        "optionA": "Only ever listen to one song for a year",
+        "optionB": "Only ever watch one film for a year",
+        "category": "Crazy"
+      },
+      {
+        "id": "every-alarm",
+        "optionA": "Have an alarm for every hour of the day",
+        "optionB": "Never need an alarm at all",
+        "category": "Everyday"
+      },
+      {
+        "id": "photo-memory",
+        "optionA": "Take a photo of every moment you live",
+        "optionB": "Never take a photo of anything ever again",
+        "category": "Crazy"
+      },
+      {
+        "id": "food-enemies",
+        "optionA": "Eat the food your enemies cook",
+        "optionB": "Cook the food your enemies eat",
+        "category": "Food"
+      },
+      {
+        "id": "alone-crowd",
+        "optionA": "Always be alone",
+        "optionB": "Always be in a crowd",
+        "category": "People"
+      }
+    ]
+  }
+}

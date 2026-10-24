@@ -1,0 +1,170 @@
+{
+  "version": 1,
+  "gameId": "truth-or-dare",
+  "collections": {
+    "truths": [
+      {
+        "id": "truth-1",
+        "text": "What is a small thing that always makes you happy?"
+      },
+      {
+        "id": "truth-2",
+        "text": "What is the silliest thing you have done in front of family?"
+      },
+      {
+        "id": "truth-3",
+        "text": "What is a secret talent you have?"
+      },
+      {
+        "id": "truth-4",
+        "text": "What is the most embarrassing song you know all the words to?"
+      },
+      {
+        "id": "truth-5",
+        "text": "What is a habit you want to change?"
+      },
+      {
+        "id": "truth-6",
+        "text": "What is the best compliment you have ever received?"
+      },
+      {
+        "id": "truth-7",
+        "text": "What is something you are proud of?"
+      },
+      {
+        "id": "truth-8",
+        "text": "What is the funniest thing you have seen at a wedding?"
+      },
+      {
+        "id": "truth-9",
+        "text": "What is a food you could eat every day?"
+      },
+      {
+        "id": "truth-10",
+        "text": "What is the last thing that made you laugh out loud?"
+      },
+      {
+        "id": "truth-11",
+        "text": "What is a place you really want to visit?"
+      },
+      {
+        "id": "truth-12",
+        "text": "What is a small mistake you still remember?"
+      },
+      {
+        "id": "truth-13",
+        "text": "What is the nicest thing someone has done for you?"
+      },
+      {
+        "id": "truth-14",
+        "text": "What is a movie or show you pretend to understand?"
+      },
+      {
+        "id": "truth-15",
+        "text": "What is the most useless fact you know?"
+      },
+      {
+        "id": "truth-16",
+        "text": "What is a tradition you love?"
+      },
+      {
+        "id": "truth-17",
+        "text": "What is the best advice you have received?"
+      },
+      {
+        "id": "truth-18",
+        "text": "What is something you would like to learn?"
+      },
+      {
+        "id": "truth-19",
+        "text": "What is a moment you wish you could relive?"
+      },
+      {
+        "id": "truth-20",
+        "text": "What is the most surprising thing about you?"
+      }
+    ],
+    "dares": [
+      {
+        "id": "dare-1",
+        "text": "Speak in a cartoon voice until your next turn."
+      },
+      {
+        "id": "dare-2",
+        "text": "Give a 10-second speech praising the person to your left."
+      },
+      {
+        "id": "dare-3",
+        "text": "Sing the first line of any song."
+      },
+      {
+        "id": "dare-4",
+        "text": "Do your best kind impression of a family member."
+      },
+      {
+        "id": "dare-5",
+        "text": "Tell a joke, even a bad one."
+      },
+      {
+        "id": "dare-6",
+        "text": "Dance for 15 seconds with no music."
+      },
+      {
+        "id": "dare-7",
+        "text": "Say the alphabet backward from Z to A."
+      },
+      {
+        "id": "dare-8",
+        "text": "Make up a new nickname for yourself and explain it."
+      },
+      {
+        "id": "dare-9",
+        "text": "Do five slow-motion high-fives with the room."
+      },
+      {
+        "id": "dare-10",
+        "text": "Describe your day using only three emojis."
+      },
+      {
+        "id": "dare-11",
+        "text": "Balance a spoon on your nose for five seconds."
+      },
+      {
+        "id": "dare-12",
+        "text": "Give a dramatic thank-you speech to your phone."
+      },
+      {
+        "id": "dare-13",
+        "text": "Do a runway walk across the room."
+      },
+      {
+        "id": "dare-14",
+        "text": "Invent a new snack and pitch it in one sentence."
+      },
+      {
+        "id": "dare-15",
+        "text": "Say momos in five different emotions."
+      },
+      {
+        "id": "dare-16",
+        "text": "Draw a self-portrait with your eyes closed."
+      },
+      {
+        "id": "dare-17",
+        "text": "Compliment every player in one breath."
+      },
+      {
+        "id": "dare-18",
+        "text": "Do your best animal impression."
+      },
+      {
+        "id": "dare-19",
+        "text": "Pretend to be a news anchor reading the room's latest headline."
+      },
+      {
+        "id": "dare-20",
+        "text": "Make a funny face and hold it for five seconds."
+      }
+    ]
+  }
+}

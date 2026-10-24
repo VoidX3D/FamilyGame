@@ -10,7 +10,7 @@ code, and the host starts a game. The server owns every room, turn, score, and
 secret assignment.
 
 No database is required. Rooms live in server memory. The built-in question bank
-is in `server/data/default-content.json`; edits made in the host console are
+is in `server/data/games/*.json`; edits made in the host console are
 saved to `server/data/content.json`.
 
 ## What it looks like
@@ -277,7 +277,9 @@ server/
   docsPage.js       The Swagger UI page and its dark theme
   .env              Settings, read by the server itself
   data/
-    default-content.json  Built-in words, questions, people, places, prompts
+    games/*.json          One built-in content bundle per game
+    content-schema.json   The shape of every content collection
+    default-content.json  Legacy compatibility copy; do not edit
     content.json          Saved content edits, created on first save
     admin-passcode        The generated passcode, when none is configured
   games/
@@ -316,14 +318,14 @@ scripts/            Foundation, engine, protocol, and Chrome UI smoke tests
   which contains control and submission counts but not unrevealed secrets.
 - Draw It keeps the word to the drawer, and the strokes travel on their own
   channel so the drawing never ends up inside the room state.
-- Admin authorization uses a passcode, an opaque in-memory bearer token stored in
-  `sessionStorage`, and a token check on the Socket.IO handshake. URL passcodes
+  - Admin authorization uses a passcode, an opaque bearer token stored in browser
+    storage, and a token check on the Socket.IO handshake. URL passcodes
   are stripped and never accepted as login input.
 
 ## Content bank
 
 English is the only v1 locale. The built-in content lives in
-`server/data/default-content.json`:
+`server/data/games/*.json`:
 
 | Collection | Entries |
 | --- | --- |
@@ -336,11 +338,11 @@ English is the only v1 locale. The built-in content lives in
 | Truth or Dare dares | 20 |
 | Act It Out prompts | 40 |
 | Draw It words | 80 |
-| Emoji Guess puzzles | 10 |
-| Caption This prompts | 10 |
-| Spyfall locations | 10 |
-| Would You Rather questions | 8 |
-| Two Truths topics | 10 |
+| Emoji Guess puzzles | 35 |
+| Caption This prompts | 42 |
+| Spyfall locations | 36 |
+| Would You Rather questions | 48 |
+| Two Truths topics | 38 |
 
 `server/contentStore.js` loads these defaults at startup and overlays any saved
 collections from `server/data/content.json`. If that file does not exist, the

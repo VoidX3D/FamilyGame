@@ -1,0 +1,158 @@
+{
+  "version": 1,
+  "gameId": "one-of-us",
+  "collections": {
+    "oneOfUsWords": [
+      {
+        "id": "momos",
+        "word": "Momos",
+        "category": "Food"
+      },
+      {
+        "id": "chiya",
+        "word": "Chiya",
+        "category": "Drink"
+      },
+      {
+        "id": "sel-roti",
+        "word": "Sel Roti",
+        "category": "Food"
+      },
+      {
+        "id": "dal-bhat",
+        "word": "Dal Bhat",
+        "category": "Food"
+      },
+      {
+        "id": "dashain",
+        "word": "Dashain",
+        "category": "Festival"
+      },
+      {
+        "id": "tihar",
+        "word": "Tihar",
+        "category": "Festival"
+      },
+      {
+        "id": "holi",
+        "word": "Holi",
+        "category": "Festival"
+      },
+      {
+        "id": "everest",
+        "word": "Everest",
+        "category": "Place"
+      },
+      {
+        "id": "pokhara",
+        "word": "Pokhara",
+        "category": "Place"
+      },
+      {
+        "id": "lumbini",
+        "word": "Lumbini",
+        "category": "Place"
+      },
+      {
+        "id": "ludo",
+        "word": "Ludo",
+        "category": "Game"
+      },
+      {
+        "id": "carrom",
+        "word": "Carrom",
+        "category": "Game"
+      },
+      {
+        "id": "cricket",
+        "word": "Cricket",
+        "category": "Sport"
+      },
+      {
+        "id": "football",
+        "word": "Football",
+        "category": "Sport"
+      },
+      {
+        "id": "temple",
+        "word": "Temple",
+        "category": "Place"
+      },
+      {
+        "id": "monastery",
+        "word": "Monastery",
+        "category": "Place"
+      },
+      {
+        "id": "elephant",
+        "word": "Elephant",
+        "category": "Animal"
+      },
+      {
+        "id": "rhino",
+        "word": "Rhinoceros",
+        "category": "Animal"
+      },
+      {
+        "id": "yak",
+        "word": "Yak",
+        "category": "Animal"
+      },
+      {
+        "id": "red-panda",
+        "word": "Red Panda",
+        "category": "Animal"
+      },
+      {
+        "id": "guitar",
+        "word": "Guitar",
+        "category": "Music"
+      },
+      {
+        "id": "madal",
+        "word": "Madal",
+        "category": "Music"
+      },
+      {
+        "id": "radio",
+        "word": "Radio",
+        "category": "Object"
+      },
+      {
+        "id": "umbrella",
+        "word": "Umbrella",
+        "category": "Object"
+      },
+      {
+        "id": "bicycle",
+        "word": "Bicycle",
+        "category": "Transport"
+      },
+      {
+        "id": "bus",
+        "word": "Bus",
+        "category": "Transport"
+      },
+      {
+        "id": "airplane",
+        "word": "Airplane",
+        "category": "Transport"
+      },
+      {
+        "id": "cinema",
+        "word": "Cinema",
+        "category": "Place"
+      },
+      {
+        "id": "picnic",
+        "word": "Picnic",
+        "category": "Activity"
+      },
+      {
+        "id": "monsoon",
+        "word": "Monsoon",
+        "category": "Nature"
+      }
+    ]
+  }
+}

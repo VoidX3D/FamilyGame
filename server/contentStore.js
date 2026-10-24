@@ -1,7 +1,7 @@
 /* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
 /* Editable game content with optional file persistence.
  *
- * Defaults are loaded from server/data/default-content.json. The host console
+ * Defaults are loaded from one JSON bundle per game in server/data/games/. The host console
  * can replace any collection; edits are normalized, validated, and written to
  * server/data/content.json so they survive a restart.
  *
@@ -18,7 +18,10 @@ import crypto from "node:crypto";
 const here = path.dirname(fileURLToPath(import.meta.url));
 /* The shape of the collections: one JSON entry per collection. */
 export const SCHEMA_FILE = path.join(here, "data", "content-schema.json");
-export const DEFAULT_CONTENT_FILE = path.join(
+export const DEFAULT_CONTENT_DIR = path.join(here, "data", "games");
+/* Kept as a read-only compatibility fallback for installations that still
+ * carry the pre-split file. New defaults never write to or depend on it. */
+export const LEGACY_DEFAULT_CONTENT_FILE = path.join(
   here,
   "data",
   "default-content.json",
@@ -230,22 +233,62 @@ function loadSchema() {
 
 export const COLLECTIONS = loadSchema();
 
+const GAME_CONTENT_FILES = new Map([
+  ["One of Us", "one-of-us.json"],
+  ["Who Is It?", "who-is-it.json"],
+  ["Who Am I?", "who-am-i.json"],
+  ["Where Am I?", "where-am-i.json"],
+  ["Who Wrote That?!", "who-wrote-that.json"],
+  ["Truth or Dare", "truth-or-dare.json"],
+  ["Act It Out", "act-it-out.json"],
+  ["Draw It", "draw-it.json"],
+  ["Emoji Guess", "emoji-guess.json"],
+  ["Caption This", "caption-this.json"],
+  ["Spyfall", "spyfall.json"],
+  ["Would You Rather?", "would-you-rather.json"],
+  ["Two Truths & One Lie", "two-truths-one-lie.json"],
+]);
+
 function loadDefaultItems() {
-  let parsed;
-  try {
-    parsed = JSON.parse(readFileSync(DEFAULT_CONTENT_FILE, "utf8"));
-  } catch (error) {
-    throw new Error(
-      `Could not load default content from ${DEFAULT_CONTENT_FILE}: ${error.message}`,
-    );
+  const items = {};
+  const games = new Set(COLLECTIONS.map((collection) => collection.game));
+
+  for (const game of games) {
+    const filename = GAME_CONTENT_FILES.get(game);
+    if (!filename) {
+      console.warn(`[content] no default file is mapped for ${game}.`);
+      continue;
+    }
+
+    const file = path.join(DEFAULT_CONTENT_DIR, filename);
+    try {
+      const parsed = JSON.parse(readFileSync(file, "utf8"));
+      const bundle = parsed?.collections;
+      if (!bundle || typeof bundle !== "object" || Array.isArray(bundle)) {
+        throw new Error("the file has no collections object");
+      }
+      Object.assign(items, bundle);
+    } catch (error) {
+      if (error.code !== "ENOENT") {
+        console.warn(`[content] could not read ${file}: ${error.message}`);
+      }
+    }
   }
 
-  const items = parsed?.collections;
-  if (!items || typeof items !== "object" || Array.isArray(items)) {
-    throw new Error(
-      `Default content file ${DEFAULT_CONTENT_FILE} must contain a collections object.`,
-    );
+  /* One release of compatibility is useful for an operator who upgrades the
+   * backend without copying the new directory at the same time. Split files
+   * win per collection, and the legacy file is never written. */
+  try {
+    const legacy = JSON.parse(readFileSync(LEGACY_DEFAULT_CONTENT_FILE, "utf8"));
+    if (legacy?.collections && typeof legacy.collections === "object") {
+      for (const [key, value] of Object.entries(legacy.collections)) {
+        if (!(key in items)) items[key] = value;
+      }
+    }
+  } catch {
+    // Missing defaults are reported per collection below; engines can use fallbacks.
   }
+
   return items;
 }
 
@@ -449,7 +492,8 @@ export function contentSnapshot() {
 export function contentStatus() {
   return {
     file: MEMORY_ONLY ? null : CONTENT_FILE,
-    defaultFile: DEFAULT_CONTENT_FILE,
+    defaultDirectory: DEFAULT_CONTENT_DIR,
+    legacyDefaultFile: LEGACY_DEFAULT_CONTENT_FILE,
     persisted: MEMORY_ONLY ? true : persisted,
     collections: COLLECTIONS.length,
     entries: COLLECTIONS.reduce(

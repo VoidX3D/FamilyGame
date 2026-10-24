@@ -135,7 +135,7 @@ missing something the players should be doing.
 ## 6. Content is data in JSON.
 
 **Decision.** The words, questions, people, places, prompts and dares live
-in `server/data/default-content.json`. The shape of each collection lives
+in `server/data/games/*.json`. The shape of each collection lives
 in `server/data/content-schema.json`. No content is hard-coded in a game
 engine, except each game's own built-in fallback entry.
 
@@ -151,8 +151,8 @@ collection on save and writes the file atomically, so a half-written file
 cannot take the site down.
 
 **In practice.** If you want to add content, edit the JSON. If you want to
-add a collection, add it to the schema and to the content file. A
-collection that is registered but missing from the content file must be
+add a collection, add it to the schema and to the game content bundle. A
+collection that is registered but missing from the game content bundle must be
 reported and survived, not fatal.
 
 ---
@@ -242,3 +242,24 @@ remain hidden until the phase that intentionally reveals them.
 ---
 
 Made by **VoidX3D (Sincere Bhattarai)**.
+
+---
+
+## 11. Built-in content is split by game; database and page-first UI are deferred.
+
+**Decision.** Built-in defaults live in one JSON bundle per game under
+`server/data/games/`. The content store merges those bundles into the existing
+collection interface, while saved host edits remain in `server/data/content.json`.
+A database migration and the move from cards to a full-page stage are planned,
+not implemented.
+
+**Why.** A single growing content file makes ownership, review, and future
+migration boundaries unclear. Per-game bundles let content change independently
+without changing the engine contract. A database should be selected only after
+retention, publishing, collaboration, and room-persistence needs are known.
+The same is true of the visual migration: the page-first stage must be mapped
+against all thirteen games before CSS or renderer changes begin.
+
+**In practice.** Add built-in content to the appropriate game bundle. Keep the
+legacy monolith read-only during the compatibility window. Treat the roadmap as
+a design and migration proposal, not a new runtime requirement.

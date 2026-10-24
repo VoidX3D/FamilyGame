@@ -1,0 +1,218 @@
+{
+  "version": 1,
+  "gameId": "caption-this",
+  "collections": {
+    "captionPrompts": [
+      {
+        "id": "group-chat",
+        "text": "The family group chat at 2 a.m.",
+        "category": "Family"
+      },
+      {
+        "id": "selfie-camera",
+        "text": "Grandma discovers the selfie camera",
+        "category": "Family"
+      },
+      {
+        "id": "last-momo",
+        "text": "The last momo on the plate",
+        "category": "Food"
+      },
+      {
+        "id": "dog-walk",
+        "text": "The dog hears the word walk",
+        "category": "Pets"
+      },
+      {
+        "id": "wifi-drops",
+        "text": "The moment the Wi-Fi drops during a family video call",
+        "category": "Family"
+      },
+      {
+        "id": "last-cake",
+        "text": "Someone finds the last piece of cake",
+        "category": "Food"
+      },
+      {
+        "id": "marriage-question",
+        "text": "Auntie asks so when are you getting married?",
+        "category": "Family"
+      },
+      {
+        "id": "uncle-song",
+        "text": "Uncle starts a rousing song at six in the morning",
+        "category": "Family"
+      },
+      {
+        "id": "power-cut",
+        "text": "The power cut during the final over",
+        "category": "Cricket"
+      },
+      {
+        "id": "fridge-midnight",
+        "text": "The fridge opens at midnight",
+        "category": "Food"
+      },
+      {
+        "id": "lost-remote",
+        "text": "The hunt for the TV remote nobody can find",
+        "category": "Home"
+      },
+      {
+        "id": "empty-gift",
+        "text": "The guest who brought an empty gift box",
+        "category": "Family"
+      },
+      {
+        "id": "burnt-toast",
+        "text": "Someone burns the toast and sets off the smoke alarm",
+        "category": "Home"
+      },
+      {
+        "id": "blink-photo",
+        "text": "The family photo where everybody is blinking",
+        "category": "Family"
+      },
+      {
+        "id": "pizza-slice",
+        "text": "The last slice of pizza, claimed by four people at once",
+        "category": "Food"
+      },
+      {
+        "id": "caught-dishes",
+        "text": "Getting caught on camera doing the dishes",
+        "category": "Home"
+      },
+      {
+        "id": "neighbour-chicken",
+        "text": "The neighbour's chicken at five in the morning",
+        "category": "Home"
+      },
+      {
+        "id": "relative-leave",
+        "text": "The relative who will not leave until nine at night",
+        "category": "Family"
+      },
+      {
+        "id": "wrong-turns",
+        "text": "The family car journey with three wrong turns",
+        "category": "Travel"
+      },
+      {
+        "id": "battery-two",
+        "text": "The moment the phone battery dies at two percent",
+        "category": "Everyday"
+      },
+      {
+        "id": "grandpa-chair",
+        "text": "Grandpa's chair that nobody else is allowed to sit on",
+        "category": "Family"
+      },
+      {
+        "id": "fridge-guest",
+        "text": "The guest who keeps quietly opening the fridge",
+        "category": "Home"
+      },
+      {
+        "id": "order-everyone",
+        "text": "One person orders for the whole table",
+        "category": "Food"
+      },
+      {
+        "id": "kid-secret",
+        "text": "The kid who announces everybody's secrets out loud",
+        "category": "Family"
+      },
+      {
+        "id": "monsoon",
+        "text": "The first monsoon rain and everybody runs outside",
+        "category": "Weather"
+      },
+      {
+        "id": "grocery-list",
+        "text": "The shopping list nobody wrote and everybody argues about",
+        "category": "Home"
+      },
+      {
+        "id": "kitchen-solo",
+        "text": "The one person in the kitchen who actually cooks",
+        "category": "Food"
+      },
+      {
+        "id": "morning-crowd",
+        "text": "Everybody trying to leave the house at the same time",
+        "category": "Everyday"
+      },
+      {
+        "id": "one-cable",
+        "text": "The one cable in the house that still works",
+        "category": "Everyday"
+      },
+      {
+        "id": "uncle-photo",
+        "text": "Uncle refusing to be photographed, again",
+        "category": "Family"
+      },
+      {
+        "id": "queue",
+        "text": "Standing in a queue that does not move",
+        "category": "Everyday"
+      },
+      {
+        "id": "leftovers",
+        "text": "The fridge raid at midnight",
+        "category": "Food"
+      },
+      {
+        "id": "homework-night",
+        "text": "Doing homework the night before it is due",
+        "category": "School"
+      },
+      {
+        "id": "neighbour-dog",
+        "text": "The neighbour's dog joining your family photo",
+        "category": "Pets"
+      },
+      {
+        "id": "gift-wrap",
+        "text": "Wrapping a present with no paper left",
+        "category": "Family"
+      },
+      {
+        "id": "spill",
+        "text": "The glass, the phone, and the carpet",
+        "category": "Everyday"
+      },
+      {
+        "id": "old-phone",
+        "text": "The first phone you ever owned",
+        "category": "Everyday"
+      },
+      {
+        "id": "first-snow",
+        "text": "The first snow, and nobody has a coat",
+        "category": "Weather"
+      },
+      {
+        "id": "cricket-tv",
+        "text": "One person in the family who actually understands the game",
+        "category": "Cricket"
+      },
+      {
+        "id": "holiday-photos",
+        "text": "The holiday photo taken before anyone was ready",
+        "category": "Travel"
+      },
+      {
+        "id": "out-of-milk",
+        "text": "The morning you realise there is no milk left",
+        "category": "Everyday"
+      },
+      {
+        "id": "phone-face-down",
+        "text": "Somebody puts the phone face down, very slowly",
+        "category": "Family"
+      }
+    ]
+  }
+}

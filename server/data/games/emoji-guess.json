@@ -1,0 +1,451 @@
+{
+  "version": 1,
+  "gameId": "emoji-guess",
+  "collections": {
+    "emojiPuzzles": [
+      {
+        "id": "honey",
+        "emoji": "🐝 🍯",
+        "name": "Honey",
+        "category": "Food",
+        "aliases": [
+          "bee honey"
+        ],
+        "hints": [
+          "Sweet, and made by very small workers"
+        ]
+      },
+      {
+        "id": "rainy-day",
+        "emoji": "🌧️ ☂️",
+        "name": "Rainy Day",
+        "category": "Weather",
+        "aliases": [
+          "rain",
+          "wet day"
+        ],
+        "hints": [
+          "The forecast was right for once"
+        ]
+      },
+      {
+        "id": "movie-night",
+        "emoji": "🎬 🍿",
+        "name": "Movie Night",
+        "category": "Activity",
+        "aliases": [
+          "movie",
+          "cinema",
+          "film night"
+        ],
+        "hints": [
+          "Tickets, snacks, and one person picks the film"
+        ]
+      },
+      {
+        "id": "birthday",
+        "emoji": "🎂 🎉",
+        "name": "Birthday",
+        "category": "Celebration",
+        "aliases": [
+          "birthday party",
+          "bday"
+        ],
+        "hints": [
+          "Cake first, photos second"
+        ]
+      },
+      {
+        "id": "road-trip",
+        "emoji": "🚗 🗺️",
+        "name": "Road Trip",
+        "category": "Travel",
+        "aliases": [
+          "driving trip",
+          "car trip"
+        ],
+        "hints": [
+          "A long drive, bad snacks, good company"
+        ]
+      },
+      {
+        "id": "halloween",
+        "emoji": "👻 🎃",
+        "name": "Halloween",
+        "category": "Celebration",
+        "aliases": [
+          "trick or treat"
+        ],
+        "hints": [
+          "Pumpkins, and a doorbell that keeps stopping"
+        ]
+      },
+      {
+        "id": "reading",
+        "emoji": "☕ 📖",
+        "name": "Reading",
+        "category": "Activity",
+        "aliases": [
+          "reading a book",
+          "book"
+        ],
+        "hints": [
+          "A cup that went cold an hour ago"
+        ]
+      },
+      {
+        "id": "basketball",
+        "emoji": "🏀 🏀",
+        "name": "Basketball",
+        "category": "Sport",
+        "aliases": [
+          "hoops"
+        ],
+        "hints": [
+          "Ten people watching one person score"
+        ]
+      },
+      {
+        "id": "surfing",
+        "emoji": "🌊 🏄",
+        "name": "Surfing",
+        "category": "Sport",
+        "aliases": [
+          "surf"
+        ],
+        "hints": [
+          "Waves, wax, and a borrowed board"
+        ]
+      },
+      {
+        "id": "campfire",
+        "emoji": "🔥 🌲",
+        "name": "Campfire",
+        "category": "Activity",
+        "aliases": [
+          "camping",
+          "bonfire"
+        ],
+        "hints": [
+          "Stories that get taller with every retelling"
+        ]
+      },
+      {
+        "id": "phone-call",
+        "emoji": "📱 📞",
+        "name": "Phone Call",
+        "category": "Everyday",
+        "aliases": [
+          "calling",
+          "telephone"
+        ],
+        "hints": [
+          "Someone rings and says guess what"
+        ]
+      },
+      {
+        "id": "snowman",
+        "emoji": "❄️ ⛄",
+        "name": "Snowman",
+        "category": "Weather",
+        "aliases": [
+          "snow"
+        ],
+        "hints": [
+          "Three balls and a lot of enthusiasm"
+        ]
+      },
+      {
+        "id": "rock-band",
+        "emoji": "🥁 🎸",
+        "name": "Rock Band",
+        "category": "Activity",
+        "aliases": [
+          "band",
+          "concert"
+        ],
+        "hints": [
+          "One person is louder than the rest"
+        ]
+      },
+      {
+        "id": "detective",
+        "emoji": "🕵️ 🔍",
+        "name": "Detective",
+        "category": "Activity",
+        "aliases": [
+          "detective work",
+          "sleuth"
+        ],
+        "hints": [
+          "Clues, a notebook, and a very suspicious neighbour"
+        ]
+      },
+      {
+        "id": "wedding",
+        "emoji": "💍 👰",
+        "name": "Wedding",
+        "category": "Celebration",
+        "aliases": [
+          "marriage"
+        ],
+        "hints": [
+          "White dresses and a very long photo list"
+        ]
+      },
+      {
+        "id": "holiday",
+        "emoji": "✈️ 🧳",
+        "name": "Holiday",
+        "category": "Travel",
+        "aliases": [
+          "vacation",
+          "trip"
+        ],
+        "hints": [
+          "A suitcase that is mostly shoes"
+        ]
+      },
+      {
+        "id": "noodles",
+        "emoji": "🍜 🍜",
+        "name": "Noodles",
+        "category": "Food",
+        "aliases": [
+          "ramen",
+          "noodle"
+        ],
+        "hints": [
+          "Slurping is part of the meal"
+        ]
+      },
+      {
+        "id": "wild-animal",
+        "emoji": "🦁 🐾",
+        "name": "Wild Animal",
+        "category": "Animals",
+        "aliases": [
+          "animal",
+          "beast"
+        ],
+        "hints": [
+          "Something with claws, in a forest"
+        ]
+      },
+      {
+        "id": "fishing",
+        "emoji": "🐟 🎣",
+        "name": "Fishing",
+        "category": "Activity",
+        "aliases": [
+          "fisherman"
+        ],
+        "hints": [
+          "Patience, and a very small catch"
+        ]
+      },
+      {
+        "id": "yoga",
+        "emoji": "🧘 🕊️",
+        "name": "Yoga",
+        "category": "Activity",
+        "aliases": [
+          "meditation",
+          "calm"
+        ],
+        "hints": [
+          "One person, one mat, one very loud instructor"
+        ]
+      },
+      {
+        "id": "space",
+        "emoji": "🚀 🌕",
+        "name": "Space",
+        "category": "Adventure",
+        "aliases": [
+          "outer space",
+          "astronaut"
+        ],
+        "hints": [
+          "No gravity, no dinner, no Wi-Fi"
+        ]
+      },
+      {
+        "id": "farm",
+        "emoji": "🌽 🦔",
+        "name": "Farm",
+        "category": "Places",
+        "aliases": [
+          "farmhouse",
+          "countryside"
+        ],
+        "hints": [
+          "Early mornings and a very large animal"
+        ]
+      },
+      {
+        "id": "skiing",
+        "emoji": "⛷️ 🏔️",
+        "name": "Skiing",
+        "category": "Sport",
+        "aliases": [
+          "ski",
+          "snow sport"
+        ],
+        "hints": [
+          "Cold hands and a very long slope"
+        ]
+      },
+      {
+        "id": "donuts",
+        "emoji": "🍩 🍩",
+        "name": "Donuts",
+        "category": "Food",
+        "aliases": [
+          "donut",
+          "doughnut"
+        ],
+        "hints": [
+          "Sugary, and gone in a minute"
+        ]
+      },
+      {
+        "id": "butterfly",
+        "emoji": "🦋 🌸",
+        "name": "Butterfly",
+        "category": "Animals",
+        "aliases": [
+          "butterflies"
+        ],
+        "hints": [
+          "Something beautiful that never stays still"
+        ]
+      },
+      {
+        "id": "tortoise-hare",
+        "emoji": "🐢 🏁",
+        "name": "Tortoise and Hare",
+        "category": "Stories",
+        "aliases": [
+          "tortoise and the hare"
+        ],
+        "hints": [
+          "Slow and steady, and a very smug hare"
+        ]
+      },
+      {
+        "id": "puzzle",
+        "emoji": "🧩 🧠",
+        "name": "Puzzle",
+        "category": "Activity",
+        "aliases": [
+          "puzzles",
+          "riddle"
+        ],
+        "hints": [
+          "A box of pieces and one missing"
+        ]
+      },
+      {
+        "id": "dinner-date",
+        "emoji": "🕯️ 🌹",
+        "name": "Dinner Date",
+        "category": "Celebration",
+        "aliases": [
+          "date",
+          "romantic dinner"
+        ],
+        "hints": [
+          "Two candles and a very small restaurant"
+        ]
+      },
+      {
+        "id": "photo-album",
+        "emoji": "📸 🖼️",
+        "name": "Photo Album",
+        "category": "Activity",
+        "aliases": [
+          "photos",
+          "photographs"
+        ],
+        "hints": [
+          "A shoebox of faces nobody can name"
+        ]
+      },
+      {
+        "id": "fish-chips",
+        "emoji": "🐟 🍟",
+        "name": "Fish and Chips",
+        "category": "Food",
+        "aliases": [
+          "fish and chip"
+        ],
+        "hints": [
+          "Paper, salt, and vinegar or not"
+        ]
+      },
+      {
+        "id": "circus",
+        "emoji": "🎪 🎭",
+        "name": "Circus",
+        "category": "Activity",
+        "aliases": [
+          "big top"
+        ],
+        "hints": [
+          "A tent, a clown, and a very small tiger"
+        ]
+      },
+      {
+        "id": "kingdom",
+        "emoji": "👑 🏰",
+        "name": "Kingdom",
+        "category": "Stories",
+        "aliases": [
+          "castle",
+          "king"
+        ],
+        "hints": [
+          "A crown, a castle, and a very long coronation"
+        ]
+      },
+      {
+        "id": "thunderstorm",
+        "emoji": "⚡ 🌧️",
+        "name": "Thunderstorm",
+        "category": "Weather",
+        "aliases": [
+          "storm",
+          "thunder"
+        ],
+        "hints": [
+          "Loud enough to wake the dog"
+        ]
+      },
+      {
+        "id": "kitchen",
+        "emoji": "🍲 💧",
+        "name": "Kitchen",
+        "category": "Places",
+        "aliases": [
+          "cooking"
+        ],
+        "hints": [
+          "One person cooking, everyone else watching"
+        ]
+      },
+      {
+        "id": "first-love",
+        "emoji": "💌 💗",
+        "name": "First Love",
+        "category": "Stories",
+        "aliases": [
+          "love"
+        ],
+        "hints": [
+          "The one that was never quite the same afterwards"
+        ]
+      }
+    ]
+  }
+}

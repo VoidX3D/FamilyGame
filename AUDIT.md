@@ -155,7 +155,7 @@ lands in `window.__FG_ERRORS` and **fails the browser suites**.
    reports. Adding a game can no longer break the deploy.
 2. **A missing content entry used to take the whole site down.** A
    collection registered in `server/contentStore.js` but missing from
-   `server/data/default-content.json` made the module throw at import:
+   `server/data/games/*.json` made the module throw at import:
 
    ```text
    SERVER BOOT FAILURE: Invalid default content for charades: Items must be a list.

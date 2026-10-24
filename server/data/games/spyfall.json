@@ -1,0 +1,326 @@
+{
+  "version": 1,
+  "gameId": "spyfall",
+  "collections": {
+    "spyfallLocations": [
+      {
+        "id": "airport",
+        "name": "Airport",
+        "category": "Travel",
+        "aliases": [
+          "the airport",
+          "departure terminal"
+        ]
+      },
+      {
+        "id": "school",
+        "name": "School",
+        "category": "Everyday",
+        "aliases": [
+          "classroom",
+          "the school"
+        ]
+      },
+      {
+        "id": "wedding",
+        "name": "Wedding",
+        "category": "Celebration",
+        "aliases": [
+          "wedding ceremony",
+          "the reception"
+        ]
+      },
+      {
+        "id": "hospital",
+        "name": "Hospital",
+        "category": "Places",
+        "aliases": [
+          "the hospital",
+          "clinic"
+        ]
+      },
+      {
+        "id": "office",
+        "name": "Office",
+        "category": "Work",
+        "aliases": [
+          "the office",
+          "workplace"
+        ]
+      },
+      {
+        "id": "supermarket",
+        "name": "Supermarket",
+        "category": "Everyday",
+        "aliases": [
+          "the supermarket",
+          "grocery store"
+        ]
+      },
+      {
+        "id": "restaurant",
+        "name": "Restaurant",
+        "category": "Food",
+        "aliases": [
+          "the restaurant",
+          "a restaurant"
+        ]
+      },
+      {
+        "id": "police-station",
+        "name": "Police station",
+        "category": "Places",
+        "aliases": [
+          "the police station"
+        ]
+      },
+      {
+        "id": "library",
+        "name": "Library",
+        "category": "Places",
+        "aliases": [
+          "the library"
+        ]
+      },
+      {
+        "id": "swimming-pool",
+        "name": "Swimming pool",
+        "category": "Places",
+        "aliases": [
+          "the swimming pool",
+          "pool"
+        ]
+      },
+      {
+        "id": "cinema",
+        "name": "Cinema",
+        "category": "Activity",
+        "aliases": [
+          "the cinema",
+          "movie theatre",
+          "movie theater"
+        ]
+      },
+      {
+        "id": "gym",
+        "name": "Gym",
+        "category": "Places",
+        "aliases": [
+          "the gym",
+          "gymnasium"
+        ]
+      },
+      {
+        "id": "barber-shop",
+        "name": "Barber shop",
+        "category": "Everyday",
+        "aliases": [
+          "the barber",
+          "hair salon"
+        ]
+      },
+      {
+        "id": "bank",
+        "name": "Bank",
+        "category": "Places",
+        "aliases": [
+          "the bank"
+        ]
+      },
+      {
+        "id": "train-station",
+        "name": "Train station",
+        "category": "Travel",
+        "aliases": [
+          "the train station",
+          "railway station"
+        ]
+      },
+      {
+        "id": "museum",
+        "name": "Museum",
+        "category": "Places",
+        "aliases": [
+          "the museum"
+        ]
+      },
+      {
+        "id": "playground",
+        "name": "Playground",
+        "category": "Places",
+        "aliases": [
+          "the playground",
+          "the park"
+        ]
+      },
+      {
+        "id": "farmhouse",
+        "name": "Farmhouse",
+        "category": "Places",
+        "aliases": [
+          "the farmhouse",
+          "a farm"
+        ]
+      },
+      {
+        "id": "construction-site",
+        "name": "Construction site",
+        "category": "Work",
+        "aliases": [
+          "a construction site",
+          "the building site"
+        ]
+      },
+      {
+        "id": "hotel-lobby",
+        "name": "Hotel lobby",
+        "category": "Travel",
+        "aliases": [
+          "the hotel"
+        ]
+      },
+      {
+        "id": "shopping-mall",
+        "name": "Shopping mall",
+        "category": "Places",
+        "aliases": [
+          "the mall",
+          "shopping centre",
+          "shopping center"
+        ]
+      },
+      {
+        "id": "petrol-station",
+        "name": "Petrol station",
+        "category": "Travel",
+        "aliases": [
+          "the petrol station",
+          "gas station"
+        ]
+      },
+      {
+        "id": "laundry",
+        "name": "Laundry",
+        "category": "Everyday",
+        "aliases": [
+          "the laundry",
+          "laundromat"
+        ]
+      },
+      {
+        "id": "cafe",
+        "name": "Café",
+        "category": "Food",
+        "aliases": [
+          "the cafe",
+          "the coffee shop"
+        ]
+      },
+      {
+        "id": "university",
+        "name": "University",
+        "category": "Places",
+        "aliases": [
+          "the university",
+          "college"
+        ]
+      },
+      {
+        "id": "campsite",
+        "name": "Campsite",
+        "category": "Places",
+        "aliases": [
+          "the campsite",
+          "the camp"
+        ]
+      },
+      {
+        "id": "zoo",
+        "name": "Zoo",
+        "category": "Places",
+        "aliases": [
+          "the zoo"
+        ]
+      },
+      {
+        "id": "theme-park",
+        "name": "Theme park",
+        "category": "Places",
+        "aliases": [
+          "the theme park",
+          "amusement park"
+        ]
+      },
+      {
+        "id": "post-office",
+        "name": "Post office",
+        "category": "Places",
+        "aliases": [
+          "the post office"
+        ]
+      },
+      {
+        "id": "fire-station",
+        "name": "Fire station",
+        "category": "Places",
+        "aliases": [
+          "the fire station"
+        ]
+      },
+      {
+        "id": "courtroom",
+        "name": "Courtroom",
+        "category": "Places",
+        "aliases": [
+          "the courtroom",
+          "court"
+        ]
+      },
+      {
+        "id": "car-wash",
+        "name": "Car wash",
+        "category": "Everyday",
+        "aliases": [
+          "the car wash"
+        ]
+      },
+      {
+        "id": "photo-studio",
+        "name": "Photography studio",
+        "category": "Places",
+        "aliases": [
+          "the photo studio"
+        ]
+      },
+      {
+        "id": "arcade",
+        "name": "Amusement arcade",
+        "category": "Places",
+        "aliases": [
+          "the arcade",
+          "game centre",
+          "game center"
+        ]
+      },
+      {
+        "id": "tailor-shop",
+        "name": "Tailor shop",
+        "category": "Everyday",
+        "aliases": [
+          "the tailor",
+          "the seamstress"
+        ]
+      },
+      {
+        "id": "call-centre",
+        "name": "Call centre",
+        "category": "Work",
+        "aliases": [
+          "the call center",
+          "the call centre",
+          "the office"
+        ]
+      }
+    ]
+  }
+}

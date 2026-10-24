@@ -1,0 +1,485 @@
+{
+  "version": 1,
+  "gameId": "who-am-i",
+  "collections": {
+    "people": [
+      {
+        "id": "prithvi-narayan-shah",
+        "name": "Prithvi Narayan Shah",
+        "hints": [
+          "An 18th-century king",
+          "Began uniting Nepal from Gorkha"
+        ],
+        "aliases": [],
+        "group": "Nepal"
+      },
+      {
+        "id": "bhanubhakta-acharya",
+        "name": "Bhanubhakta Acharya",
+        "hints": [
+          "A 19th-century poet",
+          "Translated the Ramayana into Nepali"
+        ],
+        "aliases": [
+          "Bhanu Bhakta"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "laxmi-prasad-devkota",
+        "name": "Laxmi Prasad Devkota",
+        "hints": [
+          "Known as Mahakavi",
+          "Wrote Muna Madan"
+        ],
+        "aliases": [
+          "Laxmi Devkota"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "bp-koirala",
+        "name": "B. P. Koirala",
+        "hints": [
+          "Nepal's first elected prime minister",
+          "Also a short-story writer"
+        ],
+        "aliases": [
+          "Bishweshwar Prasad Koirala"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "tenzing-norgay",
+        "name": "Tenzing Norgay Sherpa",
+        "hints": [
+          "A famous Everest climber",
+          "Summited with Edmund Hillary in 1953"
+        ],
+        "aliases": [
+          "Tenzing Norgay"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "pasang-lhamu",
+        "name": "Pasang Lhamu Sherpa",
+        "hints": [
+          "The first Nepali woman to summit Everest",
+          "A peak and a highway carry her name"
+        ],
+        "aliases": [
+          "Pasang Lhamu"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "madhav-prasad-ghimire",
+        "name": "Madhav Prasad Ghimire",
+        "hints": [
+          "Nepal's Rashtra Kavi",
+          "Wrote the epic Gauri"
+        ],
+        "aliases": [
+          "Madhav Ghimire"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "madan-krishna-shrestha",
+        "name": "Madan Krishna Shrestha",
+        "hints": [
+          "Half of the comedy duo Maha Jodi",
+          "A familiar face from Nepali TV comedy"
+        ],
+        "aliases": [
+          "Madan Krishna"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "hari-bansha-acharya",
+        "name": "Hari Bansha Acharya",
+        "hints": [
+          "The other half of Maha Jodi",
+          "Famous for comic characters and satire"
+        ],
+        "aliases": [
+          "Hari Bansha"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "rajesh-hamal",
+        "name": "Rajesh Hamal",
+        "hints": [
+          "Nicknamed Maha Nayak",
+          "A leading Nepali film hero of the 1990s"
+        ],
+        "aliases": [
+          "Maha Nayak"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "bhuwan-kc",
+        "name": "Bhuwan K.C.",
+        "hints": [
+          "A romantic Nepali film star",
+          "Also known for singing and directing"
+        ],
+        "aliases": [],
+        "group": "Nepal"
+      },
+      {
+        "id": "manisha-koirala",
+        "name": "Manisha Koirala",
+        "hints": [
+          "A Nepali actress who worked in Bollywood",
+          "Starred in 1942: A Love Story"
+        ],
+        "aliases": [
+          "Manisha"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "karishma-manandhar",
+        "name": "Karishma Manandhar",
+        "hints": [
+          "A Miss Nepal turned actress",
+          "Known for 1990s Nepali films"
+        ],
+        "aliases": [
+          "Karishma"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "rekha-thapa",
+        "name": "Rekha Thapa",
+        "hints": [
+          "A popular action-film actress",
+          "Later entered politics"
+        ],
+        "aliases": [
+          "Rekha"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "anmol-kc",
+        "name": "Anmol K.C.",
+        "hints": [
+          "A young Nepali film actor",
+          "Starred in Hostel Returns"
+        ],
+        "aliases": [],
+        "group": "Nepal"
+      },
+      {
+        "id": "samragyee-rl-shah",
+        "name": "Samragyee R.L. Shah",
+        "hints": [
+          "Actress in A Mero Hajur 2",
+          "Known for romantic films"
+        ],
+        "aliases": [
+          "Samragyee Shah"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "nischal-basnet",
+        "name": "Nischal Basnet",
+        "hints": [
+          "An actor and director",
+          "Directed the film Loot"
+        ],
+        "aliases": [
+          "Nischal"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "dayahang-rai",
+        "name": "Dayahang Rai",
+        "hints": [
+          "An actor from eastern Nepal",
+          "Known for Kabaddi and Jhari"
+        ],
+        "aliases": [
+          "Dayahang"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "deepak-raj-giri",
+        "name": "Deepak Raj Giri",
+        "hints": [
+          "A comedian and filmmaker",
+          "Known for the Chhakka Panja films"
+        ],
+        "aliases": [
+          "Deepak Raj"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "priyanka-karki",
+        "name": "Priyanka Karki",
+        "hints": [
+          "An actress and model",
+          "Known for comedy films"
+        ],
+        "aliases": [
+          "Priyanka"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "sabin-rai",
+        "name": "Sabin Rai",
+        "hints": [
+          "A Nepali pop singer",
+          "Nicknamed the Rockstar"
+        ],
+        "aliases": [
+          "Sabin"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "sugam-pokharel",
+        "name": "Sugam Pokharel",
+        "hints": [
+          "A singer and composer",
+          "Known for romantic songs"
+        ],
+        "aliases": [
+          "Sugam"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "anju-panta",
+        "name": "Anju Panta",
+        "hints": [
+          "A Nepali playback singer",
+          "Has judged music shows"
+        ],
+        "aliases": [
+          "Anju"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "komal-oli",
+        "name": "Komal Oli",
+        "hints": [
+          "A singer and radio presenter",
+          "Known for folk songs"
+        ],
+        "aliases": [
+          "Komal"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "nabin-k-bhattarai",
+        "name": "Nabin K Bhattarai",
+        "hints": [
+          "A Nepali pop singer",
+          "Known for the song Pratibimba"
+        ],
+        "aliases": [
+          "Nabin Bhattarai"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "astha-raut",
+        "name": "Astha Raut",
+        "hints": [
+          "A Nepali singer",
+          "Known for the song Kaanchhi"
+        ],
+        "aliases": [
+          "Aastha Raut",
+          "Astha"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "yama-buddha",
+        "name": "Yama Buddha",
+        "hints": [
+          "A Nepali rapper",
+          "Known for the song Sathi"
+        ],
+        "aliases": [
+          "Yama"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "bipul-chettri",
+        "name": "Bipul Chettri",
+        "hints": [
+          "A singer-songwriter from Darjeeling",
+          "Known for Wildflower"
+        ],
+        "aliases": [
+          "Bipul"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "amrit-gurung",
+        "name": "Amrit Gurung",
+        "hints": [
+          "Lead singer of Nepathya",
+          "A folk-rock musician"
+        ],
+        "aliases": [
+          "Amrit",
+          "Nepathya"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "jhamak-ghimire",
+        "name": "Jhamak Ghimire",
+        "hints": [
+          "A writer who uses a wheelchair",
+          "Wrote Jiwan Kada Ki Phool"
+        ],
+        "aliases": [
+          "Jhamak"
+        ],
+        "group": "Nepal"
+      },
+      {
+        "id": "albert-einstein",
+        "name": "Albert Einstein",
+        "hints": [
+          "A physicist",
+          "Developed the theory of relativity"
+        ],
+        "aliases": [
+          "Einstein"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "lionel-messi",
+        "name": "Lionel Messi",
+        "hints": [
+          "An Argentine footballer",
+          "Won the 2022 World Cup"
+        ],
+        "aliases": [
+          "Messi"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "cristiano-ronaldo",
+        "name": "Cristiano Ronaldo",
+        "hints": [
+          "A Portuguese footballer",
+          "Famous for his goal celebrations"
+        ],
+        "aliases": [
+          "Ronaldo"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "serena-williams",
+        "name": "Serena Williams",
+        "hints": [
+          "A tennis champion",
+          "Won 23 Grand Slam singles titles"
+        ],
+        "aliases": [
+          "Serena"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "taylor-swift",
+        "name": "Taylor Swift",
+        "hints": [
+          "An American singer-songwriter",
+          "Known for storytelling songs"
+        ],
+        "aliases": [
+          "Taylor"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "michael-jackson",
+        "name": "Michael Jackson",
+        "hints": [
+          "Known as the King of Pop",
+          "Famous for the moonwalk"
+        ],
+        "aliases": [
+          "MJ"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "malala-yousafzai",
+        "name": "Malala Yousafzai",
+        "hints": [
+          "An education activist",
+          "The youngest Nobel Peace Prize winner"
+        ],
+        "aliases": [
+          "Malala"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "mahatma-gandhi",
+        "name": "Mahatma Gandhi",
+        "hints": [
+          "An Indian independence leader",
+          "Known for nonviolent protest"
+        ],
+        "aliases": [
+          "Gandhi"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "william-shakespeare",
+        "name": "William Shakespeare",
+        "hints": [
+          "An English playwright",
+          "Wrote Romeo and Juliet"
+        ],
+        "aliases": [
+          "Shakespeare"
+        ],
+        "group": "Global"
+      },
+      {
+        "id": "leonardo-da-vinci",
+        "name": "Leonardo da Vinci",
+        "hints": [
+          "A Renaissance artist and inventor",
+          "Painted the Mona Lisa"
+        ],
+        "aliases": [
+          "Da Vinci",
+          "Leonardo"
+        ],
+        "group": "Global"
+      }
+    ]
+  }
+}

@@ -1,11 +1,29 @@
 /* Made by VoidX3D (Sincere Bhattarai) - Family Game Hub */
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { GAME_LIST, getGame } from "../server/games/index.js";
 import { answerMatches, normalizeAnswer } from "../server/games/common.js";
 import { checkScreensMatchEngines } from "./check-screens.mjs";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
+}
+
+function readDefaultCollections() {
+  const directory = new URL("../server/data/games/", import.meta.url);
+  const files = readdirSync(directory)
+    .filter((file) => file.endsWith(".json"))
+    .sort();
+  const collections = {};
+  for (const file of files) {
+    const bundle = JSON.parse(readFileSync(new URL(file, directory), "utf8"));
+    assert(bundle.gameId, `${file} has no gameId`);
+    assert(
+      bundle.collections && typeof bundle.collections === "object",
+      `${file} has no collections object`,
+    );
+    Object.assign(collections, bundle.collections);
+  }
+  return { files, collections };
 }
 
 function makeRoom(count) {
@@ -912,14 +930,8 @@ check("every game has a screen on the client", () => {
 check("every content collection has entries", () => {
   // A collection that is registered but has no entries makes the server
   // refuse to start, which takes the whole site down rather than one game.
-  const defaults = JSON.parse(
-    readFileSync(
-      new URL("../server/data/default-content.json", import.meta.url),
-      "utf8",
-    ),
-  );
-  const collections = defaults?.collections;
-  assert(collections && typeof collections === "object", "The content file has no collections");
+  const { files, collections } = readDefaultCollections();
+  assert(files.length === GAME_LIST.length, "Every game should have one default content file");
 
   for (const [key, items] of Object.entries(collections)) {
     assert(Array.isArray(items), `The collection "${key}" is not a list`);
@@ -935,8 +947,8 @@ check("the screens read what the engines publish", () => {
   checkScreensMatchEngines();
 });
 
-check("the schema and the content file agree", () => {
-  /* A collection in the content file that is not in the schema is loaded
+check("the schema and the per-game content files agree", () => {
+  /* A collection in a game content file that is not in the schema is loaded
    * by nobody. The game that wanted it falls back to its placeholder,
    * and the content looks like it is there while it is not. This is how
    * the five social games ended up with "Stay in" and "Go out". */
@@ -946,17 +958,12 @@ check("the schema and the content file agree", () => {
       "utf8",
     ),
   );
-  const defaults = JSON.parse(
-    readFileSync(
-      new URL("../server/data/default-content.json", import.meta.url),
-      "utf8",
-    ),
-  );
+  const { collections } = readDefaultCollections();
 
   const declared = new Set(
     (schema?.collections ?? []).map((collection) => collection.key),
   );
-  const present = new Set(Object.keys(defaults?.collections ?? {}));
+  const present = new Set(Object.keys(collections));
 
   for (const key of present) {
     assert(

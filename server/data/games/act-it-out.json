@@ -1,0 +1,208 @@
+{
+  "version": 1,
+  "gameId": "act-it-out",
+  "collections": {
+    "charades": [
+      {
+        "id": "charades-1",
+        "text": "Making momos",
+        "category": "Food"
+      },
+      {
+        "id": "charades-2",
+        "text": "Riding a bicycle",
+        "category": "Activity"
+      },
+      {
+        "id": "charades-3",
+        "text": "Brushing your teeth",
+        "category": "Daily life"
+      },
+      {
+        "id": "charades-4",
+        "text": "Taking a selfie",
+        "category": "Funny"
+      },
+      {
+        "id": "charades-5",
+        "text": "Flying a kite",
+        "category": "Activity"
+      },
+      {
+        "id": "charades-6",
+        "text": "Milking a cow",
+        "category": "Animal"
+      },
+      {
+        "id": "charades-7",
+        "text": "Climbing a mountain",
+        "category": "Travel"
+      },
+      {
+        "id": "charades-8",
+        "text": "Playing the madal",
+        "category": "Music"
+      },
+      {
+        "id": "charades-9",
+        "text": "Washing dishes",
+        "category": "Daily life"
+      },
+      {
+        "id": "charades-10",
+        "text": "Catching a bus",
+        "category": "Travel"
+      },
+      {
+        "id": "charades-11",
+        "text": "Blowing out birthday candles",
+        "category": "Festival"
+      },
+      {
+        "id": "charades-12",
+        "text": "Tying your shoelaces",
+        "category": "Daily life"
+      },
+      {
+        "id": "charades-13",
+        "text": "Swimming in a lake",
+        "category": "Sport"
+      },
+      {
+        "id": "charades-14",
+        "text": "Drinking hot tea",
+        "category": "Food"
+      },
+      {
+        "id": "charades-15",
+        "text": "Reading a scary book",
+        "category": "Funny"
+      },
+      {
+        "id": "charades-16",
+        "text": "Planting rice",
+        "category": "Activity"
+      },
+      {
+        "id": "charades-17",
+        "text": "Dancing at a wedding",
+        "category": "Festival"
+      },
+      {
+        "id": "charades-18",
+        "text": "Chasing a chicken",
+        "category": "Animal"
+      },
+      {
+        "id": "charades-19",
+        "text": "Riding a motorcycle",
+        "category": "Travel"
+      },
+      {
+        "id": "charades-20",
+        "text": "Opening an umbrella in the rain",
+        "category": "Funny"
+      },
+      {
+        "id": "charades-21",
+        "text": "Eating a very spicy momo",
+        "category": "Food"
+      },
+      {
+        "id": "charades-22",
+        "text": "Sleeping in class",
+        "category": "Funny"
+      },
+      {
+        "id": "charades-23",
+        "text": "Taking a photo of a tiger",
+        "category": "Animal"
+      },
+      {
+        "id": "charades-24",
+        "text": "Carrying water uphill",
+        "category": "Activity"
+      },
+      {
+        "id": "charades-25",
+        "text": "Playing cricket",
+        "category": "Sport"
+      },
+      {
+        "id": "charades-26",
+        "text": "Flying an airplane",
+        "category": "Travel"
+      },
+      {
+        "id": "charades-27",
+        "text": "Singing in the shower",
+        "category": "Music"
+      },
+      {
+        "id": "charades-28",
+        "text": "Slipping on a banana peel",
+        "category": "Funny"
+      },
+      {
+        "id": "charades-29",
+        "text": "Wrapping a gift",
+        "category": "Activity"
+      },
+      {
+        "id": "charades-30",
+        "text": "Waiting for the bus",
+        "category": "Daily life"
+      },
+      {
+        "id": "charades-31",
+        "text": "Feeding a goat",
+        "category": "Animal"
+      },
+      {
+        "id": "charades-32",
+        "text": "Praying at a temple",
+        "category": "Festival"
+      },
+      {
+        "id": "charades-33",
+        "text": "Combing your hair",
+        "category": "Daily life"
+      },
+      {
+        "id": "charades-34",
+        "text": "Making chiya",
+        "category": "Food"
+      },
+      {
+        "id": "charades-35",
+        "text": "Riding an elephant",
+        "category": "Animal"
+      },
+      {
+        "id": "charades-36",
+        "text": "Falling asleep on a bus",
+        "category": "Funny"
+      },
+      {
+        "id": "charades-37",
+        "text": "Putting on a jacket",
+        "category": "Daily life"
+      },
+      {
+        "id": "charades-38",
+        "text": "Fishing in a river",
+        "category": "Sport"
+      },
+      {
+        "id": "charades-39",
+        "text": "Winning a race",
+        "category": "Sport"
+      },
+      {
+        "id": "charades-40",
+        "text": "Losing your keys",
+        "category": "Funny"
+      }
+    ]
+  }
+}

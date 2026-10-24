@@ -69,7 +69,7 @@ Two rules matter more than the rest:
 ## Content changes
 
 The words, questions, people and places live in
-`server/data/default-content.json`. A pull request that adds or rewords
+`server/data/games/*.json`. A pull request that adds or rewords
 content is very welcome. Please keep it:
 
 - family friendly, and suitable for children,

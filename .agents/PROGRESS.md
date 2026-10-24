@@ -521,3 +521,15 @@ closed rather than filed:
 ---
 
 Made by **VoidX3D (Sincere Bhattarai)**.
+
+## 2026-10-24 — Per-game content boundaries and deferred roadmap
+
+Built-in content is now organized into one JSON bundle per game under
+`server/data/games/`. The existing collection API, host editor, saved
+`content.json` format, and no-database runtime remain unchanged. A compatibility
+fallback still understands the old monolithic default file during staged deploys.
+
+Added `docs/CONTENT-AND-DESIGN-ROADMAP.md` with the future repository/database
+shape, migration sequence, unresolved product decisions, and a page-first
+Arcade Night design philosophy. The visual redesign and database migration are
+intentionally not part of this change.

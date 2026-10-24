@@ -304,7 +304,8 @@ server/
   .env              Settings, read by the server itself
   data/
     content-schema.json   The shape of every content collection
-    default-content.json  The built-in content
+    games/*.json          One built-in content bundle per game
+    default-content.json  Legacy compatibility copy; do not edit
     content.json          Saved content edits, created on the first save
   games/
     index.js        The game registry: the list of engines and the catalogue
@@ -374,7 +375,7 @@ engine rather than inventing a new one.
    `getGame()` are derived from it.
 
 3. **The content**: add a collection to `server/data/content-schema.json`
-   and the entries to `server/data/default-content.json`. If the collection
+   and the entries to the appropriate `server/data/games/<game-id>.json` bundle. If the collection
    has a built-in fallback, the game still starts when the collection is
    empty or missing.
 
@@ -392,16 +393,16 @@ engine rather than inventing a new one.
 ## 9. Content is data, not code
 
 The words, questions, people, places, prompts and dares live in
-`server/data/default-content.json`. The shape of each collection lives in
+`server/data/games/*.json`. The shape of each collection lives in
 `server/data/content-schema.json`.
 
 Adding content is a JSON edit, not a code change. Adding a *new kind* of
-collection is a JSON edit in the schema plus entries in the content file.
+collection is a JSON edit in the schema plus entries in the game content bundle.
 The host console reads the collections from `GET /api/admin/content` and
 saves with `PUT /api/admin/content/:key`; the server validates the whole
 collection and writes the file atomically.
 
-A collection that is registered but missing from the content file must not
+A collection that is registered but missing from the game content bundle must not
 take the server down. It is reported and the game falls back to its own
 fallback entry.
 
@@ -427,3 +428,19 @@ events are listed at the bottom of the docs page.
 ---
 
 Made by **VoidX3D (Sincere Bhattarai)**.
+
+## 10. Content and future migration boundaries
+
+Built-in defaults are split into one bundle per game under
+`server/data/games/`. Each bundle has a `gameId` and a `collections` object;
+`truth-or-dare.json` is the example of one game owning two collections. The
+runtime still exposes collections through `contentStore.js`, and host edits
+still persist to `server/data/content.json`. `server/data/default-content.json`
+is a read-only compatibility copy for staged backend upgrades; new content
+must be added to the split bundle, not the legacy file.
+
+The database migration and page-first visual direction are documented in
+[`docs/CONTENT-AND-DESIGN-ROADMAP.md`](docs/CONTENT-AND-DESIGN-ROADMAP.md).
+Neither is enabled by this repository state. Do not add a database dependency
+or redesign the card-based UI until the open product decisions in that roadmap
+are answered.
